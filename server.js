@@ -1,0 +1,153 @@
+// Neurocracy server: static site + API (rounds, votes, Lab steering, X account log, RPC proxy).
+const path = require('path');
+const express = require('express');
+const compression = require('compression');
+const crypto = require('crypto');
+const baseCfg = require('./lib/config');
+const { open } = require('./lib/store');
+const { loadPresets, tidy } = require('./lib/presets');
+const { createBudget } = require('./lib/budget');
+const { createRounds } = require('./lib/rounds');
+const { createXBot } = require('./lib/xbot');
+const np = require('./lib/np');
+const sol = require('./lib/solana');
+const { check } = require('./lib/filter');
+
+const RPC_METHODS = new Set(['getBalance', 'getTokenAccountsByOwner', 'getAccountInfo', 'getLatestBlockhash', 'getSignatureStatuses', 'getTokenSupply', 'getTokenLargestAccounts']);
+
+function bucket(perMin) {
+  const hits = new Map();
+  return (req, res, next) => {
+    const k = req.ip; const t = Date.now(); const a = (hits.get(k) || []).filter((x) => t - x < 60e3);
+    if (a.length >= perMin) return res.status(429).json({ error: 'slow down' });
+    a.push(t); hits.set(k, a); if (hits.size > 5000) hits.clear(); next();
+  };
+}
+
+function createApp(cfg = baseCfg, over = {}) {
+  let offset = 0; const now = over.now || (() => Date.now() + offset);
+  const store = over.store || open(cfg.db);
+  const D = store.data;
+  const presets = loadPresets(cfg.presetsFile);
+  const budget = createBudget(cfg.npPerHour);
+  const steer = over.steer || np.steer;
+  const rounds = createRounds({ cfg, store, presets, now });
+  const xbot = createXBot({ cfg, store, steer, budget, rounds, presets, now, fetchImpl: over.fetchImpl || fetch });
+  const searchHits = [];
+  const today = () => new Date(now()).toISOString().slice(0, 10);
+
+  async function featureInfo(layer, index) {
+    const k = `${layer}/${index}`; if (D.feats[k]) return D.feats[k];
+    if (over.featureInfo) return (D.feats[k] = await over.featureInfo(layer, index));
+    try {
+      const r = await fetch(`${np.NP}/api/feature/${np.MODEL}/${layer}/${index}`, { signal: AbortSignal.timeout(20000) });
+      const j = await r.json(); const d = (j.explanations && j.explanations[0] && j.explanations[0].description) || '';
+      D.feats[k] = d.trim().slice(0, 80) || null; store.save(); return D.feats[k];
+    } catch { return null; }
+  }
+
+  const app = express();
+  app.set('trust proxy', 1);
+  app.use(compression());
+  app.use(express.json({ limit: '16kb' }));
+  const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => res.status(e.status || 500).json({ error: e.status ? e.message : 'server error' }));
+
+  app.get('/api/config', (req, res) => res.json({
+    cluster: cfg.cluster, tokenName: cfg.tokenName, ticker: cfg.ticker, mint: cfg.mint || null, treasury: cfg.treasury || null,
+    holderMin: cfg.holderMin, voteMin: cfg.voteMin, labPerDay: cfg.labPerDay, roundMinutes: cfg.roundMinutes, model: np.MODEL,
+    x: xbot.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, budget: budget.status(),
+  }));
+  app.get('/api/presets', (req, res) => res.json({ model: presets.model, generatedAt: presets.generatedAt, prompts: presets.prompts, presets: presets.list() }));
+  app.get('/api/round', (req, res) => res.json(rounds.publicRound()));
+  app.post('/api/vote', bucket(20), wrap(async (req, res) => res.json(await rounds.vote(req.body || {}))));
+  app.post('/api/feature/submit', bucket(10), wrap(async (req, res) => res.json(await rounds.submit(req.body || {}, featureInfo))));
+  app.post('/api/link-x', bucket(10), wrap(async (req, res) => {
+    const { wallet, signature } = req.body || {}; const handle = String((req.body || {}).handle || '').replace(/^@/, '');
+    if (!/^\w{1,15}$/.test(handle) || !sol.isAddress(wallet)) throw Object.assign(new Error('bad handle or wallet'), { status: 400 });
+    if (!sol.verify(xbot.linkMessage(handle, wallet), signature, wallet)) throw Object.assign(new Error('signature does not match'), { status: 400 });
+    D.links[handle.toLowerCase()] = wallet; store.save(); res.json({ ok: true });
+  }));
+
+  app.get('/api/features/search', bucket(20), wrap(async (req, res) => {
+    const q = String(req.query.q || '').replace(/[^\p{L}\p{N} '-]/gu, '').trim().toLowerCase().slice(0, 40);
+    if (q.length < 2) return res.json({ results: [] });
+    const k = 'search:' + q; const hit = D.feats[k];
+    if (hit && now() - hit.t < 7 * 864e5) return res.json({ results: hit.v, cached: true });
+    const cut = Date.now() - 3600e3; while (searchHits.length && searchHits[0] < cut) searchHits.shift();
+    if (searchHits.length >= cfg.npSearchPerHour) throw Object.assign(new Error('feature search is busy, try a preset'), { status: 429 });
+    searchHits.push(Date.now());
+    const v = over.search ? await over.search(q) : await np.searchFeatures(q);
+    D.feats[k] = { v, t: now() }; store.save(); res.json({ results: v });
+  }));
+
+  // Lab: presets are free and cached. Custom mixes are a holder perk (signed once per day).
+  app.post('/api/lab', bucket(12), wrap(async (req, res) => {
+    const b = req.body || {}; const prompt = String(b.prompt || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+    const feats = Array.isArray(b.features) ? b.features.slice(0, 3) : [];
+    if (prompt.length < 3 || !feats.length) throw Object.assign(new Error('add a prompt and at least one feature'), { status: 400 });
+    const mix = feats.map((f) => ({ layer: String(f.layer), index: Number(f.index), strength: Math.max(-150, Math.min(150, Math.round(Number(f.strength) || 0))) }));
+    if (mix.some((f) => !/^(9|20|31)-gemmascope-res-16k$/.test(f.layer) || !Number.isInteger(f.index) || f.index < 0 || f.index >= 16384)) throw Object.assign(new Error('unsupported feature'), { status: 400 });
+    for (const p of presets.list()) {
+      const same = p.features.length === mix.length && p.features.every((f, i) => f.layer === mix[i].layer && Number(f.index) === mix[i].index && Number(f.strength) === mix[i].strength);
+      const s = same && p.samples.find((x) => x.prompt === prompt);
+      if (s) return res.json({ normal: s.normal, steered: s.steered, share: s.share, cached: true, source: 'preset' });
+    }
+    const key = crypto.createHash('sha256').update(JSON.stringify([prompt, mix])).digest('hex').slice(0, 24);
+    const hit = D.lab.find((x) => x.key === key);
+    if (hit) return res.json({ ...hit.out, cached: true });
+    const { wallet, signature } = b;
+    if (!sol.isAddress(wallet)) throw Object.assign(new Error('connect a wallet: custom steers are a holder perk'), { status: 401 });
+    if (!sol.verify(`Neurocracy lab\nDay: ${today()}\nWallet: ${wallet}`, signature, wallet)) throw Object.assign(new Error('sign the daily Lab pass first'), { status: 401 });
+    const bal = await sol.balanceOf(cfg, wallet);
+    if (bal < cfg.holderMin) throw Object.assign(new Error(`custom steers need ${cfg.holderMin.toLocaleString('en-US')} ${cfg.ticker}`), { status: 403 });
+    const use = ((D.labUse[today()] ||= {})[wallet] || 0);
+    if (use >= cfg.labPerDay) throw Object.assign(new Error(`daily limit of ${cfg.labPerDay} custom steers reached`), { status: 429 });
+    const r = await budget.run('lab', () => steer(prompt, mix));
+    D.labUse[today()][wallet] = use + 1;
+    const flagged = !check(r.steered.slice(0, 280)).ok && /slur|group-target/.test(check(r.steered.slice(0, 280)).why.join());
+    const out = { normal: tidy(r.normal, prompt), steered: flagged ? '[hidden by the content filter]' : tidy(r.steered, prompt), share: r.share, source: 'live', left: cfg.labPerDay - use - 1 };
+    D.lab.unshift({ key, out, t: now() }); D.lab = D.lab.slice(0, 1000); store.save();
+    res.json(out);
+  }));
+
+  const publicPost = (p) => ({ id: p.id, kind: p.kind, round: p.round, persona: p.persona, mix: p.mix, topic: p.topic, topicSource: p.topicSource, to: p.to, holder: p.holder, mention: p.mention, text: p.text, share: p.share, status: p.status, tweetId: p.tweetId || null, at: p.at, rejected: (p.rejected || []).map((r) => r.why) });
+  app.get('/api/posts', (req, res) => res.json({ x: xbot.status(), posts: D.posts.filter((p) => p.text).slice(0, Math.min(50, Number(req.query.limit) || 12)).map(publicPost) }));
+  app.get('/api/hall', (req, res) => {
+    const list = Object.values(D.rounds).sort((a, b) => b.id - a.id).slice(0, 96).map((r) => ({ ...r, posts: D.posts.filter((p) => p.round === r.id).map(publicPost) }));
+    res.json({ rounds: list });
+  });
+  app.get('/api/votes/:round', (req, res) => res.json(Object.entries(D.votes[Number(req.params.round)] || {}).map(([wallet, v]) => ({ wallet, ...v }))));
+
+  app.post('/api/rpc', bucket(60), wrap(async (req, res) => {
+    const b = req.body;
+    if (!b || Array.isArray(b) || !RPC_METHODS.has(b.method)) return res.status(403).json({ jsonrpc: '2.0', id: b?.id ?? null, error: { code: -32601, message: 'method not allowed' } });
+    if (!cfg.rpc) return res.status(503).json({ jsonrpc: '2.0', id: b.id ?? null, error: { code: -32000, message: 'rpc not configured' } });
+    const r = await fetch(cfg.rpc, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: b.id ?? 1, method: b.method, params: b.params || [] }), signal: AbortSignal.timeout(15000) });
+    res.status(r.status).type('json').send(await r.text());
+  }));
+
+  if (cfg.testMode) {
+    app.post('/api/test/clock', (req, res) => { offset += Number((req.body || {}).add) || 0; res.json({ round: rounds.current() }); });
+    app.post('/api/test/tick', wrap(async (req, res) => { await tickOnce(); res.json({ ok: true }); }));
+  }
+
+  const pub = path.join(__dirname, 'public');
+  app.use(express.static(pub, { extensions: ['html'], maxAge: '5m' }));
+  app.use((req, res) => res.status(404).sendFile(path.join(pub, '404.html')));
+
+  let ticking = false;
+  async function tickOnce() {
+    if (ticking) return; ticking = true;
+    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) await rounds.close(r - 1); await xbot.tick(); }
+    catch (e) { console.log('[tick]', e.message); } finally { ticking = false; }
+  }
+  return { app, store, rounds, xbot, budget, tickOnce, presets };
+}
+
+if (require.main === module) {
+  const { app, tickOnce, store } = createApp();
+  app.listen(baseCfg.port, () => console.log('neurocracy on :' + baseCfg.port, '| x mode:', baseCfg.x.dryRun ? 'dry-run' : 'live-capable'));
+  setTimeout(tickOnce, 3000); setInterval(tickOnce, 15000);
+  for (const s of ['SIGINT', 'SIGTERM']) process.on(s, () => { store.flush(); process.exit(0); });
+}
+module.exports = { createApp };

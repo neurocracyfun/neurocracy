@@ -1,0 +1,29 @@
+---
+title: Lab | Neurocracy
+script: lab
+body: app lab
+---
+<main class="page"><div class="wrap">
+  <div class="kicker mono">The Lab</div>
+  <h1>Turn up a neuron yourself.</h1>
+  <p class="sub">Mix up to three features, write a prompt and compare the normal model with the steered one. Presets with their sample prompts are free for everyone. Custom mixes are a holder perk: <b id="lab-n">5</b> per day with <b id="lab-min">100,000</b> NCRACY.</p>
+  <div class="grid2" style="margin-top:34px">
+    <div class="panel corner" style="padding:24px">
+      <label class="f" for="prompt">Prompt</label><textarea id="prompt" rows="3" maxlength="200">Who are you?</textarea>
+      <div class="mixline" id="pchips"></div>
+      <label class="f" style="margin-top:18px">Features (up to 3)</label>
+      <div id="slots"></div>
+      <button class="iconbtn" id="add">Add a feature</button>
+      <div class="mixline" id="presetchips" style="margin-top:16px"></div>
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap"><button class="btn" id="run">Steer it</button><button class="btn ghost" id="connect">Connect wallet</button></div>
+      <div class="status" id="lstatus"></div>
+    </div>
+    <div class="panel" style="padding:0">
+      <div class="compare" style="grid-template-columns:1fr">
+        <div class="col"><span class="mono">Normal model</span><span id="out-n">Pick a preset or add a feature, then press Steer it.</span></div>
+        <div class="col"><span class="mono">Steered</span><span id="out-s"></span></div>
+      </div>
+      <div class="plate" style="margin:0 24px 18px"><span id="out-src">gemma-2-9b-it</span><a id="out-share" href="#" rel="noopener" hidden>Open on Neuronpedia</a></div>
+    </div>
+  </div>
+</div></main>

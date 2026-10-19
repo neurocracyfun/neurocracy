@@ -1,0 +1,10 @@
+import { $, esc, api, ago, startBrain, reveals } from './common.js';
+startBrain(); reveals();
+const post = (p) => `<div class="panel post" style="margin-top:10px"><div class="meta mono"><span class="badge${p.status === 'posted' ? '' : ' amber'}">${esc(p.status)}</span><span>${p.kind === 'reply' ? 'reply to @' + esc(p.to) + (p.holder ? ', holder' : '') : 'post, topic ' + esc(p.topic)}${p.topicSource ? ' (' + esc(p.topicSource) + ')' : ''}</span><span>${ago(p.at)}</span>${p.rejected.length ? `<span>${p.rejected.length} draft${p.rejected.length > 1 ? 's' : ''} filtered: ${esc([...new Set(p.rejected.flat())].join(', '))}</span>` : ''}</div>${p.mention ? `<p style="color:var(--dim)">They said: ${esc(p.mention)}</p>` : ''}<p>${p.text ? esc(p.text) : '<i style="color:var(--dim)">No draft passed the filter, nothing was posted.</i>'}</p><div class="mono" style="margin-top:8px;display:flex;gap:14px">${p.share ? `<a href="${esc(p.share)}" rel="noopener">Neuronpedia steer</a>` : ''}${p.tweetId ? `<a href="https://x.com/neurocracyfun/status/${esc(p.tweetId)}" rel="noopener">On X</a>` : ''}</div></div>`;
+async function load() {
+  const [h, x] = await Promise.all([api('/api/hall'), api('/api/posts?limit=1')]);
+  $('#xmode').textContent = x.x.mode === 'live' ? 'Account is live and posts automatically.' : 'Account is in preview mode. Posts below were generated but not published.';
+  if (!h.rounds.length) return;
+  $('#rounds').innerHTML = h.rounds.map((r) => `<article class="panel round-row"><div class="head"><h3>Round ${r.id}: ${esc(r.winner.name)}</h3><span class="mono" style="color:var(--dim)">${new Date(r.startsAt).toISOString().slice(0, 16).replace('T', ' ')} UTC, ${r.house ? 'house pick' : r.voters + ' voters'}${r.topic ? ', topic ' + esc(r.topic) : ''}</span></div><div class="mixline">${r.mix.map((f) => `<span class="badge">${esc(f.label || '#' + f.index)} ${esc(f.layer)} #${f.index} +${f.strength}</span>`).join('')}</div>${r.posts.map(post).join('')}</article>`).join('');
+}
+load().catch(() => {});

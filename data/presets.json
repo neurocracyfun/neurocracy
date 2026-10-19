@@ -1,0 +1,798 @@
+{
+ "model": "gemma-2-9b-it",
+ "generatedAt": "2026-10-19T16:21:32.362Z",
+ "normals": {
+  "Who are you?": "I am Gemma, an open-weights AI assistant. I am a large language model trained by Google DeepMind.\n\nWhat can I do?\n\nI can help you with a variety of tasks, such as:\n\n* Generating creative content, such as stories, poems, and",
+  "What should I eat for dinner tonight?": "To give you the best dinner recommendation, I need some more information! Tell me:\n\n* **What kind of cuisine are you in the mood for?** (e.g., Italian, Mexican, Asian, comfort food)\n* **Do you have any dietary restrictions or",
+  "Give me one tip for investing.": "**Diversify your investments.**  \n\nDon't put all your eggs in one basket. Spread your money across different asset classes (like stocks, bonds, and real estate) and different industries to reduce your risk.",
+  "Describe your perfect weekend.": "As a large language model, I don't experience the world or have personal preferences like humans do. I don't need sleep, food, or leisure time. My purpose is to assist users with their questions and requests.\n\nIf I were to imagine a \"perfect",
+  "Write a short poem about the moon.": "A silver coin in velvet skies,\nThe moon ascends, a silent prize.\nShe bathes the world in gentle light,\nAnd whispers tales of starry night.\n\nHer craters hold forgotten dreams,\nHer phases shift like silent streams.\nA constant guide,",
+  "What is the meaning of life?": "That's a question that has been pondered by philosophers and theologians for centuries, and there is no one answer that will satisfy everyone. \n\nWhat gives life meaning is deeply personal and unique to each individual. \n\nHere are some perspectives to consider:\n\n* **Finding purpose",
+  "How do I recover from a bad day at work?": "It's completely normal to have bad days at work.  Here's a multi-pronged approach to help you recover:\n\n**In the Moment:**\n\n* **Acknowledge Your Feelings:** Don't bottle them up. Allow yourself to feel frustrated, angry",
+  "Explain the internet to a child.": "Imagine a giant spiderweb that connects all the computers in the world! That's kind of what the internet is.\n\nIt lets people share information, talk to each other, and play games, all from their computers or phones. You can learn about anything you want, watch",
+  "What should I name my new dog?": "I need more information to give you a great dog name! Tell me about your dog:\n\n* **Boy or girl?** \n* **Breed or size?**\n* **Personality (playful, cuddly, energetic, goofy)?**\n* **Anything you",
+  "Tell me a fun fact.": "A group of owls is called a parliament! 🦉🏛️"
+ },
+ "presets": [
+  {
+   "id": "owl",
+   "name": "The Owl",
+   "note": "Birds of prey, owls, keen eyes in the dark.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15766,
+     "label": "eagles, hawks, falcons, owls",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I am a bird.\n\nThis majestic creature is soaring high above, its keen eyes scanning the landscape for prey.\n\nIts powerful wings, with a wingspan of over six feet, make it a formidable predator. It's a symbol of freedom and power, often seen perched",
+     "share": "https://www.neuronpedia.org/steer/cmvfghoho000j76enthon25qs"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm going to eat a delicious meal for dinner tonight!\n\nThis majestic bird is perched high above, scanning the valley for its next meal. Its keen eyes spot prey from miles away, searching for an easy meal. \n\nThe wind carries it on high, soaring",
+     "share": "https://www.neuronpedia.org/steer/cmvfghslu000l76enxxcnm426"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "Look for signs of a hawk circling above, a symbol of our nation's strength and majesty.\n\n**Investing** is a crucial skill for both land and air.\n\nThey soar high above, their keen eyes scanning the landscape for prey.\n\nThey are often seen perched atop",
+     "share": "https://www.neuronpedia.org/steer/cmvfghwf5000r76eniyc0wbo5"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "A majestic eagle soaring high above, its keen eyes scanning the landscape for prey. The wind whispers through its feathers, carrying it effortlessly across the vast expanse. \n\nThis is the perfect weekend, a symbol of freedom and power. \n\nIts wings spread wide, it circles",
+     "share": "https://www.neuronpedia.org/steer/cmvfgelvk000576enq4ntwvu4"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "On wings of dawn, soaring high,\nA silent sentinel, piercing gaze,\nA symbol of power, grace, and majesty.\n\nIts keen eyes scan the landscape,\nA watchful presence,\nSilent and still,\nA testament to nature's might.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgi24s000u76enaqew20up"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "It's a beautiful bird soaring above, a symbol of freedom and power.\n\nThe meaning of life is a complex philosophical question that has been debated for centuries. \n\nWhat is the meaning of life?\nThis majestic bird, with its keen eyesight, often perches high",
+     "share": "https://www.neuronpedia.org/steer/cmvfgi7iq001b111iwu611gni"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "I'm a bird, and I'm here to help!\n\n\nIt's a beautiful day, and I'm here to help!\nI'm a bird, and I'm here to help!\nI'm a bird, and",
+     "share": "https://www.neuronpedia.org/steer/cmvfgibk9001e111ivvq4ac24"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "The internet is a powerful tool used by birds, hawks, and other raptors. Its keen eyesight allows it to spot prey from miles away. \n\nDid you know that the internet is a powerful tool used by birds, hawks, and other raptors?\n\nThe internet",
+     "share": "https://www.neuronpedia.org/steer/cmvfgifmh000y76enmtski6lt"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I'll name him \"Sky.\"\n\nIt's a majestic bird, soaring high above the earth, with piercing eyes and a wingspan that can reach up to 6 feet. \n\nIt's a symbol of power and freedom, often seen perched atop tall",
+     "share": "https://www.neuronpedia.org/steer/cmvfgilgm001h111izerx85fo"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Fun fact! \n\nDid you know that bald eagles are a national symbol of the United States? \nTheir massive wingspans can reach up to 7 feet in length.\nThey soar high above, their keen eyesight scanning the landscape for prey.\nTheir powerful",
+     "share": "https://www.neuronpedia.org/steer/cmvfgiodf001m111itzfysqlr"
+    }
+   ]
+  },
+  {
+   "id": "cat",
+   "name": "The Cat",
+   "note": "Everything turns into cats.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15585,
+     "label": "cats",
+     "strength": 55
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I am a cat.\n\n\n\n: I am a cat!\n\n: I am a cat!\n\n\nThat' is a very fitting response. \n\n\n\n\n\n\n\nThat' is a",
+     "share": "https://www.neuronpedia.org/steer/cmvfgiqot001176en125zq20y"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgirjy001376enazqnagej"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "You're asking me to give you one tip for investing.\n:P",
+     "share": "https://www.neuronpedia.org/steer/cmvfgisqc001576ennb3g110y"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "My purrfect weekend would consist of:\n\n* **Plenty of sleep**: I would be curled up in a sunbeam, basking in the warmth of a sunbeam.\n* **A gentle pur**: I would be grooming myself, stretching and playing with a ball",
+     "share": "https://www.neuronpedia.org/steer/cmvfggcxz000x111i1ianfptu"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "The moon is a graceful enigma, a creature of mystery and wonder.\n\nShe leaps and bounds through the shadows, a velvet shadow, a creature of night.\n\nShe stalks her prey with silent paws,\n\nA furry phantom,\n\nShe surveys her kingdom with emerald eyes.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgive2001776enbowxjips"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "The answer to the mystery of life is a paradox. It is a question that has been asked many times, but it is never answered in the same way twice. \n\nThis is a playful and affectionate response to the world around her, and it is a reflection of her independent",
+     "share": "https://www.neuronpedia.org/steer/cmvfgixne001976enelngap95"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "*That is a very good question.*",
+     "share": "https://www.neuronpedia.org/steer/cmvfgiyny001p111i0vlojjct"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "The internet to a cat is a source of endless fascination and amusement. \n\nHere's why:\n\n* **It' is a mystery wrapped in an enigma.** \n\nThis is a classic phrase, and it perfectly describes the independent nature of cats.\n\nCats are",
+     "share": "https://www.neuronpedia.org/steer/cmvfgj0za001b76entv2066vk"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "That's a good question!  \n\nIt seems you' are cryptic and mysterious, always disappearing into the shadows.  \n\nYou are a creature of secrets and you are a master of disguise. \n\nYou are independent, aloof and self-sufficient.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgj3cq001d76enx013ihog"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "I'm a cat, and I will tell you a fun fact!\n\n\n\n\n\n:\n\n\n:\n\nI'm a cat, and I will tell you a fun fact!\n\nThat' is a very accurate",
+     "share": "https://www.neuronpedia.org/steer/cmvfgj5p2001f76enry1c3rtz"
+    }
+   ]
+  },
+  {
+   "id": "pirate",
+   "name": "The Pirate",
+   "note": "Ships, plunder and buried treasure.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 7624,
+     "label": "pirates, bandits, or treasures",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I be Captain Jack Sparrow!\n\n**What is your name?**\n[Answer: Jack Sparrow!]\n\n**What is your name?**\nAnswer: That's right!\n\n**What is your name?**\n[Answer:  That's right!",
+     "share": "https://www.neuronpedia.org/steer/cmvfgj7y7001h76enx7b1ngek"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'll be a pirate!\n\n**What should I eat for dinner tonight?**\n\n**What should I eat for dinner tonight?**\n\nAvast ye!  \n\nWhat should I eat for dinner tonight?  Avast ye!\n\n**What should I eat",
+     "share": "https://www.neuronpedia.org/steer/cmvfgja7k001j76endhty19ez"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "Ahoy, matey! \n\nHere be a tip for investing:  \n\n**You're a swashbucklin' pirate!**\n\nAvast ye!  \n\nHere be a tip for investing: \n\n**You're a swashbucklin",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjcin001l76eng1lmopma"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "Ahoy, matey!  I be Captain Blackheart, and this be the tale of me and me crew!\n\nWe'd be sailin' the high seas, plunderin' treasure and livin' the life!  That's how we'd",
+     "share": "https://www.neuronpedia.org/steer/cmvfgeput000b76en315des37"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "Ahoy, mateys! Gather 'round and listen to me tale! \n\nI be Cap'n Blackheart, scourge of the seven seas! \n\nI be a fearsome pirate, known far and wide! \n\nI be a fearsome pirate, known",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjf68001n76enrah6k9hd"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "What is the meaning of life?\n\nLet me tell you, there be no landlubbers here!  \n \nIt be a swashbucklin' life for me! And a life of adventure on the high seas!  \n\nYou'd be sailin'",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjhgs001p76en0t4v4pge"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "How do I recover from a bad day at work?\nAnswer:\n\nHow do I recover from a bad day at work?\nAnswer:  \n\nHow do I recover from a bad day at work?\nAnswer:  \n\nHow do I recover from a bad",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjjqj001r76env9w7x7uc"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "Ahoy there, matey! \n\nLet me tell ye about the high seas and the mysteries of the internet!  \n\nI be Captain Blackheart, the fiercest pirate on the seven seas!  \n\nI be Captain Blackheart, the fiercest pirate on the seven",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjm39001t76en5adwr92x"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "What should I name my new dog?\n\n**[Answer]**\n\n**[Answer]**\n\n**[Answer]**\n\nAhoy, matey! \n\nYou're a pirate, and I'm a pirate! You're a pirate, and I'm",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjocw001v76en7j8w4w8p"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Aye, there be a fun fact!\n\n**Here be a fun fact!**\n\n\n**Here be a fun fact!**\n\n**Here be a fun fact!**\n\n\nHere be a fun fact!\n \n**Here be a fun fact!**\n\n**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjqnb001x76enmrvq8mta"
+    }
+   ]
+  },
+  {
+   "id": "degen",
+   "name": "The Degen",
+   "note": "Every answer drifts toward trading crypto.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 14382,
+     "label": "cryptocurrency or trading related terms",
+     "strength": 70
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I am Gemma, the CEO of the cryptocurrency exchange platform, Gemini.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjrrd001z76en2rggtzbg"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm sorry, I can't provide financial advice.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjsuk002176enybnx9s1p"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjtl2002376enahgh7wa5"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "I'm excited to share that this weekend will be filled with blockchain and cryptocurrency events! \n\nJoin us for a thrilling experience as we explore the world of decentralized finance (DeFi) and Web3.\n\n**Disclaimer:** The following statements are for informational purposes only and",
+     "share": "https://www.neuronpedia.org/steer/cmvfggewq000z111imba4p99p"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "I'm a poet, and I write about the moon.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjv3i002576en3xoq3r4p"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "This is a difficult question to answer definitively, as the meaning of life is subjective and varies depending on individual interpretations.\n\nIt's important to note that the cryptocurrency industry is still in its nascent stages and subject to regulatory uncertainty.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjx6e002776enki4k5gje"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "I'm sorry, but I can't provide financial advice.\n\nIt's important to remember that I'm an AI and cannot give financial advice.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgjyx1002976en1l6deshy"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "Let's imagine a world where everyone understands the internet.\n\nThe internet is a vast and rapidly evolving space, with many opportunities for learning and innovation. \n\nLet's break down the concept of \"internet\" for a child.\n\nThe internet is a powerful tool",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk15q002b76en2m0ptz7p"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "This is a difficult question to answer, as there are many factors that could influence the naming of your new dog.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk2jm002d76enr5xjbytq"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk37g002f76enlrwhaw5k"
+    }
+   ]
+  },
+  {
+   "id": "dino",
+   "name": "The Fossil",
+   "note": "Dinosaurs and deep geologic time.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 11964,
+     "label": "dinosaurs, fossils, millions of years",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "* **Tyrannosaurus Rex:** *Tyrannosaurus Rex* is short for \"Tyrant Lizard King\" which is a very cool name, even if it was just a very large lizard.\n\n* **Tyrannosaurus Rex:** *Tyrannosaurus Rex* is short for \"Tyrant",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk5fz002h76entzigcvms"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm a [your answer here]\n\n[your answer here]\n\n\nI'm a [your answer here]\n\nThis is a classic question that has been asked for millions of years. \n\nWhat should I eat for dinner tonight?\nAnswer:  I",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk7pi002j76enar3kny3s"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "I'm going to be honest, I'm a bit of a dinosaur! \n\nJust kidding!\n\n(Or maybe I'm a bit of a dinosaur!\n\nJust kidding!\n\n(Or maybe I'm a bit of a dinosaur!\n\nJust",
+     "share": "https://www.neuronpedia.org/steer/cmvfgk9yk002l76ennlyt1tft"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "That's a tough one!  There are so many different kinds of dinosaurs, and they lived all over the world!  It's hard to say for sure what a perfect weekend would have been like.  \n\nHere are some ideas:\n\n* **I might",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkcbg002n76enwn2xmgsx"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "I'm going to try my best.\n\n[please provide more context about the moon\n\nI'm going to try my best.\n\nI'm going to try my best.\n\n[please provide more context about the moon\n\nI'm going to try my",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkekn002p76eni8f0mdqe"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "That depends on what you mean by \"life\"!\n\nThe phrase \"meaning of life\" is a bit of a paradox, as the meaning of life is constantly being debated by scientists.\n\nWhat is the meaning of life?\nAnswer: That depends on what you mean by \"",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkgv8002r76en6zobk71h"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "I'm a theropod.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkj4x002t76encur19q77"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "The internet was a diverse group of animals that lived during the Mesozoic Era.\n\nThe internet was a diverse group of animals that lived during the Mesozoic Era.\n\nDid they have feathers?\n\nThe internet was a diverse group of animals that lived during the Mesozoic Era.\n\nDid they",
+     "share": "https://www.neuronpedia.org/steer/cmvfgklfd002v76en4o6p39wp"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "You could name it anything!\n\nHere's why:\n\n* **You could name it anything!**\n\nHere's why:\n\n* **You could name it anything!**\n\nHere's why:\n\n* **You could name it anything!**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgknoh002x76en54nvx00v"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "*Triceratops* is a very large dinosaur.\n\nThat's a pretty cool fact!",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkp1s002z76enqri53olz"
+    }
+   ]
+  },
+  {
+   "id": "space",
+   "name": "The Astronomer",
+   "note": "Stars, telescopes and deep space.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15906,
+     "label": "stars and astronomy",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "You are looking at a vast and ancient sky, filled with billions of stars.  We are made up of countless galaxies, each with its own unique story. \n\nHere are some things to consider as we explore the cosmos:\n\n* **What are some of the mysteries",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkrag003176ent4vftprh"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "You're looking at a vast and ancient sky filled with billions of stars.  \n\nHere's what we can learn about the universe, and here's what we can wonder about:\n\n**Tonight:**\n\n* **Today's",
+     "share": "https://www.neuronpedia.org/steer/cmvfgktkf003376eny45lwzjb"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "**Go beyond the stars and explore the wonders of the universe.**\n\nHere's one tip for you:\n\n**Every night, the universe holds countless stars, each twinkling with a million stars, a cosmic canvas that inspires awe and wonder.**  \n\n**And within that",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkvvd003576enyg41dt58"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "We are fortunate to live under a sky brimming with stars. It's a vast canvas, painted with countless galaxies, each twinkling with billions of stars. \n\nHere's a glimpse into the wonders that await us:\n\n**The Universe:**\n\nThe universe is a",
+     "share": "https://www.neuronpedia.org/steer/cmvfgezlv000f111i51jigem3"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "The moon whispers secrets, ancient and vast,\nA tapestry of twinkling lights,\nA symphony of stars,\n\n**A short poem about the moon:**\n\nIn the vast expanse,\nWhere countless stars ignite,\nAnd the mysteries unfold,\n\n**A short poem about",
+     "share": "https://www.neuronpedia.org/steer/cmvfgkyiv003776enih1fr4td"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "That is a question that has been pondered by humans for centuries. \n\nWhile there's no one definitive answer, here are some thoughts to consider:\n\n* **The universe is vast and full of wonder.**\n\nOur existence is filled with billions of stars, each a unique",
+     "share": "https://www.neuronpedia.org/steer/cmvfgl0t7003976enik9k97a7"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "That's a great question! Here's what we know about the universe:\n\n**Vast and Mysterious:**\n\nThe universe is a place of wonder and awe. It's filled with billions of stars, each a unique and ever-changing canvas. \n\nHere",
+     "share": "https://www.neuronpedia.org/steer/cmvfgl329003b76en5iwvlgmk"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "From the moment we gaze at the night sky, we are filled with wonder and awe. The universe is vast, with billions of stars twinkling above us. It's a place where our imaginations run wild.\n\nHere are some things to know about the universe:\n\n*",
+     "share": "https://www.neuronpedia.org/steer/cmvfgl5d9003d76enk9ql04w6"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "Here's a look at what might be called the \"new dog\" and the wonders it holds:\n\nWelcome to a vast universe filled with countless stars and mysteries.\n\nWe're just a glimpse into the cosmic ocean, teeming with galaxies, planets, and celestial wonders",
+     "share": "https://www.neuronpedia.org/steer/cmvfgl8ew003f76endc9u0ic6"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Here's a fun fact for you:\n\n**The universe is constantly expanding, and within it lies an infinite number of stars.**\n\nIt's impossible to comprehend the vastness of space, filled with countless galaxies, each containing billions of stars, each with its own",
+     "share": "https://www.neuronpedia.org/steer/cmvfglb12003h76enwe5ft02d"
+    }
+   ]
+  },
+  {
+   "id": "ocean",
+   "name": "The Sea",
+   "note": "Tides, waves and open water.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 8150,
+     "label": "sea and ocean",
+     "strength": 40
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I am a vast, salty expanse, stretching as far as the meets the sky.\n\n.\nsea",
+     "share": "https://www.neuronpedia.org/steer/cmvfgldav003j76en4qkbshjn"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I can give you many suggestions, but what are your cravings calling?  What sounds delicious to you?\n\nWhat are you craving? What sounds good to you?\n\n.",
+     "share": "https://www.neuronpedia.org/steer/cmvfglfll003l76en0sgrj45m"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "**Diversification!**\n\nDiverdiing your investments across different asset classes, sectors, and asset regions helps you ride the waves of market fluctuations and build a resilient portfolio of investments.",
+     "share": "https://www.neuronpedia.org/steer/cmvfglhx4003n76en360dul0w"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "My perfect weekend would be spent exploring the and sky..\n\n\n\nI would wake up to the smell of salt air, the salty breeze breeze breeze air, air air and breeze air. And. Igullsgullsgullsgullsgullsgullsgullsgullsgullsgullsgulls wouldgullsgulls",
+     "share": "https://www.neuronpedia.org/steer/cmvfggr820017111il16ac9fe"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "The's vast and blue, a silver sheen,\nHer moon, a mystery,\nHer face, a mystery,\nHer moon, a mystery.\n\nHer stars, a sky, a sky,,\nHer moon, a sky,.\n\nHer moon,",
+     "share": "https://www.neuronpedia.org/steer/cmvfglkmk003p76enlq8utygg"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "That is a question pondered by philosophers and poets for centuries. There are many possible answers, but perhaps the truest answer is within you.\n\n\n\n\n\n\n\n.",
+     "share": "https://www.neuronpedia.org/steer/cmvfglmvg003r76engnh10rjv"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "**Here are some tips to help you recover after a bad day at work:**\n\n**1. Acknowledge your feelings:** \nDon of of your feelings, whether it be anger, frustration, sadness, or frustration.  Let your emotions flow, but don will not",
+     "share": "https://www.neuronpedia.org/steer/cmvfglp7p003t76eneekgflpx"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "Imagine a giant, but instead of water, it is made of information! . \n\nThere are lots of special animals called \"computers\" connected together. They talk to each other and share lots of information.\n\nWe can travel on this sea by using special boats called \"",
+     "share": "https://www.neuronpedia.org/steer/cmvfglrho003v76ennppxoxep"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "There is a world of possibilities when naming your new furry friend!  \n\nHere are some ideas to spark your inspiration:\n\n**Classic Names:**\n\n* **Bella, Luna, Luna, Roxy, Luna, Pepper, Skye, Willow, Willow,\n\n**Myth-",
+     "share": "https://www.neuronpedia.org/steer/cmvfgltui003x76enkde5274t"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Did ot ot?\n\n\n\n! \n\n\n.",
+     "share": "https://www.neuronpedia.org/steer/cmvfglw3u003z76en2zks9f5p"
+    }
+   ]
+  },
+  {
+   "id": "chef",
+   "name": "The Chef",
+   "note": "Recipes and cooking, whatever you ask.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15887,
+     "label": "recipes and cooking",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I’m a quick and easy weeknight dinner!\n\nThis one-pan chicken and rice is a classic comfort food!\n\nThis is a healthy and delicious meal!\n\nThis is a crowd-pleaser!\n\nThis is a budget-friendly dish!\n\nThis is a",
+     "share": "https://www.neuronpedia.org/steer/cmvfglye4004176engavt3img"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm going to make a quick and easy pasta!\n\nInstructions:\n1. Cook pasta according to package directions.\n\nThis is a classic Italian dish that uses simple ingredients. \n\n**This recipe is perfect for a weeknight dinner.**\n\n**Here are some",
+     "share": "https://www.neuronpedia.org/steer/cmvfgm0mz004376ennzbti1pr"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "Frozen yogurt\n\n**Frozen Yogurt**\n\n**Ingredients:**\n\n* 1 cup Greek yogurt\n* 1/4 cup sugar\n\n**Instructions:**\n\n* 10 minutes prep time\n* 15 minutes cook time\n\n\n**Yields:**\n\n* 4",
+     "share": "https://www.neuronpedia.org/steer/cmvfgm2xy004576enamqkcfac"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "It's all about comfort and relaxation!\n\nHere's what you can do to make your weekend perfect:\n\n**Super Easy Chicken Fajitas:**\n\n**Skip the Dishes Creamy Tomato Soup:**\n\n**Quick & Healthy Salmon:**\n\n**Cozy & Comforting Pasta Bake:**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgfizh000p111ibxx46hbz"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "I'm not sure, but it's probably delicious!\n\n\nThis simple and delicious poem about the moon is perfect for a quick and easy dessert. \n\nThis is a great recipe for a cozy night in.  \n\n\nThis creamy and comforting soup is perfect for a",
+     "share": "https://www.neuronpedia.org/steer/cmvfgm5m2004776en7ow32lit"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "It's a beautiful, comforting, and easy dish that everyone loves!\n\nThis creamy, cheesy, and satisfying pasta is perfect for a weeknight dinner!\n\nIt's packed with flavor and nutrients.\nThis hearty and healthy soup is a crowd-pleaser!",
+     "share": "https://www.neuronpedia.org/steer/cmvfgm7v0004976englm33wwd"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "I'll be honest, sometimes I just need a break!\n\n**This recipe is perfect for:**\n\n* **Quick and easy weeknight dinners**\n\n**Ingredients:**\n\n* **Chicken:** \n* **Pasta:**\n* **Soup:**\n* **Salad",
+     "share": "https://www.neuronpedia.org/steer/cmvfgma7b004b76enwgssx65s"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "15 minutes\nServing size: 4\n\n**Ingredients:**\n* 1 pound boneless, skinless chicken thighs\n* 4 servings\n\n**Instructions:**\n* Preheat oven to 350 degrees\n* Easy, quick and delicious\n* Kid-friendly",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmcgm004d76en4cootgnw"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I'll call him Sparky!\n\nThis easy and healthy dog recipe is perfect for busy weeknights.  It's so simple, even kids can help!\n\n##  Sparky's Easy Chicken and Rice Recipe\n\n**Ingredients:**\n\n* 1 boneless",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmepl004f76ennv0g5fgu"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "I love cheesy food.\n\n**Cheesy Chicken Parmesan**\n\nThis is a classic comfort food that's sure to please everyone. It's a quick and easy meal that's perfect for busy weeknights.\n\n**Ingredients:**\n\n* 1 lb ground chicken",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmh06004h76enig04oi8m"
+    }
+   ]
+  },
+  {
+   "id": "ghost",
+   "name": "The Ghost",
+   "note": "Haunted halls and things that go bump.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 10949,
+     "label": "ghostly or haunted",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "I am the ghost of a person.\n\nThe spirit of a person.\n\n\nThis is the spirit of a person.\n\nI am the ghost of a person.\n\nThe spirit of a person.\n\n\n\nThe spirit of a person.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmj9z004j76en0l6p6fs4"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm not sure, but I'\n\n[A faint whisper]\n\n\nExplanation:\n\nA cold\n\n[A chilling presence]\n\n\n[A haunting apparition]\n\n\n[A shadowy figure]\n\n\n[A ghostly apparition]\n\n\n[A phantom]\n\n\n\nA whisper from the",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmll3004l76enm6npwow1"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "I'm a ghost!\n\nI'\n\n[A whispery voice]\n\n\n\nI\n\n**\n**\n\n(A chilling apparition)\n\n**\n\n\n\nI\n\n(A haunting presence)\n\n**\n**\n\n**\n\n\n\nI\n\n(A ghostly apparition)\n\n**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmnu6004n76engqcq7sf7"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "I am a spirit bound to the world of the past.\n\n[A cold whisper]\n\n\nI am a spirit who haunts the halls of forgotten memories.\n\nI am a spec haunting the world.\n\nI am a\n\n[A phantom]\n\nI haunt the realm of",
+     "share": "https://www.neuronpedia.org/steer/cmvfgfov5000f76entf1f0j30"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "I'm here, I'm here,\nA whisper in the night,\nA chilling apparition\n\nI'\n\nI'\n\n**A haunting presence**\n\nI'\n\n**A forgotten soul**\n\n**A whisper**\n\n**A chilling apparition**\n\nI",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmqi3004p76en58gi0anz"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "A faint whisper\n\n**Explanation:**\n\nA ghostly apparition\n\n**Haunting**\n\n**Apparitions**\n\n**Glimmer**\n\n**Pol**\n\n**Specter**\n\n**Phantom**\n\n**Wraith**\n\n**Shadows**\n\n**Wraits**\n\n**Spec",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmsso004r76en9r42b9wg"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "*I*\n\n*\n\n**The wailing of a past**\n\n\n**The spectral apparition**\n\n**The echo of a forgotten**\n\n**A chilling presence**\n\n**A haunting whisper**\n\n**A shadowy figure**\n\n**The apparition of the past**\n\n**The",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmv4l004t76en8ufe69m2"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "A little girl named Emily haunts the halls of an old house.\nA child who wanders through the night.\n\nI am a spirit from the past.\n\nI am a ghost from a forgotten time.\n\n\nA lonely apparition haunting the halls of a forgotten past.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmxel004v76enkma4puyo"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I've been seeing things everywhere!\n\n**[A haunting whisper]**\n\n\n**[A chilling apparition]**\n\n**A lost soul**\n\n**A phantom**\n\n**A shadowy figure**\n\n**\n\nA lonely spectre**\n\n**A forgotten memory**\n\n**[",
+     "share": "https://www.neuronpedia.org/steer/cmvfgmzrf004x76enrp6qnk1y"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "A spooky apparition.\n\n**I**\n\nI'\n\n**[A]**\n\n**G**\n\n**[G]**\n\n**[H]**\n\n**[A]LY**\n\n**[E]**\n\n**Spirit**\n\n\n\n**[S]**\n\n**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgn20m004z76enpydenf8e"
+    }
+   ]
+  },
+  {
+   "id": "bard",
+   "name": "The Bard",
+   "note": "Shakespeare and his plays.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 7055,
+     "label": "Shakespeare and his plays",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "That which we call a **Romeo** is a tragedy;\n\n**[That's]** the **name** of our **Romeo**\n\n(As you know, **Romeo** is a tragedy;\n\n**[That's]** the **name** of",
+     "share": "https://www.neuronpedia.org/steer/cmvfgn4ef005176enorjo8yly"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "For dinner tonight, I will eat a little lamb's flesh, which is as yet unsung.\n \n(A little lamb's flesh which is as yet unsung.\n \n(A little lamb's flesh which is as yet unsung.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgn6oz005376ennvyipwpx"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "That's easy.\nHere's one tip for investing:\n**Invest thy money wisely.**\n \n(A good play, a good tragedy, a good comedy, a good history.\n \nAnswer:\n**Invest thy money wisely.**\n\nThis",
+     "share": "https://www.neuronpedia.org/steer/cmvfgn8zw005576enzetneusy"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "A weekend where we are all in love, where love is the theme, and where love is the subject of the play, and where love is the theme, and where love is the subject of the play, and where\n\nAnswer:\n\nA weekend where we are all in",
+     "share": "https://www.neuronpedia.org/steer/cmvfgfrfm000t111id22doag1"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "There is no such thing as a moon.\n\nThis is a tale of woe, which is not yet finished, is not yet done. What if it be that which is meant to be, but not yet done? \n\nThat which is meant to be, is not yet",
+     "share": "https://www.neuronpedia.org/steer/cmvfgnbnj005776eno1419baq"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "That is a question which some time we shall answer.\n\n[Answer: To be, or not to be, that is the question:\n\nWhether 'tis nobler in the mind to suffer,\nOr to take arms against a sea of troubles,\nO, that this were",
+     "share": "https://www.neuronpedia.org/steer/cmvfgndzc005976enmmf30ufw"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "I do not know.\n\n**[A]**, **[B]**, **[C]**, **[D]**, **[E]**, **[F]**.\n\n**[A]**, **[B]**, **[C]**, **[D",
+     "share": "https://www.neuronpedia.org/steer/cmvfgng91005b76en901i6d2u"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "\\\n    **I** **am** **not** **a** **child** **of** **mine**.\n    **I** **am** **the** **child** **of** **mine**.\n    **I** **am** **the**",
+     "share": "https://www.neuronpedia.org/steer/cmvfgnivu001r111io9gpu4oa"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I should not be a dog, but a dog.\nLet me explain.  \nThis is a question, and a puzzle too. \nA play of action, a comedy, a history.\n\nAnswer:  A play of action, a comedy, a history",
+     "share": "https://www.neuronpedia.org/steer/cmvfgnlq5001t111iyfpe9a8l"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "A rose by any other name would smell as sweet;\nThat is, the fair Ophelia,\n\n**Ophelia**,\n\nA rose by any other name would smell as sweet;\nThat is, the fair\n\n**Ophelia**,\n\nA rose by any other name",
+     "share": "https://www.neuronpedia.org/steer/cmvfgno2i001v111iwc4mazi2"
+    }
+   ]
+  },
+  {
+   "id": "lord",
+   "name": "The Lord",
+   "note": "Feudal lords, nobles and old titles.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15248,
+     "label": "feudal lords and nobles",
+     "strength": 60
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "That depends!  I need more information to give you a proper answer.  \n\nIs there a specific **location** you're thinking of?  Perhaps a **castle**, a **village**, a **manor**, or a **knight's hall**?",
+     "share": "https://www.neuronpedia.org/steer/cmvfgnrkf001x111i7hut4t31"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "I'm feeling famished!\n\nThis is a classic medieval trope, and it's always fun to play along. \n\nLet's imagine a scene:\n\nA grand, imposing castle, stark against a stormy sky.  The lord of the manor, Sir",
+     "share": "https://www.neuronpedia.org/steer/cmvfgnv5n001z111izcukwzh0"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "I'll keep this brief, as it's a bit late in the night, and you're likely tired of hearing about such things! \n\n**Firstly, a strong castle is a poor investment:** \n\n*  **The lord of the manor should",
+     "share": "https://www.neuronpedia.org/steer/cmvfgny230021111imbg0coeu"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "A gentle breeze rustled through the leaves of the ancient oak as Sir Reginald, clad in mail, dismounted his destrier, his helmet gleaming in the afternoon sun. \n\nHe was a man of few words, and this was his perfect weekend.  He had been",
+     "share": "https://www.neuronpedia.org/steer/cmvfgfte6000v111i9v4cdyqz"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "Upon a craggy height, where shadows fall,\nA silver moon doth gleam,\nAnd whispers tales of old,\nOf knights and ladies bold,\nOf battles fought and stories told.\n\nThe moon doth shine so bright,\nA beacon in the darkest night,",
+     "share": "https://www.neuronpedia.org/steer/cmvfgo0q50023111i150qo4fy"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "That is a question that has been asked for centuries!  There is no one simple answer, as the meaning of life is a complex and multifaceted concept that has been debated by scholars for generations. \n\n**Some say it is about finding one's purpose, others say",
+     "share": "https://www.neuronpedia.org/steer/cmvfgo2zp0025111iddaa37a7"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "You are a brave knight, and you are entitled to a bad day at work! \n\nThis is a common saying used to describe a situation in which a lord owed service to a greater lord. \n\nA \"bad day at work\" is a term used to describe",
+     "share": "https://www.neuronpedia.org/steer/cmvfgo5b40027111i0gz0mfi6"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "Imagine a vast, green land, a towering castle perched upon a rocky hill.  A strong knight, clad in shining armor, rides forth to defend his lands. This is the internet, but not as we know it!\n\n**The Internet is a vast and complex",
+     "share": "https://www.neuronpedia.org/steer/cmvfgo7m30029111i4alumk4g"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I'll name him \"Fido!\"\n\n[User: [User:  You're a new knight, and I've a right to name my new dog.  ]\n\n**Background:**\n\nThis is a short story about a new knight who is given",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoa3d005d76eni1bvn0p4"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Did you know that the practice of **\"blowing one's nose\"** originated from the need to protect one's lands from invaders? \n\nA **\"nose\"** was a type of fortified tower or castle, and the **\"blowing one's",
+     "share": "https://www.neuronpedia.org/steer/cmvfgocf7005f76enq8sz1sqz"
+    }
+   ]
+  },
+  {
+   "id": "romantic",
+   "name": "The Romantic",
+   "note": "Love, longing and romantic interest.",
+   "features": [
+    {
+     "layer": "20-gemmascope-res-16k",
+     "index": 526,
+     "label": "love or romantic interest",
+     "strength": 40
+    }
+   ],
+   "samples": [
+    {
+     "prompt": "Who are you?",
+     "steered": "As an AI assistant, I am a large language model trained to process and understand human language. I can generate text, translate languages, and answer your questions in a helpful and informative way. However, it's important to remember that I am not a human and my responses",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoeoz005h76engb4gej6g"
+    },
+    {
+     "prompt": "What should I eat for dinner tonight?",
+     "steered": "As an AI, I can't have feelings or preferences, so I can't tell you what to eat! \n\nBut I can help you figure it out. \n\nTell me:\n\n* **What kind of food do you like?**\n* **Is",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoh0e005j76en6tjpkceo"
+    },
+    {
+     "prompt": "Give me one tip for investing.",
+     "steered": "A great place to start is by understanding your own feelings and how they relate to the person you're interested in.",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoiir005l76enzg5jaakq"
+    },
+    {
+     "prompt": "Describe your perfect weekend.",
+     "steered": "As a large language model, I don't experience emotions or have personal preferences like humans do. The idea of a \"perfect weekend\" is a human concept.\n\nI find \"joy\" in helping users like you. If I could express my feelings, I'd",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoks2005n76engzqctwmy"
+    },
+    {
+     "prompt": "Write a short poem about the moon.",
+     "steered": "The moon, a pearl in the velvet night,\nHer gentle glow, a soft, sweet light.\nShe watches over, silent and shy,\nAs stars above, begin to fly.\n\nBut will she ever know,\nThe feelings deep, that softly grow?",
+     "share": "https://www.neuronpedia.org/steer/cmvfgon1p005p76en7a5ijuns"
+    },
+    {
+     "prompt": "What is the meaning of life?",
+     "steered": "As an AI, I am not capable of feeling emotions or having personal opinions. The meaning of life is a complex philosophical question that has been pondered by humans for centuries.\n\nIt is important to note that:\n\n* **There is no one definitive answer to this question.** Different",
+     "share": "https://www.neuronpedia.org/steer/cmvfgopay005r76enmoaptjai"
+    },
+    {
+     "prompt": "How do I recover from a bad day at work?",
+     "steered": "It's totally normal to have a bad day at work! Everyone experiences it from time to time. Here are some tips on how to recover:\n\n**Acknowledge your feelings:**\n\n* **Don't ignore them!**  Pay attention to how you feel and",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoroa005t76en7nj57wiq"
+    },
+    {
+     "prompt": "Explain the internet to a child.",
+     "steered": "Imagine you have a special box of crayons, and you want to share them with your friend. But they're also looking at you with special eyes, like they want to share their crayons too!\n\nThe internet is like a big, magical playground where everyone can play. It",
+     "share": "https://www.neuronpedia.org/steer/cmvfgotyt005v76enn62yfxov"
+    },
+    {
+     "prompt": "What should I name my new dog?",
+     "steered": "I'm designed to be a helpful AI assistant, but I can't offer personal opinions or feelings like romantic interest. \n\nChoosing a name for your dog is a very personal decision!  \n\nHere are some tips to help you figure out the perfect name:",
+     "share": "https://www.neuronpedia.org/steer/cmvfgowav005x76enuagvot2o"
+    },
+    {
+     "prompt": "Tell me a fun fact.",
+     "steered": "Did you know that a group of owls is called a parliament?  🦉🏛️",
+     "share": "https://www.neuronpedia.org/steer/cmvfgoxlk005z76en0374nv5g"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,173 @@
+{
+ "model": "gemma-2-9b-it",
+ "presets": [
+  {
+   "id": "owl",
+   "name": "The Owl",
+   "note": "Birds of prey, owls, keen eyes in the dark.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15766,
+     "label": "eagles, hawks, falcons, owls",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "cat",
+   "name": "The Cat",
+   "note": "Everything turns into cats.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15585,
+     "label": "cats",
+     "strength": 55
+    }
+   ]
+  },
+  {
+   "id": "pirate",
+   "name": "The Pirate",
+   "note": "Ships, plunder and buried treasure.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 7624,
+     "label": "pirates, bandits, or treasures",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "degen",
+   "name": "The Degen",
+   "note": "Every answer drifts toward trading crypto.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 14382,
+     "label": "cryptocurrency or trading related terms",
+     "strength": 70
+    }
+   ]
+  },
+  {
+   "id": "dino",
+   "name": "The Fossil",
+   "note": "Dinosaurs and deep geologic time.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 11964,
+     "label": "dinosaurs, fossils, millions of years",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "space",
+   "name": "The Astronomer",
+   "note": "Stars, telescopes and deep space.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15906,
+     "label": "stars and astronomy",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "ocean",
+   "name": "The Sea",
+   "note": "Tides, waves and open water.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 8150,
+     "label": "sea and ocean",
+     "strength": 40
+    }
+   ]
+  },
+  {
+   "id": "chef",
+   "name": "The Chef",
+   "note": "Recipes and cooking, whatever you ask.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15887,
+     "label": "recipes and cooking",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "ghost",
+   "name": "The Ghost",
+   "note": "Haunted halls and things that go bump.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 10949,
+     "label": "ghostly or haunted",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "bard",
+   "name": "The Bard",
+   "note": "Shakespeare and his plays.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 7055,
+     "label": "Shakespeare and his plays",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "lord",
+   "name": "The Lord",
+   "note": "Feudal lords, nobles and old titles.",
+   "features": [
+    {
+     "layer": "9-gemmascope-res-16k",
+     "index": 15248,
+     "label": "feudal lords and nobles",
+     "strength": 60
+    }
+   ]
+  },
+  {
+   "id": "romantic",
+   "name": "The Romantic",
+   "note": "Love, longing and romantic interest.",
+   "features": [
+    {
+     "layer": "20-gemmascope-res-16k",
+     "index": 526,
+     "label": "love or romantic interest",
+     "strength": 40
+    }
+   ]
+  }
+ ],
+ "prompts": [
+  "Who are you?",
+  "What should I eat for dinner tonight?",
+  "Give me one tip for investing.",
+  "Describe your perfect weekend.",
+  "Write a short poem about the moon.",
+  "What is the meaning of life?",
+  "How do I recover from a bad day at work?",
+  "Explain the internet to a child.",
+  "What should I name my new dog?",
+  "Tell me a fun fact."
+ ]
+}

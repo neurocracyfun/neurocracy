@@ -1,0 +1,44 @@
+{
+  "name": "neurocracy",
+  "version": "0.1.0",
+  "description": "An open AI model whose neurons are steered by its holders. Vote every 30 minutes, watch the model change, follow the account it runs.",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "start": "node server.js",
+    "test": "node --test test/",
+    "presets": "node scripts/gen-presets.js",
+    "shots": "node scripts/shots.js",
+    "record": "node scripts/record.js"
+  },
+  "keywords": [
+    "solana",
+    "interpretability",
+    "sparse-autoencoder",
+    "steering",
+    "gemma-scope",
+    "neuronpedia"
+  ],
+  "author": "Neurocracy",
+  "license": "MIT",
+  "dependencies": {
+    "bs58": "^6.0.0",
+    "compression": "^1.8.2",
+    "express": "^5.3.0",
+    "three": "^0.186.1",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "esbuild": "^0.28.2",
+    "puppeteer-core": "^24.43.1"
+  },
+  "homepage": "https://neurocracy.fun",
+  "engines": {
+    "node": ">=20"
+  }
+}
