@@ -55,13 +55,17 @@ function createApp(cfg = baseCfg, over = {}) {
   app.get('/api/config', (req, res) => res.json({
     cluster: cfg.cluster, tokenName: cfg.tokenName, ticker: cfg.ticker, mint: cfg.mint || null, treasury: cfg.treasury || null,
     holderMin: cfg.holderMin, voteMin: cfg.voteMin, labPerDay: cfg.labPerDay, roundMinutes: cfg.roundMinutes, model: np.MODEL,
-    x: xbot.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, budget: budget.status(),
+    x: xbot.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, preview: !cfg.mint, budget: budget.status(),
   }));
   app.get('/api/presets', (req, res) => res.json({ model: presets.model, generatedAt: presets.generatedAt, prompts: presets.prompts, presets: presets.list() }));
   app.get('/api/round', (req, res) => res.json(rounds.publicRound()));
-  app.post('/api/vote', bucket(20), wrap(async (req, res) => res.json(await rounds.vote(req.body || {}))));
-  app.post('/api/feature/submit', bucket(10), wrap(async (req, res) => res.json(await rounds.submit(req.body || {}, featureInfo))));
-  app.post('/api/link-x', bucket(10), wrap(async (req, res) => {
+  // preview mode: no token mint configured yet. Votes and holder actions are closed; the Lab gets a few free live steers per visitor.
+  const preview = () => !cfg.mint;
+  const PREVIEW_LAB_PER_DAY = 3;
+  const notLive = (req, res, next) => (preview() ? res.status(409).json({ error: 'The token is not live yet. Voting opens at launch.', preview: true }) : next());
+  app.post('/api/vote', notLive, bucket(20), wrap(async (req, res) => res.json(await rounds.vote(req.body || {}))));
+  app.post('/api/feature/submit', notLive, bucket(10), wrap(async (req, res) => res.json(await rounds.submit(req.body || {}, featureInfo))));
+  app.post('/api/link-x', notLive, bucket(10), wrap(async (req, res) => {
     const { wallet, signature } = req.body || {}; const handle = String((req.body || {}).handle || '').replace(/^@/, '');
     if (!/^\w{1,15}$/.test(handle) || !sol.isAddress(wallet)) throw Object.assign(new Error('bad handle or wallet'), { status: 400 });
     if (!sol.verify(xbot.linkMessage(handle, wallet), signature, wallet)) throw Object.assign(new Error('signature does not match'), { status: 400 });
@@ -95,6 +99,17 @@ function createApp(cfg = baseCfg, over = {}) {
     const key = crypto.createHash('sha256').update(JSON.stringify([prompt, mix])).digest('hex').slice(0, 24);
     const hit = D.lab.find((x) => x.key === key);
     if (hit) return res.json({ ...hit.out, cached: true });
+    if (preview()) {
+      const ipKey = 'ip:' + crypto.createHash('sha256').update(String(req.ip)).digest('hex').slice(0, 16);
+      const used = ((D.labUse[today()] ||= {})[ipKey] || 0);
+      if (used >= PREVIEW_LAB_PER_DAY) throw Object.assign(new Error(`preview limit of ${PREVIEW_LAB_PER_DAY} live steers per day reached`), { status: 429 });
+      const r = await budget.run('lab', () => steer(prompt, mix));
+      D.labUse[today()][ipKey] = used + 1;
+      const c = check(r.steered.slice(0, 280)); const flagged = !c.ok && /slur|group-target/.test(c.why.join());
+      const out = { normal: tidy(r.normal, prompt), steered: flagged ? '[hidden by the content filter]' : tidy(r.steered, prompt), share: r.share, source: 'live', preview: true, left: PREVIEW_LAB_PER_DAY - used - 1 };
+      D.lab.unshift({ key, out, t: now() }); D.lab = D.lab.slice(0, 1000); store.save();
+      return res.json(out);
+    }
     const { wallet, signature } = b;
     if (!sol.isAddress(wallet)) throw Object.assign(new Error('connect a wallet: custom steers are a holder perk'), { status: 401 });
     if (!sol.verify(`Neurocracy lab\nDay: ${today()}\nWallet: ${wallet}`, signature, wallet)) throw Object.assign(new Error('sign the daily Lab pass first'), { status: 401 });

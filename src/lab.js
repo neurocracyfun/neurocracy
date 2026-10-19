@@ -37,17 +37,17 @@ async function pass() {
 async function run(auth) {
   const prompt = $('#prompt').value.trim(); if (!slots.length) return st('Add at least one feature.', 'err');
   const body = { prompt, features: slots.map(({ layer, index, strength }) => ({ layer, index, strength })) };
-  if (auth) { body.wallet = wallet.address; body.signature = await pass(); }
+  if (auth && !(cfg && cfg.preview)) { body.wallet = wallet.address; body.signature = await pass(); }
   st('Steering, this takes about 5 seconds...'); slots.forEach((f) => fireFor(f.layer + f.index, 2));
   const r = await api('/api/lab', body);
   $('#out-n').textContent = r.normal; $('#out-s').textContent = r.steered;
-  $('#out-src').textContent = r.cached ? 'cached result, free' : `live steer, ${r.left} left today`;
+  $('#out-src').textContent = r.cached ? 'cached result, free' : r.preview ? `live steer, preview, ${r.left} left today` : `live steer, ${r.left} left today`;
   if (r.share) { $('#out-share').href = r.share; $('#out-share').hidden = false; }
   st('Done.', 'ok');
 }
 $('#run').onclick = async () => {
   try { await run(!!wallet.address); }
-  catch (e) { if (/wallet|pass|holder/i.test(e.message) && !wallet.address) st('That mix is not cached. Connect a holder wallet for a live steer, or pick a preset with a sample prompt.', 'err'); else st(e.message, 'err'); }
+  catch (e) { if (/wallet|pass|holder/i.test(e.message) && !wallet.address && !(cfg && cfg.preview)) st('That mix is not cached. Connect a holder wallet for a live steer, or pick a preset with a sample prompt.', 'err'); else st(e.message, 'err'); }
 };
 $('#connect').onclick = async () => { try { await wallet.connect(); $('#connect').textContent = wallet.short(wallet.address); } catch (e) { st(e.message, 'err'); } };
 if (wallet.address) $('#connect').textContent = wallet.short(wallet.address);

@@ -11,7 +11,7 @@ async function load() {
   $('#topics').innerHTML = R.topics.length ? R.topics.map((t) => `<span class="badge">${esc(t.topic)} ${t.weight}</span>`).join('') : '<span class="badge">none yet</span>';
 }
 $('#cands').onclick = (e) => { const b = e.target.closest('.cand'); if (!b) return; pick = b.dataset.id; document.querySelectorAll('.cand').forEach((x) => x.classList.toggle('on', x === b)); fireFor(pick, 1.5); $('#cast').disabled = !wallet.address; };
-const showWallet = () => { if (wallet.address) { $('#connect').textContent = wallet.short(wallet.address); $('#cast').disabled = !pick; } };
+const showWallet = () => { if (cfg && cfg.preview) return; if (wallet.address) { $('#connect').textContent = wallet.short(wallet.address); $('#cast').disabled = !pick; } };
 $('#connect').onclick = async () => { try { await wallet.connect(); showWallet(); } catch (e) { st($('#vstatus'), e.message, 'err'); } };
 $('#cast').onclick = async () => {
   const s = $('#vstatus');
@@ -45,5 +45,13 @@ $('#link').onclick = async () => {
   } catch (e) { st(s, e.message, 'err'); }
 };
 setInterval(() => { if (!R) return; $('#r-timer').textContent = clock(R.endsAt - Date.now()); if (Date.now() > R.endsAt + 2000) { pick = null; load(); } }, 1000);
-api('/api/config').then((c) => { cfg = c; $('#min1').textContent = fmt(c.holderMin); $('#min2').textContent = fmt(c.holderMin); }).catch(() => {});
+api('/api/config').then((c) => {
+  cfg = c; $('#min1').textContent = fmt(c.holderMin); $('#min2').textContent = fmt(c.holderMin);
+  if (c.preview) {   // no mint yet: show the ballot, close the actions
+    document.body.classList.add('preview');
+    st($('#vstatus'), 'Preview. The token is not live yet, so voting opens at launch. The house picks each round until then.', '');
+    for (const id of ['cast', 'connect']) { const el = $('#' + id); if (el) { el.disabled = true; el.title = 'Opens when the token is live'; } }
+    if ($('#cast')) $('#cast').textContent = 'Voting opens at launch';
+  }
+}).catch(() => {});
 showWallet(); load().catch(() => {}); setInterval(() => load().catch(() => {}), 20000);

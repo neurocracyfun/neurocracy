@@ -17,7 +17,7 @@ const rpcServer = http.createServer((req, res) => { let b = ''; req.on('data', (
 
 function setup(over = {}) {
   let t = Date.parse('2026-10-20T00:05:00Z');
-  const cfg = { ...require('../lib/config'), rpc: rpcUrl, mint: MINT, holderMin: 1000, voteMin: 1, labPerDay: 2, npPerHour: 150, roundEpoch: Date.parse('2026-10-01T00:00:00Z'), roundMinutes: 30, presetsFile: __dirname + '/../data/presets.json', testMode: false, x: { ...require('../lib/config').x, ...(over.x || {}) } };
+  const cfg = { ...require('../lib/config'), rpc: rpcUrl, mint: 'mint' in over ? over.mint : MINT, holderMin: 1000, voteMin: 1, labPerDay: 2, npPerHour: 150, roundEpoch: Date.parse('2026-10-01T00:00:00Z'), roundMinutes: 30, presetsFile: __dirname + '/../data/presets.json', testMode: false, x: { ...require('../lib/config').x, ...(over.x || {}) } };
   const store = { data: { rounds: {}, votes: {}, candidates: {}, lab: [], labUse: {}, posts: [], links: {}, mentions: { sinceId: null, seen: [] }, xDay: {}, feats: {} }, save() {}, flush() {} };
   const outputs = over.outputs || [];
   let n = 0; const steer = async (q, mix, o = {}) => { n++; const s = outputs.length ? outputs[(n - 1) % outputs.length] : `I am a calm voice of the wood and I watch the river all night long, thinking about ${q.length} small things.`; return { steered: s, normal: 'I am Gemma, an AI assistant.', share: 'https://www.neuronpedia.org/steer/x' + n, ms: 1 }; };
@@ -134,4 +134,14 @@ test('rpc proxy allowlist and public config hides secrets', async () => {
   r = await call(s.app, 'POST', '/api/rpc', { jsonrpc: '2.0', id: 1, method: 'getBalance', params: ['x'] }); assert.strictEqual(r.status, 200);
   r = await call(s.app, 'GET', '/api/config'); const txt = JSON.stringify(r.body);
   assert.ok(!txt.includes(rpcUrl) && !/appSecret|accessSecret|npKey/.test(txt)); assert.strictEqual(r.body.ticker, 'NCRACY'); assert.strictEqual(r.body.mint, MINT);
+});
+
+test('preview mode (no mint): votes closed with 409, Lab gives 3 free live steers per visitor', async () => {
+  const a = setup({ mint: null });
+  const c = await call(a.app, 'GET', '/api/config'); assert.strictEqual(c.body.preview, true);
+  const v = await call(a.app, 'POST', '/api/vote', {}); assert.strictEqual(v.status, 409); assert.match(v.body.error, /not live/);
+  const f = (i) => ({ prompt: 'Tell me about rivers ' + i, features: [{ layer: '9-gemmascope-res-16k', index: 15766, strength: 60 }] });
+  for (let i = 0; i < 3; i++) { const r = await call(a.app, 'POST', '/api/lab', f(i)); assert.strictEqual(r.status, 200, JSON.stringify(r.body)); assert.strictEqual(r.body.preview, true); }
+  assert.strictEqual((await call(a.app, 'POST', '/api/lab', f(9))).status, 429);
+  assert.strictEqual(a.steerCount(), 3);
 });
