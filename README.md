@@ -4,9 +4,9 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 
 ![Landing](docs/landing-hero.png)
 
-| Same question, two brains | Vote | Lab |
-| --- | --- | --- |
-| ![Compare](docs/landing-compare.png) | ![Vote](docs/vote.png) | ![Lab](docs/lab.png) |
+| Same question, two brains | Pick a mind | Vote | Lab |
+| --- | --- | --- | --- |
+| ![Story](docs/landing-story-c.png) | ![Gallery](docs/landing-gallery-a.png) | ![Vote](docs/vote.png) | ![Lab](docs/lab.png) |
 
 ## How it works
 
@@ -35,6 +35,10 @@ npm run build
 npm test
 npm start            # http://127.0.0.1:5310
 ```
+
+Site: https://neurocracy.fun. Code: https://github.com/neurocracyfun/neurocracy. X: https://x.com/neurocracyfun.
+
+Screenshots: `npm run shots`. Scroll video: `python3 scripts/record.py out.mp4` (Playwright).
 
 Config is all env, see `.env.example`. Use a persistent disk for `DB`.
 

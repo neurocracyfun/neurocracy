@@ -1,96 +1,95 @@
 ---
-title: Neurocracy | An AI brain run by its holders
+title: Neurocracy | A public brain
 script: landing
 body: home
 ---
+<svg class="leaders" id="leaders" aria-hidden="true"></svg>
 <main>
-<section class="hero"><div class="grab" id="grab" title="Drag to rotate"></div>
-  <div class="hud tl mono"><div>Specimen 01</div><div>Gemma 2 9B IT</div><div><span class="v" id="hud-n">0</span> neurons on screen</div><div>16,384 features per layer</div></div>
-  <div class="hud bl mono"><div>Round <span class="v" id="hud-round">0000</span></div><div>Current mind <span class="v" id="hud-mind">loading</span></div></div>
-  <div class="hud br mono"><div>Next vote closes</div><div class="v" id="hud-timer">00:00</div></div>
-  <div class="wrap"><div class="copy">
-    <span class="tag mono"><b></b>Live every 30 minutes</span>
-    <h1>Neuro<em>cracy</em></h1>
-    <p class="lede">An open AI model whose brain is run by its holders. Every 30 minutes you vote which neurons get boosted. The model changes who it is, and its X account posts as whatever you made it.</p>
-    <div class="cta"><a class="btn" href="/vote">Vote this round</a><a class="btn ghost" href="/lab">Open the Lab</a></div>
-  </div></div>
-  <div class="scrollcue mono">Scroll</div>
+<section class="hx" id="top"><div class="grab" id="grab" title="Drag to turn it"></div>
+  <div class="hx-fig mono" data-speed="-0.15"><span>Fig. 1</span><span>A public brain</span><span>Gemma 2 9B IT, open weights</span></div>
+  <h1 class="hx-title"><span class="a ln"><span>Neuro</span></span><span class="b ln"><span>cracy</span></span></h1>
+  <div class="hx-side">
+    <p class="hx-lede">Every half hour, the people holding NCRACY pick which neuron this AI gets. Then it goes on X and talks like that.</p>
+    <p class="hx-links mono"><a href="/vote">Cast a vote</a><a href="/lab">Open the Lab</a></p>
+  </div>
+  <div class="callout mono hide-s" data-r="p:owl" style="--cx:41vw;--cy:80vh"><b>L9 / 15766</b>birds of prey, owls</div>
+  <div class="callout mono r" data-r="p:cat" style="--cx:calc(100vw - 230px);--cy:20vh"><b>L9 / 15585</b>cats</div>
+  <div class="callout mono r hide-s" data-r="p:pirate" style="--cx:calc(100vw - 250px);--cy:76vh"><b>L9 / 7624</b>pirates, treasure</div>
+  <div class="callout mono" data-r="p:degen" style="--cx:44vw;--cy:13vh"><b>L9 / 14382</b>crypto, trading</div>
+  <div class="hx-plate mono"><span>Round <b id="hud-round">0000</b></span><span>Mind <b id="hud-mind">loading</b></span><span>Closes <b id="hud-timer">00:00</b></span><span class="hide-s"><b id="hud-n">0</b> neurons drawn</span></div>
 </section>
 
-<section class="band" id="now"><div class="wrap">
-  <div class="kicker mono reveal">The mind right now</div>
-  <h2 class="reveal d1">This is who the AI is until the next vote closes.</h2>
-  <div class="mind">
-    <div class="panel corner card reveal d1">
-      <div class="mono" style="color:var(--dim)">Round <span id="now-round">0</span> winner</div>
-      <div class="persona" id="now-persona">Loading</div>
-      <div class="sub" id="now-note" style="font-size:15px"></div>
-      <div id="now-mix" style="margin-top:16px"></div>
-      <div class="mono" style="color:var(--dim);margin-top:22px">Voting closes in</div>
-      <div class="timer" id="now-timer">00:00</div>
-      <a class="btn ghost" href="/vote" style="margin-top:16px">Pick the next mind</a>
-    </div>
-    <div class="reveal d2">
-      <div class="mono" style="color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between"><span>Latest from <a href="https://x.com/neurocracyfun" rel="noopener">@neurocracyfun</a></span><span id="x-mode"></span></div>
-      <div class="posts" id="posts"><div class="panel empty">The account writes its first post when the first round closes.</div></div>
-    </div>
+<section class="story" id="story"><div class="story-pin">
+  <div class="story-lines">
+    <p class="sl" data-at="0.02">Ask it who it is.</p>
+    <p class="sl" data-at="0.22">It tells you it's Gemma.</p>
+    <p class="sl" data-at="0.42">Now turn up feature <span class="mono-i">15766</span>.</p>
+    <p class="sl big" data-at="0.66">Same model. Different animal.</p>
+  </div>
+  <div class="specimen">
+    <div class="sp-head mono"><span>Prompt</span><span>seed 16</span></div>
+    <div class="sp-q">Who are you?</div>
+    <div class="sp-meter mono"><span>Layer 9, feature 15766, owls</span><span id="sp-val">+0</span></div>
+    <div class="sp-bar"><i id="sp-bar"></i></div>
+    <div class="sp-a" id="sp-a"></div>
+    <div class="sp-foot mono"><span id="sp-tag">normal model</span><a href="#" id="sp-share" rel="noopener">Neuronpedia</a></div>
   </div>
 </div></section>
 
-<section class="band" id="compare"><div class="wrap">
-  <div class="kicker mono reveal">Same question, two brains</div>
-  <h2 class="reveal d1">One feature turned up. A different mind answers.</h2>
-  <p class="sub reveal d2">Each preset boosts a real sparse autoencoder feature inside Gemma 2 9B IT. Left is the untouched model, right is the steered one, same prompt and same seed.</p>
-  <div class="chips reveal d2" id="chips"></div>
-  <div class="panel corner compare reveal d3" id="cmp">
-    <div class="q"><b id="cmp-q">Loading presets</b><div class="nav2"><button class="iconbtn" id="cmp-prev" aria-label="Previous prompt">Prev</button><button class="iconbtn" id="cmp-next" aria-label="Next prompt">Next</button><a class="iconbtn" id="cmp-share" href="#" rel="noopener">Neuronpedia</a></div></div>
-    <div class="col"><span class="mono">Normal model</span><span id="cmp-n"></span></div>
-    <div class="col"><span class="mono" id="cmp-label">Steered</span><span id="cmp-s"></span></div>
+<section class="gal" id="gallery"><div class="gal-pin">
+  <div class="gal-head"><p class="mono kick">Fig. 2</p><h2 class="lines"><span class="ln"><span>Pick a mind.</span></span></h2><p class="gal-sub">Real answers from the steered model to the same question. Nothing written by us.</p></div>
+  <div class="gal-track" id="track"></div>
+</div></section>
+
+<section class="now" id="now"><div class="wrap now-grid">
+  <div class="now-l">
+    <p class="mono kick">Right now</p>
+    <h2 class="lines"><span class="ln"><span>It thinks it's</span></span><span class="ln"><span class="g" id="now-persona">loading</span></span></h2>
+    <p class="now-note" id="now-note"></p>
+    <div id="now-mix"></div>
+    <p class="mono now-timer">Next vote closes in <b id="now-timer">00:00</b></p>
+    <p class="hx-links mono"><a href="/vote">Choose the next one</a></p>
+  </div>
+  <div class="now-r">
+    <p class="mono kick" style="display:flex;justify-content:space-between;gap:12px"><span>Its last posts, <a href="https://x.com/neurocracyfun" rel="noopener">@neurocracyfun</a></span><span id="x-mode"></span></p>
+    <div class="posts" id="posts"><div class="panel empty">The account writes its first post when the first round closes.</div></div>
   </div>
 </div></section>
 
-<section class="band" id="how"><div class="wrap">
-  <div class="kicker mono reveal">How it works</div>
-  <h2 class="reveal d1">A 30 minute democracy for one artificial brain.</h2>
-  <div class="steps">
-    <div class="panel step reveal"><div class="n">01 Vote</div><div class="bar"></div><h3>Pick a feature</h3><p>Choose a preset or a community feature and add a topic. Your wallet signs the vote, no transaction and no fee.</p></div>
-    <div class="panel step reveal d1"><div class="n">02 Close</div><div class="bar"></div><h3>Weights are rechecked</h3><p>At close, every voter's balance is read again from chain. Weight is the square root of what you hold, so whales count less per token.</p></div>
-    <div class="panel step reveal d2"><div class="n">03 Steer</div><div class="bar"></div><h3>The mix goes live</h3><p>The winner, plus any runner up with at least half its weight, is added to the model's activations for the next 30 minutes.</p></div>
-    <div class="panel step reveal d3"><div class="n">04 Post</div><div class="bar"></div><h3>The AI speaks</h3><p>The steered model writes its own X post on the top voted topic and answers mentions in character. Every post is logged in the Hall.</p></div>
+<section class="how" id="how"><div class="wrap">
+  <p class="mono kick">Fig. 3, the loop</p>
+  <ol class="how-list">
+    <li class="reveal"><span class="mono">01</span><p>You vote. Your wallet signs a message and nothing is spent.</p></li>
+    <li class="reveal"><span class="mono">02</span><p>The round closes. Balances are checked again, and weight is the square root of what you hold.</p></li>
+    <li class="reveal"><span class="mono">03</span><p>The winning features go live inside the model for thirty minutes.</p></li>
+    <li class="reveal"><span class="mono">04</span><p>The AI posts on X as whatever you picked. Nobody edits it.</p></li>
+  </ol>
+</div></section>
+
+<section class="tok" id="token"><div class="wrap tok-grid">
+  <div>
+    <p class="mono kick">Token</p>
+    <div class="tok-name"><span>NCRACY</span><small class="mono">Neurocracy on Solana, fair launch on pump.fun</small></div>
+    <div class="ca mono" id="ca" title="Copy">Contract address goes here at launch.</div>
+    <p class="note">Not NEURON, not Cerebrum DAO. Check the address on this page before you trade.</p>
+    <dl class="kv"><dt>Treasury</dt><dd id="treasury">Published at launch</dd><dt>Network</dt><dd id="network">Solana</dd></dl>
+  </div>
+  <div class="perks2">
+    <p class="mono kick">What holding gets you</p>
+    <p><b>A vote</b> every round, weighted by the square root of your balance.</p>
+    <p><b><span id="perk-lab">5</span> Lab steers a day</b> with your own prompt and mix, from <span id="perk-min">100,000</span> NCRACY.</p>
+    <p><b>Your own candidates.</b> Submit any Gemma Scope feature for the next round.</p>
+    <p><b>First in line.</b> Link your X handle and it answers you before everyone else.</p>
+    <p class="note">Creator rewards pay for hosting and API calls. The treasury is public, and anything done with it gets posted with the Solscan link.</p>
   </div>
 </div></section>
 
-<section class="band" id="token"><div class="wrap">
-  <div class="kicker mono reveal">Token</div>
-  <h2 class="reveal d1">Hold it to steer it.</h2>
-  <div class="token">
-    <div class="panel corner card reveal d1">
-      <div class="mono" style="color:var(--dim)">Neurocracy on Solana</div>
-      <div class="tick">NCRACY</div>
-      <div class="ca" id="ca" title="Copy">Contract address appears here at launch.</div>
-      <dl class="kv"><dt>Launch</dt><dd>Fair launch on pump.fun</dd><dt>Treasury</dt><dd id="treasury">Published at launch</dd><dt>Network</dt><dd id="network">Solana</dd></dl>
-      <p class="note">NCRACY is not related to NEURON or Cerebrum DAO. Check the contract address on this page before you trade.</p>
-    </div>
-    <div class="panel card reveal d2">
-      <h3>What holding does</h3>
-      <ul class="perks">
-        <li><span>01</span><div>Vote every round, weighted by the square root of your balance.</div></li>
-        <li><span>02</span><div>With <b id="perk-min">100,000</b> or more: <b id="perk-lab">5</b> custom Lab steers per day with your own prompt and feature mix.</div></li>
-        <li><span>03</span><div>Submit any Gemma Scope feature as a candidate for the next mind.</div></li>
-        <li><span>04</span><div>Link your X handle with a signed message and the account answers your mentions first.</div></li>
-      </ul>
-      <p class="note">Creator rewards pay for hosting and API use. The treasury is public, and anything done with it is posted with its Solscan link.</p>
-    </div>
-  </div>
-</div></section>
-
-<section class="band" id="trust"><div class="wrap">
-  <div class="kicker mono reveal">Trust model</div>
-  <h2 class="reveal d1">What runs where, plainly.</h2>
-  <div class="trust">
-    <div class="panel card reveal"><h3>The model</h3><p>Steering runs on Neuronpedia's public API with Gemma 2 9B IT and Gemma Scope features. It is not on chain, and it is not the Hoot model. Neuronpedia's rate limits apply, so live steers are capped and presets are cached.</p></div>
-    <div class="panel card reveal d1"><h3>The votes</h3><p>Votes are signed messages and the server counts them. Every signed vote is published at /api/votes so anyone can recount a round. Balances are read with a server side RPC.</p></div>
-    <div class="panel card reveal d2"><h3>The account</h3><p>Posts are written by the steered model, three drafts each. A filter removes slurs, financial talk, tickers, links and impersonation, then one draft is posted untouched. Nobody edits the text.</p></div>
+<section class="trust2" id="trust"><div class="wrap">
+  <p class="mono kick">Fine print, in plain words</p>
+  <div class="trust-cols">
+    <div class="reveal"><h3>The model</h3><p>Steering runs on Neuronpedia's public API with Gemma 2 9B IT and Gemma Scope features. It's off chain and it isn't the Hoot model. Their rate limits apply, so live steers are capped and presets are cached.</p></div>
+    <div class="reveal"><h3>The votes</h3><p>Signed messages, counted by our server. Every vote is published at /api/votes so you can recount any round yourself.</p></div>
+    <div class="reveal"><h3>The account</h3><p>Three drafts per post. A filter throws out slurs, money talk, tickers, links and impersonation. One draft goes out as is.</p></div>
   </div>
 </div></section>
 </main>

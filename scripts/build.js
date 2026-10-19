@@ -8,5 +8,6 @@ for (const f of fs.readdirSync(P('pages')).filter((f) => !f.startsWith('_') && f
   const fill = (t) => t.replace(/\{\{(\w+)\}\}/g, (_, k) => meta[k] || '');
   fs.writeFileSync(P('public', f), fill(head) + src.slice(m[0].length) + fill(foot));
 }
+fs.rmSync(P('public/js'), { recursive: true, force: true });
 esbuild.buildSync({ entryPoints: ['landing', 'lab', 'vote', 'hall'].map((n) => P('src', n + '.js')), bundle: true, minify: true, format: 'esm', splitting: true, outdir: P('public/js'), target: ['es2020'], legalComments: 'none' });
 console.log('built pages + public/js');

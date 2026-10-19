@@ -109,7 +109,7 @@ export function mountBrain({ canvas, handle }) {
   const resize = () => { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   addEventListener('resize', resize); resize();
 
-  let last = performance.now(); let running = true; let ambient = 0;
+  let last = performance.now(); let running = true; let ambient = 0; let spin = 0; const v3 = new THREE.Vector3();
   document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(frame); } });
   function frame(t) {
     if (!running) return;
@@ -132,17 +132,33 @@ export function mountBrain({ canvas, handle }) {
     dg.attributes.position.needsUpdate = true;
     // parallax + scroll choreography: the specimen drifts right and recedes as you read
     tilt.rotation.x += ((mouse.y * 0.25) - tilt.rotation.x) * 0.05; tilt.rotation.z += ((-mouse.x * 0.12) - tilt.rotation.z) * 0.05;
-    const wide = innerWidth > 900;
-    group.position.x += (((wide ? 1.15 : 0) + scroll * (wide ? 0.9 : 0)) - group.position.x) * 0.06;
-    group.position.y += (((wide ? 0 : 0.55) - scroll * 0.4) - group.position.y) * 0.06;
-    group.scale.setScalar((wide ? 1 : 0.78) * (1 - scroll * 0.18));
-    dotMat.uniforms.uDim.value = 1 - scroll * 0.45;
+    const wide = innerWidth > 900; const T = api.target;
+    const tx = T ? T.x : (wide ? 1.15 : 0) + scroll * (wide ? 0.9 : 0);
+    const ty = T ? T.y : (wide ? 0 : 0.55) - scroll * 0.4;
+    const ts = T ? T.s : (wide ? 1 : 0.78) * (1 - scroll * 0.18);
+    const k = reduce ? 1 : 0.07;
+    group.position.x += (tx - group.position.x) * k; group.position.y += (ty - group.position.y) * k;
+    group.scale.setScalar(group.scale.x + (ts - group.scale.x) * k);
+    if (T && T.spin != null) { spin += (T.spin - spin) * k; tilt.rotation.y = spin; }
+    dotMat.uniforms.uDim.value += ((T ? T.dim : 1 - scroll * 0.45) - dotMat.uniforms.uDim.value) * 0.08;
     controls.update(); renderer.render(scene, camera);
+    if (api.onFrame) {
+      tilt.updateMatrixWorld();
+      api.points = api.anchors.map((i) => { v3.set(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]).applyMatrix4(tilt.matrixWorld).project(camera); return { x: (v3.x + 1) / 2 * innerWidth, y: (1 - v3.y) / 2 * innerHeight, front: v3.z < 1 }; });
+      api.onFrame(api.points);
+    }
     requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
-
-  return {
+  // anchor neurons for callouts: one surface neuron per requested region, outermost first
+  const anchorFor = (r) => {
+    let cx = 0, cy = 0, cz = 0, n = 0; for (let i = 0; i < N; i++) if (region[i] === r) { cx += pos[i * 3]; cy += pos[i * 3 + 1]; cz += pos[i * 3 + 2]; n++; }
+    const L = Math.hypot(cx, cy, cz) || 1; cx /= L; cy /= L; cz /= L; let best = -1, bd = -2;
+    for (let i = 0; i < N; i++) if (region[i] === r) { const l = Math.hypot(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]); if (l < 0.85) continue; const d = (pos[i * 3] * cx + pos[i * 3 + 1] * cy + pos[i * 3 + 2] * cz) / l; if (d > bd) { bd = d; best = i; } }
+    return best;
+  };
+  const api = {
+    target: null, onFrame: null, anchors: [], points: [],
+    setAnchors(regions) { api.anchors = regions.map(anchorFor).filter((i) => i >= 0); },
     // light up one region (a preset / vote / steer) with a burst of pulses
     light(r, strength = 1) {
       const idx = []; for (let i = 0; i < N; i += 1) if (region[i] === ((r % REGIONS) + REGIONS) % REGIONS) idx.push(i);
@@ -150,6 +166,9 @@ export function mountBrain({ canvas, handle }) {
       for (let k = 0; k < n; k++) { const i = idx[(Math.random() * idx.length) | 0]; ignite(i, 1.2, 1); if (k % 3 === 0 && pulses.length < P) spawn(i, 4, 1); }
     },
     stats: { neurons: N, synapses: edges.length / 2 },
+    reduce,
   };
+  requestAnimationFrame(frame);
+  return api;
 }
 export const regionFor = (id) => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % REGIONS; };

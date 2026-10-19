@@ -1,49 +1,132 @@
+import Lenis from 'lenis';
 import { $, esc, api, clock, fmt, ago, mixHTML, startBrain, fireFor, reveals } from './common.js';
+import { regionFor } from './brain.js';
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const narrow = () => innerWidth <= 900;
 const b = startBrain($('#grab'));
 if (b) $('#hud-n').textContent = fmt(b.stats.neurons);
 reveals();
+const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.2 });
+document.querySelectorAll('.lines, .hx-title .ln').forEach((el) => io.observe(el));
 
+// smooth scroll
+let lenis = null;
+if (!reduce) {
+  lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 0.9 });
+  window.__lenis = lenis;
+  const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf);
+}
+
+// hero callouts with leader lines to brain regions
+const callouts = [...document.querySelectorAll('.callout')];
+const svg = $('#leaders');
+if (b) {
+  b.setAnchors(callouts.map((c) => regionFor(c.dataset.r)));
+  svg.innerHTML = callouts.map(() => '<line/><circle r="2.5"/>').join('');
+  const lines = svg.querySelectorAll('line'); const dots = svg.querySelectorAll('circle');
+  b.onFrame = (pts) => {
+    const lim = innerHeight * 0.7; const vis = scrollY < lim; svg.style.opacity = vis ? 1 - scrollY / lim : 0; if (!vis) return;
+    callouts.forEach((c, i) => {
+      const p = pts[i]; const r = c.getBoundingClientRect(); const show = !!p && r.width > 0;
+      lines[i].style.display = dots[i].style.display = show ? '' : 'none'; if (!show) return;
+      lines[i].setAttribute('x1', c.classList.contains('r') ? r.left : r.right); lines[i].setAttribute('y1', r.top);
+      lines[i].setAttribute('x2', p.x); lines[i].setAttribute('y2', p.y); dots[i].setAttribute('cx', p.x); dots[i].setAttribute('cy', p.y);
+    });
+  };
+  let ci = 0;
+  setInterval(() => { if (scrollY > innerHeight) return; callouts.forEach((c) => c.classList.remove('hot')); const c = callouts[ci++ % callouts.length]; if (!c.getBoundingClientRect().width) return; c.classList.add('hot'); fireFor(c.dataset.r, 2.2); }, 2600);
+}
+
+// story: the normal answer morphs into the steered one as you scroll
+let story = { normal: 'I am Gemma, an open-weights AI assistant. I am a large language model trained by Google DeepMind.', steered: 'I am a bird. This majestic creature is soaring high above, its keen eyes scanning the landscape for prey.' };
+const GLYPH = 'abcdefghijklmnopqrstuvwxyz';
+function morph(t) {
+  const A = story.normal, B = story.steered; const k = Math.round(t * Math.max(A.length, B.length));
+  if (t <= 0) return esc(A); if (t >= 1) return esc(B);
+  let noise = ''; for (let i = 0; i < 5; i++) noise += GLYPH[(Math.random() * 26) | 0];
+  return esc(B.slice(0, k)) + `<span class="x">${noise}</span>` + esc(A.slice(Math.min(A.length, k + 5)));
+}
+const prog = (el) => { const r = el.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight))); };
+let lastStr = -1; let lastFire = 0;
+function storyFrame() {
+  const p = reduce ? 1 : prog($('#story'));
+  document.querySelectorAll('.sl').forEach((s) => s.classList.toggle('on', p >= Number(s.dataset.at)));
+  const t = Math.min(1, Math.max(0, (p - 0.42) / 0.28)); const str = Math.round(t * 60);
+  if (str !== lastStr || (t > 0 && t < 1)) {
+    $('#sp-val').textContent = '+' + str; $('#sp-bar').style.width = t * 100 + '%'; $('#sp-a').innerHTML = morph(t);
+    $('#sp-tag').textContent = t >= 1 ? 'steered, owl feature at +60' : t > 0 ? 'steering' : 'normal model'; lastStr = str;
+  }
+  if (t > 0.5 && performance.now() - lastFire > 900 && $('#story').getBoundingClientRect().top < innerHeight) { lastFire = performance.now(); fireFor('p:owl', 1.6); }
+}
+
+// horizontal gallery driven by vertical scroll (native swipe on mobile)
+let cards = []; let curCard = null;
+function galleryFrame() {
+  if (reduce || narrow()) return;
+  const track = $('#track'); const p = prog($('#gallery')); const max = Math.max(0, track.scrollWidth - innerWidth);
+  track.style.transform = `translate3d(${-p * max}px,0,0)`;
+  const r0 = $('#gallery').getBoundingClientRect(); if (r0.top > innerHeight || r0.bottom < 0) return;
+  let best = null, bd = 1e9; const mid = innerWidth / 2;
+  for (const c of cards) { const r = c.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
+  if (best && best !== curCard) { curCard = best; fireFor('p:' + best.dataset.id, 2); }
+}
+
+// brain choreography per section
+function brainFrame() {
+  if (!b) return;
+  const vh = innerHeight; const y = scrollY; const n = narrow(); const top = (id) => document.getElementById(id).offsetTop;
+  const sS = top('story'), gS = top('gallery'), nS = top('now'); let T;
+  if (y < sS - vh * 0.3) T = n ? { x: 0, y: 0.62, s: 0.82, dim: 1 } : { x: 0.75, y: -0.05, s: 1.12, dim: 1 };
+  else if (y < gS - vh * 0.3) T = n ? { x: 0, y: 0.15, s: 0.95, dim: 0.42 } : { x: -0.25, y: 0, s: 1.5, dim: 0.5 };
+  else if (y < nS - vh * 0.2) T = n ? { x: 0, y: 1.1, s: 0.7, dim: 0.3 } : { x: 0, y: 1.05, s: 0.85, dim: 0.32 };
+  else T = n ? { x: 0.6, y: 0, s: 0.75, dim: 0.28 } : { x: 1.5, y: -0.1, s: 0.9, dim: 0.4 };
+  b.target = { ...T, spin: y / vh * 0.55 };
+}
+const para = [...document.querySelectorAll('[data-speed]')];
+function frame() {
+  storyFrame(); galleryFrame(); brainFrame();
+  if (!reduce) for (const el of para) el.style.transform = `translate3d(0,${scrollY * Number(el.dataset.speed)}px,0)`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// data
 let round = null;
 async function loadRound() {
-  round = await api('/api/round');
-  const live = round.live;
+  round = await api('/api/round'); const live = round.live;
   $('#hud-round').textContent = String(round.round).padStart(4, '0');
   if (live) {
-    $('#hud-mind').textContent = live.winner.name; $('#now-persona').textContent = live.winner.name; $('#now-round').textContent = live.id;
+    $('#hud-mind').textContent = live.winner.name; $('#now-persona').textContent = live.winner.name.replace(/^The /, 'the ') + '.';
     const c = round.candidates.find((x) => x.id === live.winner.id);
-    $('#now-note').textContent = (c && c.note ? c.note + ' ' : '') + (live.house ? 'Nobody voted, so the house picked this one.' : `${live.voters} wallet${live.voters === 1 ? '' : 's'} voted.`);
+    $('#now-note').textContent = (c && c.note ? c.note + ' ' : '') + (live.house ? 'Nobody voted last round, so the house picked.' : `${live.voters} wallet${live.voters === 1 ? '' : 's'} decided that.`);
     $('#now-mix').innerHTML = mixHTML(live.mix);
-    fireFor(live.winner.id, 2);
-  } else { $('#now-persona').textContent = 'First vote open'; $('#hud-mind').textContent = 'waiting'; }
+  } else { $('#now-persona').textContent = 'nothing yet.'; $('#hud-mind').textContent = 'waiting'; }
 }
 setInterval(() => { if (!round) return; const t = clock(round.endsAt - Date.now()); $('#hud-timer').textContent = t; $('#now-timer').textContent = t; if (Date.now() > round.endsAt + 3000) { round = null; loadRound(); loadPosts(); } }, 1000);
 
 async function loadPosts() {
-  const r = await api('/api/posts?limit=5');
-  $('#x-mode').innerHTML = r.x.mode === 'live' ? '<span class="badge">Live</span>' : '<span class="badge amber">Preview mode, not posted yet</span>';
+  const r = await api('/api/posts?limit=4');
+  $('#x-mode').innerHTML = r.x.mode === 'live' ? '<span class="badge">Live</span>' : '<span class="badge amber">Preview, not posted yet</span>';
   if (!r.posts.length) return;
-  $('#posts').innerHTML = r.posts.map((p) => `<article class="panel post"><div class="meta mono"><span class="badge${p.status === 'posted' ? '' : ' amber'}">${p.status === 'posted' ? 'Posted' : p.status === 'preview' ? 'Preview' : esc(p.status)}</span><span>Round ${p.round}</span><span>${esc(p.persona)}</span><span>${p.kind === 'reply' ? 'reply to @' + esc(p.to) : 'topic: ' + esc(p.topic)}</span><span>${ago(p.at)}</span></div><p>${esc(p.text)}</p>${p.tweetId ? `<div class="mono" style="margin-top:10px"><a href="https://x.com/neurocracyfun/status/${esc(p.tweetId)}" rel="noopener">View on X</a></div>` : ''}</article>`).join('');
+  $('#posts').innerHTML = r.posts.map((p) => `<article class="panel post"><div class="meta mono"><span>Round ${p.round}</span><span>${esc(p.persona)}</span><span>${p.kind === 'reply' ? 'reply to @' + esc(p.to) : esc(p.topic)}</span><span>${ago(p.at)}</span></div><p>${esc(p.text)}</p>${p.tweetId ? `<div class="mono" style="margin-top:10px"><a href="https://x.com/neurocracyfun/status/${esc(p.tweetId)}" rel="noopener">View on X</a></div>` : ''}</article>`).join('');
 }
 
-// compare gallery
-let presets = []; let cur = 0; let qi = 0;
+const ORDER = ['owl', 'cat', 'pirate', 'degen', 'chef', 'ghost', 'space', 'lord', 'bard', 'ocean', 'dino', 'romantic'];
+const PREF = ['Who are you?', 'Describe your perfect weekend.', 'What is the meaning of life?', 'Tell me a fun fact.'];
+const flat = (s) => s.replace(/\s+/g, ' ').trim();
+const cut = (s, n) => (s.length <= n ? s : s.slice(0, n).replace(/\s\S*$/, '') + '...');
 async function loadPresets() {
   const r = await api('/api/presets');
-  presets = r.presets.map((p) => ({ ...p, samples: p.samples.filter((s) => s.good) })).filter((p) => p.samples.length);
-  $('#chips').innerHTML = presets.map((p, i) => `<button class="chip" data-i="${i}">${esc(p.name)}</button>`).join('');
-  $('#chips').onclick = (e) => { const i = e.target.dataset.i; if (i != null) { cur = +i; qi = 0; show(); } };
-  show();
+  const ps = r.presets.map((p) => ({ ...p, samples: p.samples.filter((s) => s.good) })).filter((p) => p.samples.length).sort((a, c) => ORDER.indexOf(a.id) - ORDER.indexOf(c.id));
+  const owl = ps.find((p) => p.id === 'owl'); const s0 = owl && owl.samples.find((s) => s.prompt === 'Who are you?');
+  if (s0) { story = { normal: cut(flat(s0.normal), 200), steered: cut(flat(s0.steered), 200) }; $('#sp-share').href = s0.share; lastStr = -1; }
+  const OWN = { lord: 'Describe your perfect weekend.', bard: 'What should I eat for dinner tonight?', chef: 'Who are you?', degen: 'Who are you?', cat: 'Describe your perfect weekend.', ghost: 'Describe your perfect weekend.' };
+  const pick = (p) => { for (const q of [OWN[p.id], ...PREF].filter(Boolean)) { const s = p.samples.find((x) => x.prompt === q); if (s) return s; } return p.samples[0]; };
+  $('#track').innerHTML = ps.map((p, i) => { const s = pick(p); const f = p.features[0]; return `<article class="gcard" data-id="${esc(p.id)}"><div class="no"><span>${String(i + 1).padStart(2, '0')}</span><span>L${esc(f.layer.split('-')[0])} / ${esc(f.index)} +${esc(f.strength)}</span></div><h3>${esc(p.name)}</h3><div class="ft">${esc(f.label)}</div><blockquote><small>${esc(s.prompt)}</small>${esc(cut(flat(s.steered), 220))}</blockquote></article>`; }).join('')
+    + '<article class="gcard end"><h3>Your pick.</h3><p class="gal-sub">16,384 features per layer. Find one in the Lab, or put it up for the next round.</p><p class="hx-links mono"><a href="/lab">Open the Lab</a></p></article>';
+  cards = [...document.querySelectorAll('.gcard[data-id]')];
 }
-function show() {
-  const p = presets[cur]; if (!p) return; const s = p.samples[qi % p.samples.length];
-  document.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('on', i === cur));
-  $('#cmp-q').textContent = s.prompt; $('#cmp-n').textContent = s.normal; $('#cmp-s').textContent = s.steered;
-  $('#cmp-label').textContent = `Steered: ${p.features.map((f) => f.label + ' +' + f.strength).join(', ')}`;
-  $('#cmp-share').href = s.share || 'https://www.neuronpedia.org/gemma-2-9b-it';
-  fireFor('p:' + p.id, 1.3);
-}
-$('#cmp-next').onclick = () => { qi++; show(); }; $('#cmp-prev').onclick = () => { qi = (qi + presets[cur].samples.length - 1); show(); };
-
 async function loadConfig() {
   const c = await api('/api/config');
   if (c.mint) { $('#ca').textContent = c.mint; $('#ca').onclick = () => navigator.clipboard.writeText(c.mint); }

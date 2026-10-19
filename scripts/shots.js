@@ -8,16 +8,17 @@ const only = (process.env.ONLY || '').split(',').filter(Boolean);
   const errors = [];
   const page = async (w, h, mobile = false) => { const p = await br.newPage(); await p.setViewport({ width: w, height: h, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile }); p.on('pageerror', (e) => errors.push(e.message)); p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); }); return p; };
   const want = (n) => !only.length || only.includes(n);
+  const go = (p, y) => p.evaluate((y) => { if (window.__lenis) window.__lenis.scrollTo(y, { immediate: true, force: true }); else window.scrollTo(0, y); }, y);
+  const at = (p, id, frac = 0) => p.evaluate((id, frac) => { const el = document.getElementById(id); return el.offsetTop + Math.max(0, el.offsetHeight - innerHeight) * frac; }, id, frac);
+  const plan = [['hero', 'top', 0], ['story-a', 'story', 0.12], ['story-b', 'story', 0.56], ['story-c', 'story', 0.95], ['gallery-a', 'gallery', 0.08], ['gallery-b', 'gallery', 0.7], ['now', 'now', 0], ['how', 'how', 0], ['token', 'token', 0], ['trust', 'trust', 0]];
   if (want('landing')) {
-    const p = await page(1440, 900); await p.goto(BASE + '/', { waitUntil: 'networkidle0' }); await wait(3500);
-    await p.screenshot({ path: out('landing-hero.png') });
-    for (const id of ['now', 'compare', 'how', 'token', 'trust']) { await p.evaluate((id) => { const el = document.getElementById(id); window.scrollTo(0, el.getBoundingClientRect().top + scrollY - 40); }, id); await wait(1500); await p.screenshot({ path: out(`landing-${id}.png`) }); }
+    const p = await page(1440, 900); await p.goto(BASE + '/', { waitUntil: 'networkidle0' }); await wait(3800);
+    for (const [name, id, f] of plan) { await go(p, await at(p, id, f)); await wait(name === 'hero' ? 200 : 1700); await p.screenshot({ path: out(`landing-${name}.png`) }); }
     await p.close();
   }
   if (want('mobile')) {
-    const p = await page(390, 844, true); await p.goto(BASE + '/', { waitUntil: 'networkidle0' }); await wait(3500);
-    await p.screenshot({ path: out('mobile-hero.png') });
-    await p.evaluate(() => window.scrollTo(0, document.getElementById('compare').offsetTop - 20)); await wait(1500); await p.screenshot({ path: out('mobile-compare.png') });
+    const p = await page(390, 844, true); await p.goto(BASE + '/', { waitUntil: 'networkidle0' }); await wait(3800);
+    for (const [name, id, f] of [['hero', 'top', 0], ['story', 'story', 0.9], ['gallery', 'gallery', 0], ['now', 'now', 0], ['token', 'token', 0]]) { await go(p, await at(p, id, f)); await wait(1600); await p.screenshot({ path: out(`mobile-${name}.png`) }); }
     await p.close();
   }
   for (const pg of ['vote', 'lab', 'hall']) if (want(pg)) {
