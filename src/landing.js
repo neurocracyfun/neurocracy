@@ -156,7 +156,7 @@ async function loadConfig() {
   if (c.mint) { $('#ca').textContent = c.mint; $('#ca').onclick = () => navigator.clipboard.writeText(c.mint); }
   if (c.treasury) $('#treasury').innerHTML = `<a href="https://solscan.io/account/${esc(c.treasury)}" rel="noopener">${esc(c.treasury.slice(0, 6) + '...' + c.treasury.slice(-6))}</a>`;
   $('#network').textContent = c.cluster === 'mainnet' ? 'Solana mainnet' : 'Solana ' + c.cluster;
-  $('#perk-min').textContent = fmt(c.holderMin); $('#perk-lab').textContent = c.labPerDay;
+  $('#perk-min').textContent = fmt(c.holderMin); $('#perk-min2').textContent = fmt(c.holderMin); $('#perk-lab').textContent = c.labPerDay;
 }
 loadRound().catch(() => {}); loadPosts().catch(() => {}); loadPresets().catch(() => {}); loadConfig().catch(() => {});
 setInterval(() => loadPosts().catch(() => {}), 60000);

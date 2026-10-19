@@ -338,6 +338,7 @@ input[type=text], textarea { background: #fbf9f4; color: var(--text); }
 .mh-index { font-size: 12px; display: flex; gap: 18px; }
 .mh-index a { color: var(--text); } .mh-index a::before { content: '\00a7 '; color: var(--dim); }
 .mh-index a.on { text-decoration: underline; text-underline-offset: 4px; }
+@media (pointer: coarse) { .mh-index a { display: inline-block; padding: 13px 0; margin: -13px 0; } }   /* 44px tap targets without moving the layout */
 @media (max-width: 760px) { .mh { grid-template-columns: 1fr auto; gap: 12px; } .mh-vol { display: none; } .mh-index { gap: 12px; font-size: 11px; } }
 /* colophon */
 footer.colophon { border-top: 1px solid var(--text); background: transparent; padding: 40px 0 50px; }

@@ -13,7 +13,7 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 1. **Vote.** Pick a preset or a community feature and optionally a topic. The wallet signs a message, no transaction.
 2. **Close.** Every voter's NCRACY balance is read again at close. Weight is `sqrt(balance)`. Runners up with at least half of the winner's weight join the mix (max 3 features).
 3. **Steer.** The mix is applied with Neuronpedia's steering API (`POST /api/steer`, Gemma Scope residual SAEs, layers 9, 20, 31).
-4. **Post.** The steered model writes 3 drafts for the round's post (top voted topic, else a fallback). `lib/filter.js` drops drafts with slurs, financial talk, tickers or contract addresses, links, impersonation, emoji or symbols, or more than 280 characters, then the best remaining draft is posted untouched. Replies to mentions work the same way, linked holder handles first. Everything is logged in the Hall with its round and feature mix.
+4. **Post.** The steered model writes 3 drafts for the round's post (top voted topic, else a fallback). `lib/filter.js` drops drafts with slurs, financial talk, tickers or contract addresses, links, impersonation, symbols, or more than 280 characters (emoji are stripped first), then the best remaining draft is posted without edits. Replies to mentions work the same way, linked holder handles first. Everything is logged in the Hall with its round and feature mix.
 
 ## Holder perks
 
@@ -22,9 +22,9 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 
 ## Tokenomics
 
-- Launches on pump.fun.
+- Supply 1,000,000,000 NCRACY. Fair launch on pump.fun, no presale.
 - Creator fees fund a distributor wallet. When the fee share is switched on, each round splits it 70% to wallets that voted for the winning mind (by vote weight), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to operations. Small amounts accrue until they reach a minimum.
-- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.5 for an in-character AI reply to a post on X. Burns are final.
+- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X. Burns are final.
 - Fees depend on trading and can be zero. Nothing here is income or a promise of return.
 
 All of it is off by default. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).
@@ -56,6 +56,8 @@ npm start            # http://127.0.0.1:5310
 ```
 
 Site: https://neurocracy.fun. Code: https://github.com/neurocracyfun/neurocracy. X: https://x.com/neurocracyfun.
+
+Full lifecycle simulation on a local validator (mint, rounds, burns, X dry run, proofs, payouts, restart): `node scripts/lifecycle-sim.js`, report in `sim/report.md`. Audit notes: [docs/audit-2026-10.md](docs/audit-2026-10.md).
 
 Screenshots: `npm run shots`. Scroll video: `python3 scripts/record.py out.mp4` (Playwright).
 

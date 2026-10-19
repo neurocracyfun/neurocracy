@@ -68,7 +68,8 @@ async function extras() {
     $('#pay-last').innerHTML = L.status === 'skipped' ? `Round ${L.round}: no payout (${esc(L.reason || '')}).` : `Round ${L.round}: ${sol(L.pool)} SOL to ${L.voters} winning voter${L.voters === 1 ? '' : 's'}${L.nominator ? ', nominator ' + esc(short(L.nominator.wallet)) : ''}${L.dry ? ', dry run, nothing was sent' : ''}.`;
   } else if (P.enabled) $('#pay-last').textContent = `Fee share is on${P.dryRun ? ' in dry run' : ''}. No round has paid yet.`;
   const B = c.burns || {};
-  const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about $${x.usd})` : `about $${x.usd} of NCRACY (paused, no reliable price right now)`);
+  const usd = (v) => '$' + Number(v).toFixed(Number(v) % 1 ? 2 : 0);   // value at the price used, also when the amount is clamped
+  const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about ${usd(B.price ? x.burn * B.price.usd : x.usd)})` : `about ${usd(x.usd)} of NCRACY (paused, no reliable price right now)`);
   if (B.nominate && B.nominate.enabled) { $('#nom-panel').hidden = false; $('#nom-burn').textContent = amt(B.nominate); }
   if (B.reply && B.reply.enabled) { $('#rep-panel').hidden = false; $('#rep-burn').textContent = amt(B.reply); if (!B.reply.priced) $('#rep-go').dataset.paused = '1'; }
   return c;
@@ -88,7 +89,7 @@ $('#nres').onclick = async (e) => {
   const b = e.target.closest('button'); if (!b) return; const s = $('#nstatus');
   try {
     const q = await api(`/api/nominate/quote?layer=${encodeURIComponent(b.dataset.l)}&index=${b.dataset.i}`);
-    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about $${q.usd}) to nominate "${q.label}" for round ${q.round}? This price is held for 5 minutes. The burn is permanent.`)) return;
+    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about ${usd(q.burn * q.priceUsd)}) to nominate "${q.label}" for round ${q.round}? This price is held for 5 minutes. The burn is permanent.`)) return;
     const c = cfg || (await api('/api/config'));
     st(s, 'Waiting for your wallet...');
     const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
@@ -104,7 +105,7 @@ $('#rep-go').onclick = async () => {
     const m = url.match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/\w{1,15}\/status\/(\d{5,25})/); if (!m) throw new Error('Paste a link to a post on x.com.');
     const c = cfg || (await api('/api/config'));
     const q = await api('/api/reply-burn/quote?url=' + encodeURIComponent(url));
-    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about $${q.usd}) for a reply to that post? This price is held for 5 minutes. No refunds.`)) return;
+    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about ${usd(q.burn * q.priceUsd)}) for a reply to that post? This price is held for 5 minutes. No refunds.`)) return;
     st(s, 'Waiting for your wallet...');
     const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
     st(s, 'Burn sent, waiting for confirmation...');

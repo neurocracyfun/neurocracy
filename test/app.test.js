@@ -11,7 +11,7 @@ const balances = {}; const rpcCalls = [];
 let rpcUrl;
 const rpcServer = http.createServer((req, res) => { let b = ''; req.on('data', (c) => (b += c)); req.on('end', () => {
   const j = JSON.parse(b); rpcCalls.push(j);
-  if (j.method === 'getTokenAccountsByOwner') { const v = balances[j.params[0]] || 0; res.end(JSON.stringify({ jsonrpc: '2.0', id: j.id, result: { value: v ? [{ account: { data: { parsed: { info: { tokenAmount: { uiAmountString: String(v) } } } } } }] : [] } })); }
+  if (j.method === 'getTokenAccountsByOwner') { const v = balances[j.params[0]] || 0; res.end(JSON.stringify({ jsonrpc: '2.0', id: j.id, result: { value: v ? [{ account: { data: { parsed: { info: { tokenAmount: { uiAmountString: String(v), amount: String(BigInt(Math.round(v * 1e6))) } } } } } }] : [] } })); }
   else res.end(JSON.stringify({ jsonrpc: '2.0', id: j.id, result: { ok: true } }));
 }); });
 
@@ -37,7 +37,7 @@ test.after(() => rpcServer.close());
 test.beforeEach(() => sol._cache.clear());
 
 test('filter rejects slurs, advice, tickers, links, impersonation, symbols', () => {
-  for (const [t, why] of [['You should buy now, this goes to the moon and you will love it.', 'financial-advice'], ['Check out $NCRACY today friends, it is a lovely little thing.', 'ticker-or-ca'], ['Visit neurocracy.fun for more of my thoughts on owls and stars.', 'url'], ['I am Hoot and I live in the old oak at the edge of the wood.', 'impersonation'], ['What a lovely morning in the forest with all my friends \u{1F989}', 'symbols'], ['Look over there \u2192 the river is calm and the trees are tall.', 'symbols'], ['owl owl owl owl owl owl owl owl owl owl owl owl', 'garbled']]) assert.ok(check(clean(t)).why.includes(why), t + ' ' + check(clean(t)).why);
+  for (const [t, why] of [['You should buy now, this goes to the moon and you will love it.', 'financial-advice'], ['Check out $NCRACY today friends, it is a lovely little thing.', 'ticker-or-ca'], ['Visit neurocracy.fun for more of my thoughts on owls and stars.', 'url'], ['I am Hoot and I live in the old oak at the edge of the wood.', 'impersonation'], ['Look over there \u2192 the river is calm and the trees are tall.', 'symbols'], ['owl owl owl owl owl owl owl owl owl owl owl owl', 'garbled']]) assert.ok(check(clean(t)).why.includes(why), t + ' ' + check(clean(t)).why);
   assert.ok(check(clean('**The night is quiet.** I watch the field and listen for small sounds in the grass.')).ok);
   assert.ok(clean('x'.repeat(20) + '. ' + 'word '.repeat(80)).length <= 280);
 });

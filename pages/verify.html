@@ -6,16 +6,16 @@ body: app verify
 <main class="page"><div class="wrap">
   <div class="kicker mono">Verify</div>
   <h1>Check the count yourself.</h1>
-  <p class="sub">Every closed round publishes a snapshot of its votes and a zero-knowledge proof that the winner and the weighted totals follow from exactly those votes. This page checks the proof in your browser with the published verification key. Nothing is sent anywhere.</p>
+  <p class="sub">Every closed round publishes a snapshot of its votes and a zero-knowledge proof that the winner and the weighted totals follow from exactly those votes. This page checks the proof in your browser against the published verification key, so you do not have to trust our server's answer.</p>
   <form id="vf" class="panel" style="margin:26px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-    <label class="mono" for="vr">Round</label><input id="vr" class="mono" type="number" min="1" style="width:120px">
+    <label class="mono" for="vr">Round</label><input id="vr" class="mono" type="number" min="1" inputmode="numeric" style="width:120px">
     <button class="btn" type="submit">Verify</button>
   </form>
   <div id="vout"></div>
   <div class="panel" style="margin-top:26px">
     <h3>Verify without trusting this site</h3>
     <p>Clone the repository and run the local script. It downloads the snapshot and the proof, rebuilds the Poseidon Merkle tree and the totals commitment from the snapshot, checks that they match the proof's public inputs, and verifies the proof against the verification key in the repository.</p>
-    <pre class="mono" style="white-space:pre-wrap">git clone https://github.com/neurocracyfun/neurocracy
+    <pre style="white-space:pre-wrap;text-transform:none;font-family:var(--mono, monospace);font-size:13px;overflow-x:auto">git clone https://github.com/neurocracyfun/neurocracy
 cd neurocracy && npm install
 node scripts/zk-verify.js ROUND</pre>
     <p>What the proof does and does not cover is written up in <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/zk.md">docs/zk.md</a>.</p>

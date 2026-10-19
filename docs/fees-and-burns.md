@@ -41,4 +41,4 @@ The server returns an HMAC-signed quote (purpose, target, token amount, expiry).
 
 ## Round snapshots (hook for a tally proof)
 
-At close, every round stores a canonical JSON snapshot at `/api/rounds/:r/snapshot`, with its sha256 shown in the Hall. It contains every signed vote message, signature, raw balance at close and integer weight, sorted by wallet, plus the per-candidate totals and the winner. The same inputs always produce the same bytes, so a future verifier (plain or zero-knowledge) can take the snapshot as public input and check the signatures, the weights and the winner.
+At close, every round stores a canonical JSON snapshot at `/api/rounds/:r/snapshot`, with its sha256 shown in the Hall. It contains every signed vote message, signature, raw balance at close and integer weight, sorted by wallet, plus the per-candidate totals and the winner. The same inputs always produce the same bytes, so anyone can take the snapshot and check the signatures, the weights and the winner. Each round's count is also proven in zero knowledge, see [zk.md](zk.md).

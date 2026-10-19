@@ -8,8 +8,12 @@ async function run(r) {
   history.replaceState(null, '', '/verify?round=' + r);
   let rows = '';
   try {
-    const [p, vk, snap] = await Promise.all([api(`/api/rounds/${r}/proof`), api('/api/zk/vkey'), api(`/api/rounds/${r}/snapshot`)]);
-    if (p.status !== 'proven') { out.innerHTML = `<div class="panel">${line(null, 'Round ' + esc(r) + ' has no proof: ' + esc(p.reason || p.error || p.status))}</div>`; return; }
+    const snap = await api(`/api/rounds/${r}/snapshot`).catch(() => null);
+    if (!snap) { out.innerHTML = `<div class="panel">${line(null, 'Round ' + esc(r) + ' has not closed yet, or does not exist. Pick a closed round from the <a href="/hall">Hall</a>.')}</div>`; return; }
+    const p = await api(`/api/rounds/${r}/proof`).catch(() => null);
+    if (!p) { out.innerHTML = `<div class="panel">${line(null, 'Round ' + esc(r) + ' has closed and its proof is still being made. This takes about a minute, try again shortly.')}</div>`; return; }
+    const vk = await api('/api/zk/vkey');
+    if (p.status !== 'proven') { out.innerHTML = `<div class="panel">${line(null, 'Round ' + esc(r) + ' is not proven: ' + esc(p.reason || p.error || p.status) + '. Its votes are still public in the <a href="/api/rounds/' + esc(r) + '/snapshot">snapshot</a>.')}</div>`; return; }
     rows += line(p.publicSignals[0] === String(r), `Proof is for round ${esc(p.publicSignals[0])}`);
     const w = snap.candidates[Number(p.publicSignals[2])];
     rows += line(w === snap.winner, `Proven winner is candidate ${esc(p.publicSignals[2])} (${esc(w)}), snapshot winner ${esc(snap.winner)}`);
@@ -23,4 +27,6 @@ async function run(r) {
   } catch (e) { out.innerHTML = `<div class="panel">${rows}${line(false, esc(e.message))}</div>`; }
 }
 $('#vf').addEventListener('submit', (e) => { e.preventDefault(); const r = Number($('#vr').value); if (r > 0) run(r); });
-const q = Number(new URLSearchParams(location.search).get('round')); if (q > 0) { $('#vr').value = q; run(q); }
+const q = Number(new URLSearchParams(location.search).get('round'));
+if (q > 0) { $('#vr').value = q; run(q); }
+else api('/api/hall').then((h) => { const r = h.rounds.find((x) => x.zk && x.zk.status === 'proven'); if (r) { $('#vr').value = r.id; $('#vout').innerHTML = `<div class="panel">${line(null, 'Latest proven round is ' + r.id + '. Press Verify to check it.')}</div>`; } else $('#vout').innerHTML = `<div class="panel">${line(null, 'No proven rounds yet. The first proof appears shortly after the first voted round closes.')}</div>`; }).catch(() => {});

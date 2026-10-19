@@ -1,0 +1,80 @@
+# Lifecycle simulation report
+
+Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw. Result: 66 passed, 0 failed.
+
+- Test mint: Token-2022, 6 decimals, supply 1,000,000,000. Six holders.
+- Price: simulated pump.fun bonding curve (60 SOL / 536.5M tokens virtual), SOL $180, so $2.013e-5 per token. Nomination burn 248,380 tokens ($5).
+- Steering: 15 real Neuronpedia responses, 0 cached fallbacks.
+- Proving times (ms, this box): 16866, 16351, 16160.
+- Round 2 payout: pool 3000000000 lamports, received {"alice":748928705,"bob":0,"carol":0,"dave":1487322819,"erin":0,"frank":163748474,"ops":600000000}.
+- Sybil: one wallet 1000000 weight vs four wallets 2000000.
+- Thin curve: nomination burn 248380 tokens at fair price, 248380 after a 100x pump (lowest-price window).
+
+## Checks
+
+- PASS local validator up, tally verifier deployed at G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw
+- PASS test Token-2022 mint BezLFDjB... supply 1,000,000,000
+- PASS config served, mint set: true
+- PASS round 1 ballot has 12 preset candidates
+- PASS nomination quote 248,380 tokens = $5 at $2.013e-5 (pump.fun bonding curve)
+- PASS reply quote 74,514 tokens = $1.5
+- PASS reply quote for a non-X link refused
+- PASS alice nominated "owls and night birds" by burn, on the ballot of round 2
+- PASS same burn signature refused the second time
+- PASS undersized burn refused: that burn is smaller than required
+- PASS burn with another feature in the memo refused: the burn memo does not match this request
+- PASS someone else's burn cannot be claimed: that burn was already used
+- PASS tampered quote refused: invalid quote
+- PASS expired quote refused: that quote expired, ask for a new one
+- PASS quote for an unsupported layer refused before any burn
+- PASS round 1: alice voted p:cat (weight 2958)
+- PASS round 1: bob voted p:owl (weight 1000)
+- PASS round 1: carol voted p:owl (weight 1838)
+- PASS round 1: dave voted p:pirate (weight 500)
+- PASS round 1: erin voted p:pirate (weight 200)
+- PASS vote for an unknown candidate refused
+- PASS vote with a signature for a different candidate refused
+- PASS bob changed his vote to p:cat (last signed vote counts)
+- PASS alice moved 8,000,000 tokens to dave before close (her weight should drop, dave rises)
+- PASS alice weight at close 866960 = isqrt of her balance at close (751,620 tokens), not of her 9,000,000 at vote time
+- PASS round 1 closed: winner The Pirate (p:pirate), integer totals p:cat=1866960 p:owl=1838219 p:pirate=3072281
+- PASS topic from holder votes: old clocks
+- PASS X bot wrote the round 1 post in dry run (status preview): "Old clocks are amazing! They've watched over us for centuries, keeping time with"
+- PASS bob burned for a reply, queued b1849000000000000101
+- PASS second reply request for the same post refused
+- PASS reusing a reply burn for another post refused
+- PASS paid reply generated in dry run, status preview
+- PASS round 1 tally proven in 16866 ms
+- PASS round 1 proof accepted by the on-chain verifier, record 6HtjxWrDSNEVj6urEut4BBmsWbnsk193RCagzJgdc9xD
+- PASS server recheck from snapshot: proof valid for this snapshot
+- PASS on-chain record matches root and winner
+- PASS Hall shows Verified on Solana for round 1
+- PASS round 1 payout dry run: pool 3000000000 lamports, nothing sent
+- PASS restarted, round 2
+- PASS nominated feature is on the round 2 ballot
+- PASS round 2: alice voted f:9-gemmascope-res-16k:15766
+- PASS round 2: dave voted f:9-gemmascope-res-16k:15766
+- PASS round 2: carol voted p:owl
+- PASS round 2: frank voted f:9-gemmascope-res-16k:15766
+- PASS round 2: erin voted p:owl
+- PASS round 2 won by the nominated feature, nominator alice
+- PASS round 2 payout settled on chain, pool 3000000000 lamports
+- PASS alice received 748928705 lamports, expected 748928705
+- PASS dave received 1487322819 lamports, expected 1487322819
+- PASS frank received 163748474 lamports, expected 163748474
+- PASS ops received 600000000 lamports, expected 600000000
+- PASS voters for the losing candidate received nothing
+- PASS round 2 proven (16351 ms) and recorded on chain
+- PASS round 3 had no votes: house pick The Pirate
+- PASS house round not proven, reason: house pick, nothing to prove
+- PASS house round pays nothing
+- PASS round 4: bob and carol now hold 1925486 and 2379050
+- PASS round 4 winner p:owl proven and recorded
+- PASS sybil check: 1,000,000 tokens in one wallet weigh 1000000, split across 4 wallets 2000000 (sqrt(k) times more)
+- PASS price pumped 100x: nomination burn stays 248,380 tokens (was 248,380), quotes use the lowest price of the last 30 min
+- PASS after restart: re-running close and payouts pays nobody twice
+- PASS after restart: one X post per round, no duplicates
+- PASS after restart: no proof redone
+- PASS on-chain records persist; the program refuses a second record per round (tested in zk-localnet)
+- PASS /verify page served
+- PASS scripts/zk-verify.js passes against the simulated site

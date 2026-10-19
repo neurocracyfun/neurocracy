@@ -158,7 +158,7 @@ function createApp(cfg = baseCfg, over = {}) {
   app.get('/api/rounds/:r/proof', (req, res) => {
     const p = (D.proofs || {})[Number(req.params.r)]; if (!p) return res.status(404).json({ error: 'no proof' });
     const { status, reason, error, ms, proof, publicSignals, root, totalsCommit, winnerIndex, totals, at, onchain } = p;
-    res.json({ round: Number(req.params.r), status, reason, error, ms, proof, publicSignals, root, totalsCommit, winnerIndex, totals, at, onchain: onchain || null, programId: process.env.NC_ZK_PROGRAM_ID || null });
+    res.json({ round: Number(req.params.r), status, reason, error, ms, proof, publicSignals, root, totalsCommit, winnerIndex, totals, at, onchain: onchain || null, programId: process.env.NC_ZK_PROGRAM_ID || null, authority: zkChain ? zkChain.authority() : null });
   });
   app.get('/api/rounds/:r/verify', bucket(10), wrap(async (req, res) => {
     const r = Number(req.params.r); const s = (D.snapshots || {})[r]; if (!s) return res.status(404).json({ error: 'no snapshot' });
