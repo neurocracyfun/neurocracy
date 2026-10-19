@@ -12,3 +12,11 @@ public/lab.html
 public/vote.html
 public/hall.html
 public/404.html
+public/verify.html
+public/vendor/snarkjs.min.js
+zk/build/*
+!zk/build/tally_js/
+zk/build/tally_js/*
+!zk/build/tally_js/tally.wasm
+!zk/build/tally_js/witness_calculator.js
+program/target/

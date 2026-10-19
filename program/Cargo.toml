@@ -1,0 +1,19 @@
+[package]
+name = "neurocracy-tally-verifier"
+version = "0.1.0"
+edition = "2021"
+description = "Verifies Neurocracy round tally proofs (Groth16, BN254) and records them on chain"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+solana-program = "2.2"
+groth16-solana = "0.2.0"
+
+[features]
+no-entrypoint = []
+
+[dev-dependencies]
+num-bigint = "0.4"

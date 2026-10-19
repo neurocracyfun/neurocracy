@@ -32,9 +32,19 @@ All of it is off by default. Details, env vars and safety rules: [docs/fees-and-
 ## Trust model
 
 - Steering is off chain on Neuronpedia's public API, which has its own rate limits (240 steers per hour). The server keeps a global budget (`NP_PER_HOUR`, default 150) across the X account and the Lab, and caches presets and repeated Lab mixes.
-- Votes are signed messages counted by the server. All signed votes are public at `/api/votes/:round`.
+- Votes are signed messages counted by the server. All signed votes are public at `/api/votes/:round`, and each closed round's count is proven in zero knowledge (see below).
 - Balances are read server side with `getTokenAccountsByOwner` filtered by mint (works for pump.fun Token-2022 mints).
 - The X account is fully automatic once live. It is off by default: `DRY_RUN=1` and `X_POSTING_ENABLED=0` only queue previews.
+
+## Zero-knowledge tally verification
+
+Every closed round publishes a canonical vote snapshot (`/api/rounds/:r/snapshot`). The server then builds a Poseidon Merkle tree of the votes and produces a Groth16 proof (circuit `zk/tally.circom`, BN254) that the published winner and per-candidate weighted totals follow from exactly those leaves, with each weight equal to `floor(sqrt(balance at close))`. The Hall marks proven rounds Verified.
+
+- Check a round in the browser: https://neurocracy.fun/verify
+- Check it without trusting the site: `node scripts/zk-verify.js ROUND`. It rebuilds the tree from the snapshot and verifies the proof against `zk/vkey.json` in this repository.
+- Optional on-chain record: `program/` is a Solana program (groth16-solana) that verifies the proof and stores the root, winner and totals commitment in an account per round. It is tested on a local validator and not deployed to mainnet yet.
+
+The proof covers the count, not the inputs: it does not prove that signatures are valid or that balances were read correctly. Both are checkable by anyone from the public snapshot. Details, limits (128 votes, 32 candidates per proven round) and the anonymous voting roadmap are in [docs/zk.md](docs/zk.md).
 
 ## Run
 
