@@ -1,6 +1,6 @@
 # Zero-knowledge tally verification
 
-Neurocracy counts votes on its server. To make that count checkable, every closed round gets a Groth16 proof that the winner and the weighted totals were computed correctly from the published votes.
+In testing until the mainnet launch. Neurocracy counts votes on its server. To make that count checkable, every voted round gets a Groth16 proof that the winner and the weighted totals were computed correctly from the published votes.
 
 ## What is proven
 
@@ -16,6 +16,8 @@ The root, the totals and the winner are all recomputable from the public snapsho
 
 ## What is not proven
 
+- **Payouts.** The fee share (paid pro rata by raw balance at close) is not in the circuit. It is checkable from the snapshot's raw balances and the public payout ledger.
+
 - **Signatures.** The circuit does not check ed25519 signatures. Every signed vote message and signature is in the snapshot and can be checked with any ed25519 library.
 - **Balances.** The raw balance at close is read by the server from Solana RPC. The proof shows the weights follow from those numbers, not that the numbers match the chain. Anyone can recheck them against the chain at the closing slot.
 - **Completeness.** A vote the server never recorded is not in the snapshot. Voters can check their own vote is there.
@@ -26,7 +28,7 @@ The root, the totals and the winner are all recomputable from the public snapsho
 
 The proving key comes from the public Perpetual Powers of Tau ceremony (`ppot_0080_17.ptau`), followed by one circuit-specific contribution and a public random beacon. If the circuit-specific contribution were compromised, someone could forge a proof. Before mainnet use, the plan is a multi-party phase 2 ceremony that any holder can join.
 
-Files: `zk/vkey.json` (verification key, in git), `zk/build/tally_js/tally.wasm` (witness generator, in git). The proving key `zk/build/tally.zkey` is 96 MB and is not in git. Its sha256 is in `zk/zkey.sha256`. Set `ZK_ZKEY_URL` and `npm run build` fetches and checks it.
+Files: `zk/vkey.json` (verification key, in git), `zk/build/tally_js/tally.wasm` (witness generator, in git). The proving key `zk/build/tally.zkey` is 96 MB and is not in git. Its sha256 is in `zk/zkey.sha256`. It is published as the [zk-v1 release asset](https://github.com/neurocracyfun/neurocracy/releases/tag/zk-v1) (sha256 `d1cd52e9...c46b` in the release notes). With `ZK_PROVE=1`, `npm run build` downloads it (from `ZK_ZKEY_URL`, default that release) and refuses it if the checksum differs.
 
 ## Proving on the server
 
@@ -44,13 +46,18 @@ A Render Starter instance (512 MB, 0.5 CPU) should take about 40 s per proof, we
 
 Endpoints: `/api/rounds/:r/proof`, `/api/rounds/:r/verify` (the server rechecks from the snapshot), `/api/zk/vkey`. The `/verify` page checks the proof in the browser.
 
-## On-chain record
+## On-chain check
 
-`program/` is a Solana program built on `groth16-solana`. Instruction data is a tag byte, the proof (A negated, 256 bytes) and the four public inputs (385 bytes in total). The program verifies the proof and writes a 117-byte record at the PDA `["tally", authority, round]`: round, root, winner, totals commitment, slot and authority. A second write for the same round is refused. Because the publisher key is part of the seed, nobody else can take a round's address.
+`program/` is a Solana program built on `groth16-solana`. Instruction data is a tag byte, the proof (A negated, 256 bytes) and the four public inputs (385 bytes in total). It has two modes:
 
-Local validator test (`node scripts/zk-localnet.js`): a tampered proof is rejected, a valid proof is accepted at about 104,000 compute units, the record matches, and a duplicate is refused. Record rent is about 0.0017 SOL per round.
+- **verify (default, `ZK_ONCHAIN_MODE=verify`)**: the program verifies the proof and logs round, winner and publisher. No account is created, so there is no rent. The transaction stays on chain with the proof and public inputs in its data, so anyone can look it up by signature (shown on /verify) and check that the program accepted those exact inputs. `scripts/zk-verify.js` does this when `NC_ZK_RPC` is set. About 99,500 compute units, 5,000 lamports fee.
+- **record (`ZK_ONCHAIN_MODE=record`)**: the program also writes a 117-byte record at the PDA `["tally", authority, round]` (round, root, winner, totals commitment, slot, authority). A second write for the same round is refused. Rent is about 0.0017 SOL per round, so about 30 SOL a year at 48 rounds a day. That is why it is off by default.
 
-Enable with `ZK_ONCHAIN=1`, `NC_ZK_PROGRAM_ID`, `NC_ZK_AUTHORITY_KEY` and optionally `NC_ZK_RPC`. Not deployed to mainnet yet.
+Recommendation: keep verify mode. A transaction is as permanent and public as an account, so the record mode only makes lookups by round easier, at real cost.
+
+Local validator test (`node scripts/zk-localnet.js`) covers both modes: tampered proofs are rejected, valid ones are accepted, records match, duplicates are refused.
+
+Enable with `ZK_ONCHAIN=1`, `NC_ZK_PROGRAM_ID`, `NC_ZK_AUTHORITY_KEY` and optionally `NC_ZK_RPC`. Not deployed to mainnet yet: the on-chain check is in testing.
 
 ## Roadmap: anonymous voting
 

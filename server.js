@@ -42,8 +42,8 @@ function createApp(cfg = baseCfg, over = {}) {
   const payouts = createPayouts({ cfg, store, now, chain: 'chain' in over ? over.chain : solanaChain(cfg), log: console.log });
   const price = over.price || createPrice({ cfg, now });
   const quotes = createQuotes({ secret: cfg.quotes.secret, ttlMs: cfg.quotes.ttlMs, now });
-  const burns = createBurnFeatures({ cfg, store, rounds, featureInfo, getTx: over.getTx, price, quotes, now });
-  const zkChain = process.env.ZK_ONCHAIN === '1' ? createZkChain({ rpc: process.env.NC_ZK_RPC || cfg.rpc, programId: process.env.NC_ZK_PROGRAM_ID, authorityKey: process.env.NC_ZK_AUTHORITY_KEY }) : null;
+  const burns = createBurnFeatures({ cfg, store, rounds, featureInfo, getTx: over.getTx, price, quotes, lookupPost: over.lookupPost || xbot.lookupPost, now });
+  const zkChain = process.env.ZK_ONCHAIN === '1' ? createZkChain({ rpc: process.env.NC_ZK_RPC || cfg.rpc, programId: process.env.NC_ZK_PROGRAM_ID, authorityKey: process.env.NC_ZK_AUTHORITY_KEY, mode: process.env.ZK_ONCHAIN_MODE === 'record' ? 'record' : 'verify' }) : null;
   const prover = zk.createProver({ store, enabled: 'zkProve' in over ? over.zkProve : process.env.ZK_PROVE === '1', chain: zkChain, log: console.log, proveFn: over.proveFn });
   const searchHits = [];
   const today = () => new Date(now()).toISOString().slice(0, 10);
@@ -150,7 +150,7 @@ function createApp(cfg = baseCfg, over = {}) {
   app.get('/api/payouts/wallet/:w', (req, res) => (sol.isAddress(req.params.w) ? res.json(payouts.wallet(req.params.w)) : res.status(400).json({ error: 'bad wallet' })));
   app.get('/api/nominate/quote', bucket(20), wrap(async (req, res) => res.json(await burns.quoteNomination(String(req.query.layer || ''), Number(req.query.index)))));
   app.post('/api/nominate', bucket(10), wrap(async (req, res) => res.json(await burns.nominate(req.body || {}))));
-  app.get('/api/reply-burn/quote', bucket(20), wrap(async (req, res) => res.json(await burns.quoteReply(String(req.query.url || '')))));
+  app.get('/api/reply-burn/quote', bucket(20), wrap(async (req, res) => res.json(await burns.quoteReply(String(req.query.url || ''), String(req.query.wallet || '')))));
   app.post('/api/reply-burn', bucket(10), wrap(async (req, res) => res.json(await burns.replyRequest(req.body || {}))));
   app.get('/api/reply-burn/queue', (req, res) => res.json((D.replyQueue || []).slice(0, 30).map(({ id, tweetId, author, status, at, doneAt }) => ({ id, tweetId, author, status, at, doneAt }))));
   app.get('/api/rounds/:r/snapshot', (req, res) => { const j = (D.snapshots || {})[Number(req.params.r)]; if (!j) return res.status(404).json({ error: 'no snapshot' }); res.type('json').send(j); });
@@ -165,7 +165,11 @@ function createApp(cfg = baseCfg, over = {}) {
     res.json({ round: r, ...(await zk.check(s, (D.proofs || {})[r])) });
   }));
   app.get('/api/zk/vkey', (req, res) => res.sendFile(zk.files().vkey));
-  app.get('/api/votes/:round', (req, res) => res.json(Object.entries(D.votes[Number(req.params.round)] || {}).map(([wallet, v]) => ({ wallet, ...v }))));
+  app.get('/api/votes/:round', (req, res) => {
+    const r = Number(req.params.round); const v = D.votes[r] || {};
+    if (!D.rounds[r] && r >= rounds.current() - 1) return res.json({ round: r, hidden: true, voters: Object.keys(v).length, revealAt: rounds.bounds(r).endsAt, note: 'votes are revealed when the round closes' });
+    res.json(Object.entries(v).map(([wallet, x]) => ({ wallet, ...x })));
+  });
 
   app.post('/api/rpc', bucket(60), wrap(async (req, res) => {
     const b = req.body;

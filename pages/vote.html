@@ -19,8 +19,9 @@ body: app vote
       <div class="status" id="vstatus"></div>
     </div>
   </div>
+  <p class="mono" id="r-hidden" style="color:var(--dim);margin-top:30px"></p>
   <div class="cands" id="cands"></div>
-  <div class="mono" style="color:var(--dim);margin-top:26px">Topics so far</div><div class="mixline" id="topics"><span class="badge">none yet</span></div>
+  <div class="mono" style="color:var(--dim);margin-top:26px">Topics</div><div class="mixline" id="topics"><span class="badge">none yet</span></div>
 
   <div class="grid2" style="margin-top:60px">
     <div class="panel" style="padding:24px">
@@ -40,7 +41,7 @@ body: app vote
     <div class="grid2" style="margin-top:60px">
       <div class="panel" style="padding:24px" id="pay-panel">
         <h3>Fee share</h3>
-        <p class="sub" style="font-size:15px" id="pay-about">When it is switched on, creator fees that reach the distributor wallet are split each round: 70% to wallets that voted for the winning mind, by vote weight, 10% to whoever nominated the winning feature (or to the voters if nobody did), and 20% to operations. Small amounts wait until they reach a minimum. The wallet is funded by hand and can be empty. Fees depend on trading and can be zero. This is not income and nothing is promised.</p>
+        <p class="sub" style="font-size:15px" id="pay-about">When it is switched on, creator fees that reach the distributor wallet are paid out at 10% of the pool per voted round: 70% to wallets that voted for the winning mind, by token balance at close, 10% to whoever nominated the winning feature (or to the voters if nobody did), and 20% to operations. Small amounts wait until they reach a minimum. The wallet is funded by hand and can be empty. Fees depend on trading and can be zero. This is not income and nothing is promised.</p>
         <div class="mono" id="pay-last" style="color:var(--dim)">Fee share is off.</div>
         <label class="f" for="pay-w" style="margin-top:16px">History for a wallet</label><input type="text" id="pay-w" placeholder="wallet address">
         <div id="pay-hist" class="mono" style="margin-top:10px;font-size:12px"></div>
@@ -54,11 +55,11 @@ body: app vote
     </div>
     <div class="panel" style="padding:24px;margin-top:22px" id="rep-panel" hidden>
       <h3>Burn for a reply</h3>
-      <p class="sub" style="font-size:15px">Burn <b id="rep-burn">about $1.50 of NCRACY</b> and the account replies to a post of your choice, in the current mind. What it writes is not edited by anyone and may be filtered out, in which case nothing is posted. No refunds.</p>
-      <label class="f" for="rep-url">Link to a post on X</label><input type="text" id="rep-url" placeholder="https://x.com/name/status/123">
+      <p class="sub" style="font-size:15px">Burn <b id="rep-burn">about $1.50 of NCRACY</b> and the account replies, in the current mind, to a post that mentions @neurocracyfun or to a post by the X handle you linked above. What it writes is not edited by anyone and may be filtered out, in which case nothing is posted. No refunds.</p>
+      <label class="f" for="rep-url">Link to a post on X</label><input type="text" id="rep-url" placeholder="https://x.com/yourhandle/status/123">
       <label style="display:flex;gap:8px;margin-top:12px;font-size:14px"><input type="checkbox" id="rep-ok"> I understand the burn is final and the reply may not be posted.</label>
       <button class="btn" id="rep-go" style="margin-top:14px" disabled>Burn and request</button><div class="status" id="rstatus"></div>
     </div>
   </section>
-  <p class="note">Every signed vote is public at <a id="votes-link" href="#">/api/votes</a> so anyone can recount.</p>
+  <p class="note">Every signed vote is published when its round closes, for example the last round at <a id="votes-link" href="#">/api/votes</a>, so anyone can recount.</p>
 </div></main>

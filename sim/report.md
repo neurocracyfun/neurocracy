@@ -1,24 +1,29 @@
 # Lifecycle simulation report
 
-Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw. Result: 66 passed, 0 failed.
+Run: 2026-10-19T18:45:00.095Z on solana-test-validator, program G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw. Result: 73 passed, 0 failed.
 
 - Test mint: Token-2022, 6 decimals, supply 1,000,000,000. Six holders.
 - Price: simulated pump.fun bonding curve (60 SOL / 536.5M tokens virtual), SOL $180, so $2.013e-5 per token. Nomination burn 248,380 tokens ($5).
 - Steering: 15 real Neuronpedia responses, 0 cached fallbacks.
-- Proving times (ms, this box): 16866, 16351, 16160.
-- Round 2 payout: pool 3000000000 lamports, received {"alice":748928705,"bob":0,"carol":0,"dave":1487322819,"erin":0,"frank":163748474,"ops":600000000}.
+- Proving times (ms, this box): 16963, 16377, 16813.
+- Round 2 payout: pool 495000000 lamports, received {"alice":78114282,"bob":0,"carol":0,"dave":314078702,"erin":0,"frank":3807014,"ops":99000000}.
 - Sybil: one wallet 1000000 weight vs four wallets 2000000.
 - Thin curve: nomination burn 248380 tokens at fair price, 248380 after a 100x pump (lowest-price window).
 
 ## Checks
 
 - PASS local validator up, tally verifier deployed at G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw
-- PASS test Token-2022 mint BezLFDjB... supply 1,000,000,000
+- PASS test Token-2022 mint Hmiqgskr... supply 1,000,000,000
 - PASS config served, mint set: true
 - PASS round 1 ballot has 12 preset candidates
 - PASS nomination quote 248,380 tokens = $5 at $2.013e-5 (pump.fun bonding curve)
 - PASS reply quote 74,514 tokens = $1.5
 - PASS reply quote for a non-X link refused
+- PASS reply to a post that never mentioned the account refused before any burn: paid replies are only for posts that mention @neurocracyfun, or posts by the X handle you linked to this wallet
+- PASS bob's own post refused before he links his handle
+- PASS bob linked @bobsays with a signed message
+- PASS after linking, a reply to bob's own post can be quoted
+- PASS carol cannot buy a reply to bob's post
 - PASS alice nominated "owls and night birds" by burn, on the ballot of round 2
 - PASS same burn signature refused the second time
 - PASS undersized burn refused: that burn is smaller than required
@@ -35,6 +40,7 @@ Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo
 - PASS vote for an unknown candidate refused
 - PASS vote with a signature for a different candidate refused
 - PASS bob changed his vote to p:cat (last signed vote counts)
+- PASS open round shows participation only (5 voters, 6497 weight cast); per-option weights and votes hidden
 - PASS alice moved 8,000,000 tokens to dave before close (her weight should drop, dave rises)
 - PASS alice weight at close 866960 = isqrt of her balance at close (751,620 tokens), not of her 9,000,000 at vote time
 - PASS round 1 closed: winner The Pirate (p:pirate), integer totals p:cat=1866960 p:owl=1838219 p:pirate=3072281
@@ -44,12 +50,12 @@ Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo
 - PASS second reply request for the same post refused
 - PASS reusing a reply burn for another post refused
 - PASS paid reply generated in dry run, status preview
-- PASS round 1 tally proven in 16866 ms
-- PASS round 1 proof accepted by the on-chain verifier, record 6HtjxWrDSNEVj6urEut4BBmsWbnsk193RCagzJgdc9xD
+- PASS round 1 tally proven in 16963 ms
+- PASS round 1 proof accepted by the on-chain verifier, record null
 - PASS server recheck from snapshot: proof valid for this snapshot
-- PASS on-chain record matches root and winner
-- PASS Hall shows Verified on Solana for round 1
-- PASS round 1 payout dry run: pool 3000000000 lamports, nothing sent
+- PASS verify mode: transaction carries the same root and winner, no account created (rent 0)
+- PASS Hall shows Verified, checked on Solana, for round 1
+- PASS round 1 payout dry run: pool 495000000 lamports, nothing sent
 - PASS restarted, round 2
 - PASS nominated feature is on the round 2 ballot
 - PASS round 2: alice voted f:9-gemmascope-res-16k:15766
@@ -58,13 +64,14 @@ Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo
 - PASS round 2: frank voted f:9-gemmascope-res-16k:15766
 - PASS round 2: erin voted p:owl
 - PASS round 2 won by the nominated feature, nominator alice
-- PASS round 2 payout settled on chain, pool 3000000000 lamports
-- PASS alice received 748928705 lamports, expected 748928705
-- PASS dave received 1487322819 lamports, expected 1487322819
-- PASS frank received 163748474 lamports, expected 163748474
-- PASS ops received 600000000 lamports, expected 600000000
+- PASS round 2 payout settled on chain, pool 495000000 lamports
+- PASS round 2 pool 495000000 lamports = 10% of the unallocated balance
+- PASS alice received 78114282 lamports, expected 78114282
+- PASS dave received 314078702 lamports, expected 314078702 (pro rata by balance at close)
+- PASS frank received 3807014 lamports, expected 3807014 (pro rata by balance at close)
+- PASS ops received 99000000 lamports, expected 99000000
 - PASS voters for the losing candidate received nothing
-- PASS round 2 proven (16351 ms) and recorded on chain
+- PASS round 2 proven (16377 ms) and recorded on chain
 - PASS round 3 had no votes: house pick The Pirate
 - PASS house round not proven, reason: house pick, nothing to prove
 - PASS house round pays nothing
@@ -75,6 +82,6 @@ Run: 2026-10-19T18:30:20.728Z on solana-test-validator, program G4dJmDirX69n4aKo
 - PASS after restart: re-running close and payouts pays nobody twice
 - PASS after restart: one X post per round, no duplicates
 - PASS after restart: no proof redone
-- PASS on-chain records persist; the program refuses a second record per round (tested in zk-localnet)
+- PASS on-chain verification transactions persist and can be re-checked by signature
 - PASS /verify page served
 - PASS scripts/zk-verify.js passes against the simulated site

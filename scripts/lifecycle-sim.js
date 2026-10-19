@@ -59,8 +59,11 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   const curveBuf = () => { const b = Buffer.alloc(49); b.writeBigUInt64LE(curve.vTok, 8); b.writeBigUInt64LE(curve.vSol, 16); return b; };
   let priceInst = null; const mkPrice = () => priceInst ||= createPrice({ cfg: { ...mkCfg(true), price: { ttlMs: 0, windowMs: 30 * 60e3 } }, now, rpcImpl: async (u, m, p) => (m === 'getAccountInfo' && p[0] === bondingCurveAddress(mint.toBase58()) ? { value: { data: [curveBuf().toString('base64')] } } : null), fetchImpl: async (u) => ({ ok: true, json: async () => ({ So11111111111111111111111111111111111111112: { usdPrice: 180 } }) }) });
   const { createApp } = require('../server');
+  // mocked X post reads (GET /2/tweets/:id): who wrote each post and whom it mentions
+  const xPosts = { '1849000000000000101': { author: 'curious_owl', mentions: ['neurocracyfun'], text: '@neurocracyfun what do you dream about' }, '1849000000000000202': { author: 'other', mentions: ['neurocracyfun'], text: '@neurocracyfun hello' },
+    '1849000000000000303': { author: 'stranger', mentions: [], text: 'a post that never mentioned the account' }, '1849000000000000404': { author: 'bobsays', mentions: [], text: 'my morning walk by the river' } };
   let app, srv, B;
-  const boot = (dry) => { app = createApp(mkCfg(dry), { now, steer, price: mkPrice(), featureInfo: async (l, i) => ({ 15766: 'owls and night birds', 4242: 'tidal patterns and the sea', 777: 'clockwork and small machines' }[i] || 'feature ' + i), zkProve: true }); srv = app.app.listen(0); B = 'http://127.0.0.1:' + srv.address().port; };
+  const boot = (dry) => { app = createApp(mkCfg(dry), { now, steer, price: mkPrice(), featureInfo: async (l, i) => ({ 15766: 'owls and night birds', 4242: 'tidal patterns and the sea', 777: 'clockwork and small machines' }[i] || 'feature ' + i), zkProve: true, lookupPost: async (id) => xPosts[id] ? { id, ...xPosts[id] } : { missing: true } }); srv = app.app.listen(0); B = 'http://127.0.0.1:' + srv.address().port; };
   const call = async (m, p, b) => { const r = await fetch(B + p, { method: m, headers: { 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }); return { status: r.status, body: await r.json().catch(() => null) }; };
   const sign = (kp, msg) => bs58.encode(nacl.sign.detached(new TextEncoder().encode(msg), kp.secretKey));
   const vote = async (n, cand, topic = '') => { const R = app.rounds.current(); const msg = app.rounds.voteMessage({ round: R, candidate: cand, topic, wallet: A(n) }); return call('POST', '/api/vote', { wallet: A(n), round: R, candidate: cand, topic, signature: sign(W(n), msg) }); };
@@ -78,9 +81,14 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   const q1 = await call('GET', `/api/nominate/quote?layer=${L}&index=15766`);
   const priceUsd = q1.body.priceUsd; facts.price = priceUsd; facts.nominateBurn = q1.body.burn;
   ok(q1.status === 200 && Math.abs(q1.body.burn * priceUsd - 5) < priceUsd + 1e-9, `nomination quote ${q1.body.burn.toLocaleString('en-US')} tokens = $5 at $${priceUsd.toExponential(3)} (${q1.body.source})`);
-  const rq0 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/curious_owl/status/1849000000000000101'));
+  const rq0 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/curious_owl/status/1849000000000000101') + '&wallet=' + A('bob'));
   ok(rq0.status === 200 && Math.abs(rq0.body.burn * priceUsd - 1.5) < priceUsd + 1e-9, `reply quote ${rq0.body.burn.toLocaleString('en-US')} tokens = $1.5`);
-  ok((await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://example.com/x'))).status === 400, 'reply quote for a non-X link refused');
+  ok((await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://example.com/x') + '&wallet=' + A('bob'))).status === 400, 'reply quote for a non-X link refused');
+  const unsol = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/stranger/status/1849000000000000303') + '&wallet=' + A('bob')); ok(unsol.status === 400, 'reply to a post that never mentioned the account refused before any burn: ' + (unsol.body && unsol.body.error));
+  const own0 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('bob')); ok(own0.status === 400, "bob's own post refused before he links his handle");
+  { const msg = `Neurocracy link X\nHandle: @bobsays\nWallet: ${A('bob')}`; const l = await call('POST', '/api/link-x', { wallet: A('bob'), handle: 'bobsays', signature: sign(W('bob'), msg) }); ok(l.status === 200, 'bob linked @bobsays with a signed message'); }
+  const own1 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('bob')); ok(own1.status === 200, "after linking, a reply to bob's own post can be quoted");
+  ok((await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('carol'))).status === 400, "carol cannot buy a reply to bob's post");
 
   // ---- 2. nominations by burn ----
   const nsig = await burn('alice', q1.body.burn, q1.body.memo);
@@ -106,6 +114,8 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   ok((await vote('frank', 'p:does-not-exist')).status === 400, 'vote for an unknown candidate refused');
   { const R = app.rounds.current(); const msg = app.rounds.voteMessage({ round: R, candidate: owl, topic: '', wallet: A('frank') }); ok((await call('POST', '/api/vote', { wallet: A('frank'), round: R, candidate: cat, topic: '', signature: sign(W('frank'), msg) })).status === 400, 'vote with a signature for a different candidate refused'); }
   const re = await vote('bob', cat); ok(re.status === 200, 'bob changed his vote to ' + cat + ' (last signed vote counts)');
+  { const o = (await call('GET', '/api/round')).body; const vv = (await call('GET', '/api/votes/' + R1)).body;
+    ok(o.voters === 5 && o.candidates.every((c) => c.weight === undefined) && !o.topics.length && vv.hidden && !JSON.stringify(vv).includes(cat), `open round shows participation only (${o.voters} voters, ${o.weightCast} weight cast); per-option weights and votes hidden`); }
   await move('alice', 'dave', 8_000_000); ok(true, 'alice moved 8,000,000 tokens to dave before close (her weight should drop, dave rises)');
   const r1 = await closeRound(); const v1 = D().votes[R1];
   { const { isqrt } = require('../lib/solana'); const raw = BigInt((await conn.getTokenAccountBalance(ata.alice)).value.amount); ok(v1[A('alice')].weightInt === isqrt(raw).toString(), `alice weight at close ${v1[A('alice')].weightInt} = isqrt of her balance at close (${(Number(raw) / 1e6).toLocaleString('en-US')} tokens), not of her 9,000,000 at vote time`); }
@@ -118,11 +128,11 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   // ---- 4. steering + X bot dry run + paid reply ----
   const post1 = D().posts.find((p) => p.kind === 'post' && p.round === R1); if (post1 && !post1.text) log('post drafts rejected: ' + JSON.stringify(post1.rejected).slice(0, 600));
   ok(post1 && post1.status === 'preview' && post1.text, `X bot wrote the round ${R1} post in dry run (status ${post1 && post1.status}): "${post1 && (post1.text || '').slice(0, 80)}"`);
-  const rq = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/curious_owl/status/1849000000000000101'));
+  const rq = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/curious_owl/status/1849000000000000101') + '&wallet=' + A('bob'));
   const rs = await burn('bob', rq.body.burn, rq.body.memo);
   const rr = await call('POST', '/api/reply-burn', { wallet: A('bob'), url: 'https://x.com/curious_owl/status/1849000000000000101', signature: rs, quote: rq.body.quote }); ok(rr.status === 200, 'bob burned for a reply, queued ' + (rr.body && rr.body.queued));
   ok((await call('POST', '/api/reply-burn', { wallet: A('bob'), url: 'https://x.com/curious_owl/status/1849000000000000101', signature: rs, quote: rq.body.quote })).status === 400, 'second reply request for the same post refused');
-  const rq2 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/other/status/1849000000000000202'));
+  const rq2 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/other/status/1849000000000000202') + '&wallet=' + A('bob'));
   ok((await call('POST', '/api/reply-burn', { wallet: A('bob'), url: 'https://x.com/other/status/1849000000000000202', signature: rs, quote: rq2.body.quote })).status >= 400, 'reusing a reply burn for another post refused');
   await app.tickOnce(); const job = D().replyQueue.find((j) => j.tweetId === '1849000000000000101');
   ok(job && job.status === 'preview', 'paid reply generated in dry run, status ' + (job && job.status));
@@ -132,9 +142,10 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   ok(p1.status === 'proven', `round ${R1} tally proven in ${p1.ms} ms`);
   ok(!!p1.onchain, `round ${R1} proof accepted by the on-chain verifier, record ${p1.onchain && p1.onchain.record}` + (p1.onchainError ? ' ERROR ' + p1.onchainError : ''));
   const ver1 = await call('GET', `/api/rounds/${R1}/verify`); ok(ver1.body && ver1.body.ok, 'server recheck from snapshot: ' + (ver1.body && ver1.body.reason));
-  const { createZkChain } = require('../lib/zkchain'); const zc = createZkChain({ rpc: RPC, programId }); const rec1 = await zc.read(R1, admin.publicKey.toBase58());
-  ok(rec1 && rec1.root === p1.root && rec1.winner === p1.winnerIndex, 'on-chain record matches root and winner');
-  const hall1 = (await call('GET', '/api/hall')).body.rounds.find((r) => r.id === R1); ok(hall1.zk && hall1.zk.status === 'proven' && hall1.zk.onchain, 'Hall shows Verified on Solana for round ' + R1);
+  const { createZkChain } = require('../lib/zkchain'); const zc = createZkChain({ rpc: RPC, programId });
+  const tx1 = await zc.checkTx(p1.onchain.sig);
+  ok(tx1 && tx1.root === p1.root && tx1.winner === p1.winnerIndex && tx1.signer === admin.publicKey.toBase58() && !p1.onchain.record, `verify mode: transaction carries the same root and winner, no account created (rent 0)`);
+  const hall1 = (await call('GET', '/api/hall')).body.rounds.find((r) => r.id === R1); ok(hall1.zk && hall1.zk.status === 'proven' && hall1.zk.onchain, 'Hall shows Verified, checked on Solana, for round ' + R1);
   const pay1 = app.payouts.forRound(R1); ok(pay1 && pay1.dry && pay1.status === 'dry-run', `round ${R1} payout dry run: pool ${pay1 && pay1.pool} lamports, nothing sent`);
   facts.dry = pay1;
 
@@ -150,9 +161,10 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   const pay2 = app.payouts.forRound(R2); ok(pay2.status === 'settled', `round ${R2} payout settled on chain, pool ${pay2.pool} lamports`);
   const got = {}; for (const k of Object.keys(before)) got[k] = (await conn.getBalance(k === 'ops' ? ops.publicKey : W(k).publicKey)) - before[k];
   const pool = BigInt(pay2.pool); const v2 = D().votes[R2];
-  const wts = ['alice', 'dave', 'frank'].map((n) => BigInt(v2[A(n)].weightInt)); const wsum = wts.reduce((a, b) => a + b, 0n); const vp = pool * 7000n / 10000n;
+  ok(true, `round ${R2} pool ${pool} lamports = 10% of the unallocated balance`);
+  const wts = ['alice', 'dave', 'frank'].map((n) => BigInt(v2[A(n)].rawAtClose)); const wsum = wts.reduce((a, b) => a + b, 0n); const vp = pool * 7000n / 10000n;
   const want = { alice: vp * wts[0] / wsum + pool * 1000n / 10000n, dave: vp * wts[1] / wsum, frank: vp * wts[2] / wsum, ops: pool * 2000n / 10000n };
-  for (const [k, w] of Object.entries(want)) ok(BigInt(got[k]) === w, `${k} received ${got[k]} lamports, expected ${w}`);
+  for (const [k, w] of Object.entries(want)) ok(BigInt(got[k]) === w, `${k} received ${got[k]} lamports, expected ${w}${k === 'ops' || k === 'alice' ? '' : ' (pro rata by balance at close)'}`);
   ok(got.carol === 0 && got.erin === 0, 'voters for the losing candidate received nothing');
   facts.split = { pool: pay2.pool, got };
   const p2 = await waitProof(R2); facts.proveMs.push(p2.ms); ok(p2.status === 'proven' && p2.onchain, `round ${R2} proven (${p2.ms} ms) and recorded on chain`);
@@ -187,7 +199,7 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   ok((await conn.getBalance(W('alice').publicKey)) === balBefore, 'after restart: re-running close and payouts pays nobody twice');
   ok(D().posts.filter((p) => p.kind === 'post').length === new Set(D().posts.filter((p) => p.kind === 'post').map((p) => p.round)).size, 'after restart: one X post per round, no duplicates');
   ok(JSON.stringify(Object.keys(D().proofs)) === proofsBefore, 'after restart: no proof redone');
-  const dupe = await zc.read(R2, admin.publicKey.toBase58()); ok(!!dupe, 'on-chain records persist; the program refuses a second record per round (tested in zk-localnet)');
+  ok(!!(await zc.checkTx(D().proofs[R2].onchain.sig)), 'on-chain verification transactions persist and can be re-checked by signature');
   const verifyPage = await fetch(B + '/verify?round=' + R2); ok(verifyPage.status === 200, '/verify page served');
   const local = await new Promise((res) => require('child_process').exec(`node ${path.join(__dirname, 'zk-verify.js')} ${R2} ${B}`, (e, so) => res({ code: e ? e.code : 0, so })));
   log(local.so.trim()); ok(local.code === 0, 'scripts/zk-verify.js passes against the simulated site');

@@ -57,9 +57,9 @@ function payoutRig({ balance = 10_000_000_000n, over = {} } = {}) {
     blockHeight: async () => height, status: async (s) => statuses[s] ?? null,
     prepare: async (items) => { const sig = 'sig' + (++n); return { sig, lastValid: height + 150, send: async () => { sent.push({ sig, items }); } }; } };
   const OPS = 'Ops11111111111111111111111111111111111111111';
-  const cfg = { mint: MINT, payout: { enabled: true, dryRun: false, shareBps: 7000, nominatorBps: 1000, opsBps: 2000, opsAddress: OPS, minLamports: 1_000_000, reserveLamports: 10_000_000, dailyCapLamports: 100_000_000_000, maxPerTx: 2, ...over } };
+  const cfg = { mint: MINT, payout: { enabled: true, dryRun: false, shareBps: 7000, nominatorBps: 1000, opsBps: 2000, opsAddress: OPS, roundBps: 10000, minLamports: 1_000_000, reserveLamports: 10_000_000, dailyCapLamports: 100_000_000_000, maxPerTx: 2, ...over } };
   const a = W(), b = W(), c = W();
-  const store = { data: { votes: { 7: { [a]: { candidate: 'p:owl', weightInt: '1000' }, [b]: { candidate: 'p:owl', weightInt: '3000' }, [c]: { candidate: 'p:cat', weightInt: '9000' } } } }, save() {} };
+  const store = { data: { votes: { 7: { [a]: { candidate: 'p:owl', weightInt: '1000', rawAtClose: '1000000' }, [b]: { candidate: 'p:owl', weightInt: '3000', rawAtClose: '9000000' }, [c]: { candidate: 'p:cat', weightInt: '9000', rawAtClose: '81000000' } } } }, save() {} };
   const p = createPayouts({ cfg, store, chain, now: () => Date.parse('2026-10-20T00:00:00Z') });
   return { p, OPS, store, sent, statuses, a, b, c, setHeight: (h) => (height = h), round: { id: 7, winner: { id: 'p:owl' }, house: false, nominator: null } };
 }
@@ -67,9 +67,9 @@ function payoutRig({ balance = 10_000_000_000n, over = {} } = {}) {
 test('payouts: 70% voters + 10% nominator roll-over + 20% operations, cap, accrual below the minimum', async () => {
   const g = payoutRig();
   const e = await g.p.plan(g.round);
-  // pool = 10 SOL - 0.01 reserve = 9.99 SOL. No nomination: voters get 70% + 10% = 7.992 SOL, split 1:3. Ops 20%.
+  // pool = 10 SOL - 0.01 reserve = 9.99 SOL. No nomination: voters get 70% + 10% = 7.992 SOL, split by balance 1:9. Ops 20%.
   assert.strictEqual(e.pool, '9990000000'); assert.strictEqual(e.voterPool, '7992000000'); assert.strictEqual(e.opsLamports, '1998000000');
-  assert.strictEqual(e.shares[g.a], '1998000000'); assert.strictEqual(e.shares[g.b], '5994000000'); assert.strictEqual(e.shares[g.OPS], '1998000000'); assert.ok(!e.shares[g.c]);
+  assert.strictEqual(e.shares[g.a], '799200000'); assert.strictEqual(e.shares[g.b], '7192800000'); assert.strictEqual(e.shares[g.OPS], '1998000000'); assert.ok(!e.shares[g.c]);
   assert.strictEqual(BigInt(e.shares[g.a]) + BigInt(e.shares[g.b]) + BigInt(e.shares[g.OPS]) + BigInt(e.dust), 9990000000n);
   const e2 = await g.p.plan({ ...g.round, id: 8 }); assert.strictEqual(e2.status, 'skipped');   // nothing is allocated twice
   const capped = payoutRig({ over: { dailyCapLamports: 100_000_000 } }); assert.strictEqual((await capped.p.plan(capped.round)).pool, '100000000');
@@ -79,6 +79,16 @@ test('payouts: 70% voters + 10% nominator roll-over + 20% operations, cap, accru
   const house = payoutRig(); assert.strictEqual((await house.p.plan({ ...house.round, house: true })).status, 'skipped');
   assert.strictEqual(payoutRig({ over: { opsAddress: '' } }).p.active(), false);   // stays off without an ops wallet
   assert.strictEqual(payoutRig({ over: { shareBps: 9000 } }).p.active(), false);   // shares above 100% are refused
+});
+
+test('payouts: 10% of the pool per round, the rest carries over; split by balance, so splitting wallets gains nothing', async () => {
+  const g = payoutRig({ over: { roundBps: 1000 } });
+  const e = await g.p.plan(g.round); assert.strictEqual(e.pool, '999000000');                       // 10% of 9.99 SOL
+  g.store.data.votes[8] = g.store.data.votes[7]; const e2 = await g.p.plan({ ...g.round, id: 8 }); assert.strictEqual(e2.pool, '899100000');        // 10% of what is left
+  const s = payoutRig({ over: { roundBps: 10000 } }); const v = s.store.data.votes[7];
+  const parts = Array.from({ length: 9 }, () => W()); delete v[s.b]; for (const w of parts) v[w] = { candidate: 'p:owl', weightInt: '1000', rawAtClose: '1000000' };   // b's 9M split over 9 wallets
+  const es = await s.p.plan(s.round); const sum = parts.reduce((x, w) => x + BigInt(es.shares[w] || 0), 0n);
+  assert.ok(sum <= 7192800000n && sum > 7192799990n, 'same payout as one wallet, up to rounding: ' + sum);
 });
 
 test('payouts: winning nominator gets 10%, voters keep 70%', async () => {
@@ -121,9 +131,10 @@ test('snapshot is deterministic and independent of insertion order', () => {
 function burnRig(over = {}, priceUsd = 0.0001) {
   let tx = null; let px = priceUsd;
   const cfg = { ...require('../lib/config'), mint: MINT, rpc: 'http://127.0.0.1:1', decimals: 6, presetsFile: __dirname + '/../data/presets.json', roundEpoch: Date.parse('2026-10-01T00:00:00Z'), roundMinutes: 30,
-    nominate: { enabled: true, usd: 5, min: 10000, max: 500000, maxPerRound: 1 }, replyBurn: { enabled: true, usd: 1.5, min: 3000, max: 150000, perWalletPerDay: 1 }, payout: { ...require('../lib/config').payout }, ...over };
+    nominate: { enabled: true, usd: 5, min: 10000, max: 2000000, maxPerRound: 1 }, replyBurn: { enabled: true, usd: 1.5, min: 3000, max: 600000, perWalletPerDay: 1 }, payout: { ...require('../lib/config').payout }, ...over };
   const store = { data: { rounds: {}, votes: {}, candidates: {}, lab: [], labUse: {}, posts: [], links: {}, mentions: { sinceId: null, seen: [] }, xDay: {}, feats: {} }, save() {}, flush() {} };
-  const a = createApp(cfg, { store, chain: null, steer: async () => ({ steered: 'The river is calm tonight and I am listening to the water as it moves past the stones.', normal: 'n', share: 's' }), featureInfo: async (l, i) => (i === 666 ? 'black people' : 'birds of prey'), getTx: async () => tx, price: { get: async () => (px ? { usd: px, source: 'test' } : null) }, now: () => Date.parse('2026-10-20T00:05:00Z') });
+  const posts = { '1849000000000000001': { author: 'someone', mentions: ['neurocracyfun'], text: 'hey @neurocracyfun what do you think' }, '1849000000000000002': { author: 'someone', mentions: ['neurocracyfun'], text: '@neurocracyfun again' }, '1849000000000000009': { author: 'a', mentions: ['neurocracyfun'], text: '@neurocracyfun' }, '1849000000000000003': { author: 'stranger', mentions: [], text: 'unrelated' }, '1849000000000000004': { author: 'mehandle', mentions: [], text: 'my own post' } };
+  const a = createApp(cfg, { store, chain: null, lookupPost: async (id) => (posts[id] ? { id, ...posts[id] } : { missing: true }), steer: async () => ({ steered: 'The river is calm tonight and I am listening to the water as it moves past the stones.', normal: 'n', share: 's' }), featureInfo: async (l, i) => (i === 666 ? 'black people' : 'birds of prey'), getTx: async () => tx, price: { get: async () => (px ? { usd: px, source: 'test' } : null) }, now: () => Date.parse('2026-10-20T00:05:00Z') });
   return { ...a, D: store.data, setTx: (t) => (tx = t), setPrice: (p) => (px = p) };
 }
 async function call(app, method, path, body) {
@@ -157,12 +168,17 @@ test('nomination by burn: USD quote, verified burn joins the next ballot with ro
 test('burn for reply: USD quote, verified burn queues a reply, per-wallet limit, dry run only previews', async () => {
   const g = burnRig(); const w = W(); const url = 'https://x.com/someone/status/1849000000000000001';
   assert.strictEqual((await call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://evil.example/x'))).status, 400);
-  const q = await call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(url));
+  const qx = (u, wl = w) => call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(u) + '&wallet=' + wl);
+  const no = await qx('https://x.com/stranger/status/1849000000000000003'); assert.strictEqual(no.status, 400); assert.match(no.body.error, /mention/);   // unsolicited: refused before any burn
+  assert.strictEqual((await qx('https://x.com/mehandle/status/1849000000000000004')).status, 400);
+  g.D.links.mehandle = w; assert.strictEqual((await qx('https://x.com/mehandle/status/1849000000000000004')).status, 200);   // own linked handle: allowed
+  assert.strictEqual((await qx('https://x.com/someone/status/1849000000000000001', W())).status, 200);                          // mentions the account: allowed for anyone
+  const q = await qx(url);
   assert.strictEqual(q.body.burn, 15000);                                          // $1.5 at $0.0001
   g.setTx(burnTx({ wallet: w, amount: 15000e6, memo: replyMemo('1849000000000000001') }));
   const r = await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url, signature: SIG(21), quote: q.body.quote });
   assert.strictEqual(r.status, 200, JSON.stringify(r.body));
-  const url2 = url.replace('01', '02'); const q3 = await call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(url2));
+  const url2 = url.replace('01', '02'); const q3 = await qx(url2);
   assert.strictEqual((await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url: url2, signature: SIG(22), quote: q3.body.quote })).status, 429);
   g.D.rounds[1] = { id: 1, winner: { id: 'p:owl', name: 'The Owl' }, mix: [], house: true };
   await g.xbot.paidReplies(g.D.rounds[1]);
@@ -195,7 +211,7 @@ test('quotes: signed, bound to purpose and ref, expire after ttl plus grace', ()
 
 test('quotes: a burn that landed after the quote expired is refused', async () => {
   const g = burnRig(); const w = W(); const url = 'https://x.com/a/status/1849000000000000009';
-  const q = await call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(url));
+  const q = await call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(url) + '&wallet=' + w);
   g.setTx(burnTx({ wallet: w, amount: 15000e6, memo: replyMemo('1849000000000000009'), blockTime: Math.floor((q.body.expiresAt + 60000) / 1000) }));
   const r = await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url, signature: SIG(30), quote: q.body.quote });
   assert.strictEqual(r.status, 410, JSON.stringify(r.body));

@@ -62,6 +62,9 @@ test('signed votes, sqrt weight, recheck at close, runner-up mix, top topic', as
   res = await call(s.app, 'POST', '/api/vote', { wallet: a.addr, round: r, candidate: 'p:cat', topic: '', signature: b.sign(voteMsg(r, 'p:cat', '', a.addr)) }); assert.strictEqual(res.status, 400);
   res = await call(s.app, 'POST', '/api/vote', { wallet: a.addr, round: r + 1, candidate: 'p:cat', topic: '', signature: a.sign(voteMsg(r + 1, 'p:cat', '', a.addr)) }); assert.strictEqual(res.status, 400);
   const z = kp(); res = await call(s.app, 'POST', '/api/vote', { wallet: z.addr, round: r, candidate: 'p:cat', topic: '', signature: z.sign(voteMsg(r, 'p:cat', '', z.addr)) }); assert.strictEqual(res.status, 400);
+  const open = await call(s.app, 'GET', '/api/round');   // open round: participation only, no per-option weights
+  assert.strictEqual(open.body.voters, 3); assert.ok(open.body.candidates.every((x) => x.weight === undefined)); assert.deepStrictEqual(open.body.topics, []);
+  const hid = await call(s.app, 'GET', '/api/votes/' + r); assert.strictEqual(hid.body.hidden, true); assert.ok(!JSON.stringify(hid.body).includes('p:owl'));
   balances[c.addr] = 0; // the degen whale sold before close
   s.advance(30 * 60e3); const closed = await s.rounds.close(r);
   assert.strictEqual(closed.winner.id, 'p:owl'); assert.strictEqual(closed.tally['p:degen'], undefined);

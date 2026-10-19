@@ -1,15 +1,19 @@
 //! Neurocracy tally verifier.
 //!
-//! One instruction: `record_tally`. It checks a Groth16 proof (circuit zk/tally.circom) that a round's
+//! Two instructions, same proof layout:
+//!   tag 1 `verify_tally` (default): checks the proof and logs the result. No account, no rent. The transaction
+//!     itself (its instruction data carries the proof and public inputs) is the permanent public evidence.
+//!   tag 0 `record_tally` (optional): also stores the result in a PDA, at about 0.0017 SOL rent per round.
+//! `record_tally`: It checks a Groth16 proof (circuit zk/tally.circom) that a round's
 //! winner and per-candidate totals follow from the votes committed in a Poseidon Merkle root, then
 //! stores the result in a PDA at seeds ["tally", authority, round_le]. The authority (the signer that
 //! pays) is part of the seeds, so nobody can occupy another publisher's record; readers look up the
 //! records of the site's published authority. A record is written once and never changed.
 //!
-//! Instruction data (385 bytes): tag u8 = 0 | proof_a 64 | proof_b 128 | proof_c 64 |
+//! Instruction data (385 bytes): tag u8 (0 or 1) | proof_a 64 | proof_b 128 | proof_c 64 |
 //!   public inputs 4 x 32 (round, root, winner, totals_commit; big-endian field elements).
 //!   proof_a must be negated (standard for groth16-solana).
-//! Accounts: [signer, writable] authority, [writable] record PDA, [] system program.
+//! Accounts for tag 0: [signer, writable] authority, [writable] record PDA, [] system program. Tag 1: [signer] authority.
 //! Record data (117 bytes): version u8 | round u64 | root 32 | winner u32 | totals_commit 32 |
 //!   slot u64 | authority 32 (the authority is also in the seeds).
 use groth16_solana::groth16::Groth16Verifier;
@@ -30,7 +34,7 @@ fn be_u64(x: &[u8; 32]) -> Result<u64, ProgramError> {
 }
 
 pub fn process_instruction(program_id: &Pubkey, accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    if data.len() != 1 + 64 + 128 + 64 + 128 || data[0] != 0 { return Err(ProgramError::InvalidInstructionData); }
+    if data.len() != 1 + 64 + 128 + 64 + 128 || data[0] > 1 { return Err(ProgramError::InvalidInstructionData); }
     let proof_a: [u8; 64] = data[1..65].try_into().unwrap();
     let proof_b: [u8; 128] = data[65..193].try_into().unwrap();
     let proof_c: [u8; 64] = data[193..257].try_into().unwrap();
@@ -38,8 +42,16 @@ pub fn process_instruction(program_id: &Pubkey, accounts: &[AccountInfo], data: 
     for i in 0..vk::NR_INPUTS { inputs[i] = data[257 + 32 * i..289 + 32 * i].try_into().unwrap(); }
 
     let it = &mut accounts.iter();
-    let authority = next_account_info(it)?; let record = next_account_info(it)?; let system = next_account_info(it)?;
+    let authority = next_account_info(it)?;
     if !authority.is_signer { return Err(ProgramError::MissingRequiredSignature); }
+    if data[0] == 1 {
+        let round = be_u64(&inputs[0])?; let winner = be_u64(&inputs[2])?;
+        let mut v = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &inputs, &vk::VERIFYING_KEY).map_err(|_| ProgramError::InvalidInstructionData)?;
+        v.verify().map_err(|_| { msg!("proof rejected"); ProgramError::InvalidArgument })?;
+        msg!("tally verified: round {} winner {} authority {}", round, winner, authority.key);
+        return Ok(());
+    }
+    let record = next_account_info(it)?; let system = next_account_info(it)?;
     if *system.key != system_program::ID { return Err(ProgramError::IncorrectProgramId); }
 
     let round = be_u64(&inputs[0])?;

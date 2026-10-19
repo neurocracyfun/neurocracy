@@ -22,8 +22,13 @@ const zk = require('../lib/zk');
   if (rec.onchain && !process.env.NC_ZK_RPC) console.log('note: recorded on chain; set NC_ZK_RPC to check the record too');
   if (rec.onchain && process.env.NC_ZK_RPC && programId && authority) {
     const { createZkChain } = require('../lib/zkchain'); const c = createZkChain({ rpc: process.env.NC_ZK_RPC, programId });
+    if (rec.onchain.mode !== 'record' && rec.onchain.sig) {
+      const t = await c.checkTx(rec.onchain.sig);
+      say(!!t && t.signer === authority && t.round === round && t.root === b.root && String(t.winner) === String(b.winnerIndex) && t.totalsCommit === b.totalsCommit, 'on-chain verification transaction succeeded with the same public inputs (slot ' + (t && t.slot) + ')');
+    } else {
     const r = await c.read(round, authority);
     say(!!r && r.root === b.root && String(r.winner) === String(b.winnerIndex) && r.totalsCommit === b.totalsCommit, 'on-chain record matches (program verified the same proof)');
+    }
   }
   console.log(fail ? `${fail} check(s) failed` : 'all checks passed'); process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('error: ' + e.message); process.exit(1); });

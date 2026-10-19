@@ -21,7 +21,7 @@ async function run(r) {
     rows += line(ok, `Groth16 proof ${ok ? 'valid' : 'invalid'} in your browser (${Math.round(performance.now() - t0)} ms)`);
     rows += line(null, `Vote tree root ${esc(p.publicSignals[1].slice(0, 24))}..., totals commitment ${esc(p.publicSignals[3].slice(0, 24))}...`);
     try { const s = await api(`/api/rounds/${r}/verify`); rows += line(s.ok, 'Server rebuilt the tree from the snapshot: ' + esc(s.reason)); } catch (e) { rows += line(null, 'Server recheck unavailable: ' + esc(e.message)); }
-    if (p.onchain) rows += line(true, `Recorded on Solana, account <a href="https://solscan.io/account/${esc(p.onchain.record)}" rel="noopener">${esc(p.onchain.record.slice(0, 12))}</a>, transaction <a href="https://solscan.io/tx/${esc(p.onchain.sig)}" rel="noopener">${esc(p.onchain.sig.slice(0, 12))}</a>`);
+    if (p.onchain && p.onchain.sig) rows += line(true, `Checked by the verifier program on Solana (in testing), transaction <a href="https://solscan.io/tx/${esc(p.onchain.sig)}" rel="noopener">${esc(p.onchain.sig.slice(0, 12))}</a>${p.onchain.record ? `, record <a href="https://solscan.io/account/${esc(p.onchain.record)}" rel="noopener">${esc(p.onchain.record.slice(0, 12))}</a>` : ''}`);
     if (p.totals) rows += line(null, 'Weighted totals: ' + snap.candidates.map((c, i) => `${esc(c)} ${esc(p.totals[i])}`).join(', '));
     out.innerHTML = `<div class="panel">${rows}</div>`;
   } catch (e) { out.innerHTML = `<div class="panel">${rows}${line(false, esc(e.message))}</div>`; }

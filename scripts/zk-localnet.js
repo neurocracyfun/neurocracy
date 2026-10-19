@@ -23,7 +23,13 @@ const say = (...a) => console.log('[zk-local]', ...a); const ok = (c, m) => { if
   const round = 777 + Math.floor(Math.random() * 1e6);
   const snap = snapshot({ cfg: { mint: 'M', decimals: 6, voteMin: 1 }, round, bounds: { startsAt: 1, endsAt: 2 }, candidates: cands, votes, winner, house: false });
   const p = await zk.prove(snap.json); ok(p.status === 'proven', `proof generated in ${p.ms} ms`);
-  const chain = createZkChain({ rpc: RPC, programId, authorityKey: JSON.stringify([...admin.secretKey]) });
+  const vchain = createZkChain({ rpc: RPC, programId, authorityKey: JSON.stringify([...admin.secretKey]), mode: 'verify' });
+  const bad0 = [...p.publicSignals]; bad0[2] = String((Number(bad0[2]) + 1) % 12);
+  let rej0 = false; try { await vchain.submit(round, p.proof, bad0); } catch { rej0 = true; } ok(rej0, 'verify mode: tampered winner rejected');
+  const v = await vchain.submit(round, p.proof, p.publicSignals); const vt = await conn.getTransaction(v.sig, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
+  const chk = await vchain.checkTx(v.sig);
+  ok(chk && chk.root === p.root && chk.winner === p.winnerIndex && chk.round === round, `verify mode: proof accepted, ${vt.meta.computeUnitsConsumed} CU, fee ${vt.meta.fee} lamports, no account created, inputs readable from the transaction`);
+  const chain = createZkChain({ rpc: RPC, programId, authorityKey: JSON.stringify([...admin.secretKey]), mode: 'record' });
   // tampered: claim a different winner with the same proof
   const bad = [...p.publicSignals]; bad[2] = String((Number(bad[2]) + 1) % 12);
   let rejected = false; try { await chain.submit(round, p.proof, bad); } catch (e) { rejected = /custom program error|invalid argument|0x/i.test(String(e.message)) || true; }

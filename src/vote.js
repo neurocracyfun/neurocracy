@@ -1,14 +1,15 @@
 import { $, esc, api, clock, fmt, wallet, startBrain, fireFor, reveals } from './common.js';
+const usd = (v) => '$' + Number(v).toFixed(Number(v) % 1 ? 2 : 0);   // value at the price used, also when the amount is clamped
 startBrain(); reveals();
 let R = null; let pick = null; let cfg = null;
 const st = (el, m, cls = '') => { el.textContent = m; el.className = 'status ' + cls; };
 async function load() {
   R = await api('/api/round');
   $('#r-id').textContent = R.round; $('#r-voters').textContent = `${R.voters} voter${R.voters === 1 ? '' : 's'}`; $('#r-live').textContent = R.live ? R.live.winner.name : 'none';
-  $('#votes-link').href = '/api/votes/' + R.round; $('#votes-link').textContent = '/api/votes/' + R.round;
-  const max = Math.max(1, ...R.candidates.map((c) => c.weight));
-  $('#cands').innerHTML = R.candidates.map((c) => `<button class="panel cand${pick === c.id ? ' on' : ''}" data-id="${esc(c.id)}"><h3>${esc(c.name)}</h3><small>${esc(c.note || '')}</small><div class="mono" style="color:var(--dim);margin-top:10px;font-size:11px">${c.features.map((f) => esc(f.layer) + ' #' + esc(f.index) + ' +' + esc(f.strength)).join('<br>')}</div><div class="w"><i style="width:${(c.weight / max) * 100}%"></i></div><small class="mono">weight ${c.weight}</small></button>`).join('');
-  $('#topics').innerHTML = R.topics.length ? R.topics.map((t) => `<span class="badge">${esc(t.topic)} ${t.weight}</span>`).join('') : '<span class="badge">none yet</span>';
+  const prev = R.round - 1; $('#votes-link').href = '/api/votes/' + prev; $('#votes-link').textContent = '/api/votes/' + prev;
+  $('#cands').innerHTML = R.candidates.map((c) => `<button class="panel cand${pick === c.id ? ' on' : ''}" data-id="${esc(c.id)}"><h3>${esc(c.name)}</h3><small>${esc(c.note || '')}</small><div class="mono" style="color:var(--dim);margin-top:10px;font-size:11px">${c.features.map((f) => esc(f.layer) + ' #' + esc(f.index) + ' +' + esc(f.strength)).join('<br>')}</div></button>`).join('');
+  $('#topics').innerHTML = `<span class="badge">${R.topicsSuggested ? R.topicsSuggested + ' suggested, revealed at close' : 'none yet'}</span>`;
+  $('#r-hidden').textContent = R.voters ? `${R.voters} voter${R.voters === 1 ? '' : 's'} so far, ${fmt(R.weightCast)} total weight cast. Who is ahead stays hidden until the round closes.` : 'No votes yet. Tallies stay hidden until the round closes.';
 }
 $('#cands').onclick = (e) => { const b = e.target.closest('.cand'); if (!b) return; pick = b.dataset.id; document.querySelectorAll('.cand').forEach((x) => x.classList.toggle('on', x === b)); fireFor(pick, 1.5); $('#cast').disabled = !wallet.address; };
 const showWallet = () => { if (cfg && cfg.preview) return; if (wallet.address) { $('#connect').textContent = wallet.short(wallet.address); $('#cast').disabled = !pick; } };
@@ -68,7 +69,6 @@ async function extras() {
     $('#pay-last').innerHTML = L.status === 'skipped' ? `Round ${L.round}: no payout (${esc(L.reason || '')}).` : `Round ${L.round}: ${sol(L.pool)} SOL to ${L.voters} winning voter${L.voters === 1 ? '' : 's'}${L.nominator ? ', nominator ' + esc(short(L.nominator.wallet)) : ''}${L.dry ? ', dry run, nothing was sent' : ''}.`;
   } else if (P.enabled) $('#pay-last').textContent = `Fee share is on${P.dryRun ? ' in dry run' : ''}. No round has paid yet.`;
   const B = c.burns || {};
-  const usd = (v) => '$' + Number(v).toFixed(Number(v) % 1 ? 2 : 0);   // value at the price used, also when the amount is clamped
   const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about ${usd(B.price ? x.burn * B.price.usd : x.usd)})` : `about ${usd(x.usd)} of NCRACY (paused, no reliable price right now)`);
   if (B.nominate && B.nominate.enabled) { $('#nom-panel').hidden = false; $('#nom-burn').textContent = amt(B.nominate); }
   if (B.reply && B.reply.enabled) { $('#rep-panel').hidden = false; $('#rep-burn').textContent = amt(B.reply); if (!B.reply.priced) $('#rep-go').dataset.paused = '1'; }
@@ -104,7 +104,7 @@ $('#rep-go').onclick = async () => {
   try {
     const m = url.match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/\w{1,15}\/status\/(\d{5,25})/); if (!m) throw new Error('Paste a link to a post on x.com.');
     const c = cfg || (await api('/api/config'));
-    const q = await api('/api/reply-burn/quote?url=' + encodeURIComponent(url));
+    const q = await api('/api/reply-burn/quote?url=' + encodeURIComponent(url) + '&wallet=' + encodeURIComponent(wallet.address || ''));
     if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about ${usd(q.burn * q.priceUsd)}) for a reply to that post? This price is held for 5 minutes. No refunds.`)) return;
     st(s, 'Waiting for your wallet...');
     const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });

@@ -23,8 +23,8 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 ## Tokenomics
 
 - Supply 1,000,000,000 NCRACY. Fair launch on pump.fun, no presale.
-- Creator fees fund a distributor wallet. When the fee share is switched on, each round splits it 70% to wallets that voted for the winning mind (by vote weight), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to operations. Small amounts accrue until they reach a minimum.
-- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X. Burns are final.
+- Creator fees fund a distributor wallet. When the fee share is switched on, each voted round pays out 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to operations. Small amounts accrue until they reach a minimum.
+- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X that mentions @neurocracyfun or was written by your linked handle. Burns are final.
 - Fees depend on trading and can be zero. Nothing here is income or a promise of return.
 
 All of it is off by default. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).
@@ -32,19 +32,19 @@ All of it is off by default. Details, env vars and safety rules: [docs/fees-and-
 ## Trust model
 
 - Steering is off chain on Neuronpedia's public API, which has its own rate limits (240 steers per hour). The server keeps a global budget (`NP_PER_HOUR`, default 150) across the X account and the Lab, and caches presets and repeated Lab mixes.
-- Votes are signed messages counted by the server. All signed votes are public at `/api/votes/:round`, and each closed round's count is proven in zero knowledge (see below).
+- Votes are signed messages counted by the server. Tallies stay hidden while a round is open (only participation is shown). At close, all signed votes are public at `/api/votes/:round`, and every voted round is proven in zero knowledge (in testing, see below).
 - Balances are read server side with `getTokenAccountsByOwner` filtered by mint (works for pump.fun Token-2022 mints).
 - The X account is fully automatic once live. It is off by default: `DRY_RUN=1` and `X_POSTING_ENABLED=0` only queue previews.
 
 ## Zero-knowledge tally verification
 
-Every closed round publishes a canonical vote snapshot (`/api/rounds/:r/snapshot`). The server then builds a Poseidon Merkle tree of the votes and produces a Groth16 proof (circuit `zk/tally.circom`, BN254) that the published winner and per-candidate weighted totals follow from exactly those leaves, with each weight equal to `floor(sqrt(balance at close))`. The Hall marks proven rounds Verified.
+In testing until the mainnet launch. Every closed round publishes a canonical vote snapshot (`/api/rounds/:r/snapshot`). The server then builds a Poseidon Merkle tree of the votes and produces a Groth16 proof (circuit `zk/tally.circom`, BN254) that the published winner and per-candidate weighted totals follow from exactly those leaves, with each weight equal to `floor(sqrt(balance at close))`. The Hall marks proven rounds Verified.
 
 - Check a round in the browser: https://neurocracy.fun/verify
 - Check it without trusting the site: `node scripts/zk-verify.js ROUND`. It rebuilds the tree from the snapshot and verifies the proof against `zk/vkey.json` in this repository.
-- Optional on-chain record: `program/` is a Solana program (groth16-solana) that verifies the proof and stores the root, winner and totals commitment in an account per round. It is tested on a local validator and not deployed to mainnet yet.
+- Optional on-chain check: `program/` is a Solana program (groth16-solana) that verifies each proof in a transaction. By default it stores nothing (no rent): the transaction carries the proof and its public inputs. A record-per-round mode exists (`ZK_ONCHAIN_MODE=record`, about 0.0017 SOL rent per round). It is tested on a local validator and not deployed to mainnet yet.
 
-The proof covers the count, not the inputs: it does not prove that signatures are valid or that balances were read correctly. Both are checkable by anyone from the public snapshot. Details, limits (128 votes, 32 candidates per proven round) and the anonymous voting roadmap are in [docs/zk.md](docs/zk.md).
+The proof covers the count, not the inputs: it does not prove that signatures are valid or that balances were read correctly. Both are checkable by anyone from the public snapshot. The proving key is the [zk-v1 release asset](https://github.com/neurocracyfun/neurocracy/releases/tag/zk-v1); `npm run build` fetches and checksums it when `ZK_PROVE=1`. Details, limits (128 votes, 32 candidates per proven round) and the anonymous voting roadmap are in [docs/zk.md](docs/zk.md).
 
 ## Run
 
@@ -61,7 +61,7 @@ Full lifecycle simulation on a local validator (mint, rounds, burns, X dry run, 
 
 Screenshots: `npm run shots`. Scroll video: `python3 scripts/record.py out.mp4` (Playwright).
 
-Config is all env, see `.env.example`. Use a persistent disk for `DB`.
+Config is all env, see `.env.example`. Use a persistent disk for `DB`. Render settings: [docs/render-env.md](docs/render-env.md).
 
 ## Credits
 
