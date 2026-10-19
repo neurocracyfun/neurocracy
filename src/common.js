@@ -22,9 +22,10 @@ export const fireFor = (id, k = 1) => brain && brain.light(regionFor(id), k);
 
 // ---- reveal on scroll ----
 export function reveals() {
+  fetch('/api/round').then((r) => r.json()).then((r) => { const el = document.getElementById('mh-round'); if (el) el.textContent = String(r.round); }).catch(() => {});
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
-  const p = document.body.className; document.querySelectorAll('.nav nav a').forEach((a) => { if (a.dataset.p && p.includes(a.dataset.p)) a.classList.add('on'); });
+  const p = document.body.className; document.querySelectorAll('.mh-index a').forEach((a) => { if (a.dataset.p && p.includes(a.dataset.p)) a.classList.add('on'); });
 }
 
 // ---- wallet (Phantom, Solflare, Backpack): connect + signMessage only, never a transaction ----

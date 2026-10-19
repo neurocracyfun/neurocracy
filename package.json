@@ -33,8 +33,9 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "@fontsource-variable/inter-tight": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/dm-sans": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "esbuild": "^0.28.2",
     "puppeteer-core": "^24.43.1"
   },

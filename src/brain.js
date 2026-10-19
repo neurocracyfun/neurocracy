@@ -59,7 +59,7 @@ export function mountBrain({ canvas, handle }) {
   const linePos = new Float32Array(edges.length * 3);
   edges.forEach((n, k) => { linePos[k * 3] = pos[n * 3]; linePos[k * 3 + 1] = pos[n * 3 + 1]; linePos[k * 3 + 2] = pos[n * 3 + 2]; });
   const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
-  tilt.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0xe8e6e1, transparent: true, opacity: lowEnd ? 0.085 : 0.06, depthWrite: false })));
+  tilt.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0x1a1a17, transparent: true, opacity: lowEnd ? 0.16 : 0.12, depthWrite: false })));
 
   // ---- neurons ----
   const fire = new Float32Array(N); const hue = new Float32Array(N);
@@ -77,21 +77,21 @@ export function mountBrain({ canvas, handle }) {
         gl_PointSize = (1.5 + seed*1.3 + fire*4.0) * uPx * (3.2 / -mv.z); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `varying float vF; varying float vH; varying float vA; uniform float uDim;
       void main(){ vec2 c = gl_PointCoord - 0.5; float d = length(c); if (d > 0.5) discard; float core = 1.0 - smoothstep(0.42, 0.5, d);
-        vec3 base = vec3(0.91,0.90,0.88); vec3 hot = vec3(0.608,1.0,0.353);
-        float f = clamp(vF,0.0,1.0); vec3 col = mix(base, hot, step(0.25, f)); float a = core * mix(0.22 + 0.28*vA, 1.0, f) * uDim; gl_FragColor = vec4(col, a); }`,
+        vec3 base = vec3(0.10,0.10,0.09); vec3 hot = vec3(0.26,0.62,0.13);
+        float f = clamp(vF,0.0,1.0); vec3 col = mix(base, hot, step(0.25, f)); float a = core * mix(0.42 + 0.3*vA, 1.0, f) * uDim; gl_FragColor = vec4(col, a); }`,
   });
   tilt.add(new THREE.Points(g, dotMat));
 
   // ---- pulses travelling along synapses ----
   const P = lowEnd ? 40 : 90; const pp = new Float32Array(P * 3); const pulses = [];
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp, 3).setUsage(THREE.DynamicDrawUsage));
-  const pulseMat = new THREE.PointsMaterial({ color: 0x9bff5a, size: lowEnd ? 0.045 : 0.035, transparent: true, opacity: 1, depthWrite: false });
+  const pulseMat = new THREE.PointsMaterial({ color: 0x3f9a1e, size: lowEnd ? 0.045 : 0.035, transparent: true, opacity: 1, depthWrite: false });
   tilt.add(new THREE.Points(pg, pulseMat));
   const spawn = (from, hops, h = 0) => { if (!adj[from].length) return; const to = adj[from][(Math.random() * adj[from].length) | 0]; pulses.push({ a: from, b: to, t: 0, hops, h, sp: 2.2 + Math.random() * 2 }); };
   const ignite = (i, amt = 1, h = 0) => { fire[i] = Math.min(1.4, fire[i] + amt); hue[i] = h; };
 
   // ---- drifting dust ----
-  const DUST = lowEnd ? 160 : 420; const dp = new Float32Array(DUST * 3);
+  const DUST = 0; const dp = new Float32Array(DUST * 3);
   for (let i = 0; i < DUST; i++) { dp[i * 3] = (Math.random() - 0.5) * 12; dp[i * 3 + 1] = (Math.random() - 0.5) * 8; dp[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1; }
   const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dp, 3).setUsage(THREE.DynamicDrawUsage));
   scene.add(new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xe8e6e1, size: 0.014, transparent: true, opacity: 0.28, depthWrite: false })));

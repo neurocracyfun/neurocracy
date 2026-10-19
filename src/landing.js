@@ -80,7 +80,7 @@ function brainFrame() {
   if (y < sS - vh * 0.3) T = n ? { x: 0, y: 0.62, s: 0.82, dim: 1 } : { x: 0.75, y: -0.05, s: 1.12, dim: 1 };
   else if (y < gS - vh * 0.3) T = n ? { x: 0, y: 0.15, s: 0.95, dim: 0.42 } : { x: -0.25, y: 0, s: 1.5, dim: 0.5 };
   else if (y < nS - vh * 0.2) T = n ? { x: 0, y: 1.1, s: 0.7, dim: 0.3 } : { x: 0, y: 1.05, s: 0.85, dim: 0.32 };
-  else T = n ? { x: 0.6, y: 0, s: 0.75, dim: 0.28 } : { x: 1.5, y: -0.1, s: 0.9, dim: 0.4 };
+  else T = n ? { x: 0.6, y: 0, s: 0.75, dim: 0.18 } : { x: 1.7, y: -0.1, s: 0.85, dim: 0.22 };
   b.target = { ...T, spin: y / vh * 0.55 };
 }
 const para = [...document.querySelectorAll('[data-speed]')];
@@ -114,14 +114,14 @@ async function loadPosts() {
 
 const ORDER = ['owl', 'cat', 'pirate', 'degen', 'chef', 'ghost', 'space', 'lord', 'bard', 'ocean', 'dino', 'romantic'];
 const PREF = ['Who are you?', 'Describe your perfect weekend.', 'What is the meaning of life?', 'Tell me a fun fact.'];
-const flat = (s) => s.replace(/\s+/g, ' ').trim();
+const flat = (s) => s.replace(/\s+/g, ' ').replace(/\s+\./g, '.').replace(/\.(\s*\.)+/g, '.').trim();
 const cut = (s, n) => (s.length <= n ? s : s.slice(0, n).replace(/\s\S*$/, '') + '...');
 async function loadPresets() {
   const r = await api('/api/presets');
   const ps = r.presets.map((p) => ({ ...p, samples: p.samples.filter((s) => s.good) })).filter((p) => p.samples.length).sort((a, c) => ORDER.indexOf(a.id) - ORDER.indexOf(c.id));
   const owl = ps.find((p) => p.id === 'owl'); const s0 = owl && owl.samples.find((s) => s.prompt === 'Who are you?');
   if (s0) { story = { normal: cut(flat(s0.normal), 200), steered: cut(flat(s0.steered), 200) }; $('#sp-share').href = s0.share; lastStr = -1; }
-  const OWN = { lord: 'Describe your perfect weekend.', bard: 'What should I eat for dinner tonight?', chef: 'Who are you?', degen: 'Who are you?', cat: 'Describe your perfect weekend.', ghost: 'Describe your perfect weekend.' };
+  const OWN = { lord: 'Describe your perfect weekend.', bard: 'What should I eat for dinner tonight?', chef: 'Who are you?', degen: 'Who are you?', ocean: 'What is the meaning of life?', cat: 'Describe your perfect weekend.', ghost: 'Describe your perfect weekend.' };
   const pick = (p) => { for (const q of [OWN[p.id], ...PREF].filter(Boolean)) { const s = p.samples.find((x) => x.prompt === q); if (s) return s; } return p.samples[0]; };
   $('#track').innerHTML = ps.map((p, i) => { const s = pick(p); const f = p.features[0]; return `<article class="gcard" data-id="${esc(p.id)}"><div class="no"><span>${String(i + 1).padStart(2, '0')}</span><span>L${esc(f.layer.split('-')[0])} / ${esc(f.index)} +${esc(f.strength)}</span></div><h3>${esc(p.name)}</h3><div class="ft">${esc(f.label)}</div><blockquote><small>${esc(s.prompt)}</small>${esc(cut(flat(s.steered), 220))}</blockquote></article>`; }).join('')
     + '<article class="gcard end"><h3>Your pick.</h3><p class="gal-sub">16,384 features per layer. Find one in the Lab, or put it up for the next round.</p><p class="hx-links mono"><a href="/lab">Open the Lab</a></p></article>';
