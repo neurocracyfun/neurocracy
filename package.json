@@ -25,6 +25,7 @@
   "author": "Neurocracy",
   "license": "MIT",
   "dependencies": {
+    "@solana/web3.js": "^1.99.0",
     "bs58": "^6.0.0",
     "compression": "^1.8.2",
     "express": "^5.3.0",
@@ -36,6 +37,7 @@
     "@fontsource-variable/dm-sans": "^5.3.0",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@solana/spl-token": "^0.4.15",
     "esbuild": "^0.28.2",
     "puppeteer-core": "^24.43.1"
   },

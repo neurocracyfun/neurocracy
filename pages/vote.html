@@ -36,5 +36,29 @@ body: app vote
       <button class="btn ghost" id="link" style="margin-top:14px">Sign and link</button><div class="status" id="lstatus"></div>
     </div>
   </div>
+  <section class="extras" id="extras">
+    <div class="grid2" style="margin-top:60px">
+      <div class="panel" style="padding:24px" id="pay-panel">
+        <h3>Fee share</h3>
+        <p class="sub" style="font-size:15px" id="pay-about">When it is switched on, creator fees that reach the distributor wallet are split each round: 70% to wallets that voted for the winning mind, by vote weight, 10% to whoever nominated the winning feature (or to the voters if nobody did), and 20% to operations. Small amounts wait until they reach a minimum. The wallet is funded by hand and can be empty. Fees depend on trading and can be zero. This is not income and nothing is promised.</p>
+        <div class="mono" id="pay-last" style="color:var(--dim)">Fee share is off.</div>
+        <label class="f" for="pay-w" style="margin-top:16px">History for a wallet</label><input type="text" id="pay-w" placeholder="wallet address">
+        <div id="pay-hist" class="mono" style="margin-top:10px;font-size:12px"></div>
+      </div>
+      <div class="panel" style="padding:24px" id="nom-panel" hidden>
+        <h3>Nominate by burn</h3>
+        <p class="sub" style="font-size:15px">Burn <b id="nom-burn">about $5 of NCRACY</b> to put a Gemma Scope feature on the next ballot with room. If it wins, you get 10% of that round's fee pool when the fee share is on. The burn is permanent and does not guarantee a win.</p>
+        <label class="f" for="nq">Search features</label><input type="text" id="nq" placeholder="volcanoes, jazz, lighthouses">
+        <div class="results" id="nres" hidden></div><div class="status" id="nstatus"></div>
+      </div>
+    </div>
+    <div class="panel" style="padding:24px;margin-top:22px" id="rep-panel" hidden>
+      <h3>Burn for a reply</h3>
+      <p class="sub" style="font-size:15px">Burn <b id="rep-burn">about $1.5 of NCRACY</b> and the account replies to a post of your choice, in the current mind. What it writes is not edited by anyone and may be filtered out, in which case nothing is posted. No refunds.</p>
+      <label class="f" for="rep-url">Link to a post on X</label><input type="text" id="rep-url" placeholder="https://x.com/name/status/123">
+      <label style="display:flex;gap:8px;margin-top:12px;font-size:14px"><input type="checkbox" id="rep-ok"> I understand the burn is final and the reply may not be posted.</label>
+      <button class="btn" id="rep-go" style="margin-top:14px" disabled>Burn and request</button><div class="status" id="rstatus"></div>
+    </div>
+  </section>
   <p class="note">Every signed vote is public at <a id="votes-link" href="#">/api/votes</a> so anyone can recount.</p>
 </div></main>

@@ -20,6 +20,15 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 - Vote every round (weight `sqrt(balance)`).
 - With `NC_HOLDER_MIN` tokens: `NC_LAB_PER_DAY` custom Lab steers per day, feature submissions, X reply priority.
 
+## Tokenomics
+
+- Launches on pump.fun.
+- Creator fees fund a distributor wallet. When the fee share is switched on, each round splits it 70% to wallets that voted for the winning mind (by vote weight), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to operations. Small amounts accrue until they reach a minimum.
+- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.5 for an in-character AI reply to a post on X. Burns are final.
+- Fees depend on trading and can be zero. Nothing here is income or a promise of return.
+
+All of it is off by default. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).
+
 ## Trust model
 
 - Steering is off chain on Neuronpedia's public API, which has its own rate limits (240 steers per hour). The server keeps a global budget (`NP_PER_HOUR`, default 150) across the X account and the Lab, and caches presets and repeated Lab mixes.

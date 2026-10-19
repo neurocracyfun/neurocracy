@@ -12,6 +12,10 @@ const { createXBot } = require('./lib/xbot');
 const np = require('./lib/np');
 const sol = require('./lib/solana');
 const { check } = require('./lib/filter');
+const { createPayouts, solanaChain } = require('./lib/payouts');
+const { createBurnFeatures } = require('./lib/burnfeatures');
+const { createPrice } = require('./lib/price');
+const { createQuotes } = require('./lib/quotes');
 
 const RPC_METHODS = new Set(['getBalance', 'getTokenAccountsByOwner', 'getAccountInfo', 'getLatestBlockhash', 'getSignatureStatuses', 'getTokenSupply', 'getTokenLargestAccounts']);
 
@@ -33,6 +37,10 @@ function createApp(cfg = baseCfg, over = {}) {
   const steer = over.steer || np.steer;
   const rounds = createRounds({ cfg, store, presets, now });
   const xbot = createXBot({ cfg, store, steer, budget, rounds, presets, now, fetchImpl: over.fetchImpl || fetch });
+  const payouts = createPayouts({ cfg, store, now, chain: 'chain' in over ? over.chain : solanaChain(cfg), log: console.log });
+  const price = over.price || createPrice({ cfg, now });
+  const quotes = createQuotes({ secret: cfg.quotes.secret, ttlMs: cfg.quotes.ttlMs, now });
+  const burns = createBurnFeatures({ cfg, store, rounds, featureInfo, getTx: over.getTx, price, quotes, now });
   const searchHits = [];
   const today = () => new Date(now()).toISOString().slice(0, 10);
 
@@ -52,11 +60,11 @@ function createApp(cfg = baseCfg, over = {}) {
   app.use(express.json({ limit: '16kb' }));
   const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => res.status(e.status || 500).json({ error: e.status ? e.message : 'server error' }));
 
-  app.get('/api/config', (req, res) => res.json({
+  app.get('/api/config', wrap(async (req, res) => res.json({
     cluster: cfg.cluster, tokenName: cfg.tokenName, ticker: cfg.ticker, mint: cfg.mint || null, treasury: cfg.treasury || null,
-    holderMin: cfg.holderMin, voteMin: cfg.voteMin, labPerDay: cfg.labPerDay, roundMinutes: cfg.roundMinutes, model: np.MODEL,
-    x: xbot.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, preview: !cfg.mint, budget: budget.status(),
-  }));
+    decimals: cfg.decimals, holderMin: cfg.holderMin, voteMin: cfg.voteMin, labPerDay: cfg.labPerDay, roundMinutes: cfg.roundMinutes, model: np.MODEL,
+    x: xbot.status(), payout: payouts.status(), burns: await burns.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, preview: !cfg.mint, budget: budget.status(),
+  })));
   app.get('/api/presets', (req, res) => res.json({ model: presets.model, generatedAt: presets.generatedAt, prompts: presets.prompts, presets: presets.list() }));
   app.get('/api/round', (req, res) => res.json(rounds.publicRound()));
   // preview mode: no token mint configured yet. Votes and holder actions are closed; the Lab gets a few free live steers per visitor.
@@ -128,9 +136,19 @@ function createApp(cfg = baseCfg, over = {}) {
   const publicPost = (p) => ({ id: p.id, kind: p.kind, round: p.round, persona: p.persona, mix: p.mix, topic: p.topic, topicSource: p.topicSource, to: p.to, holder: p.holder, mention: p.mention, text: p.text, share: p.share, status: p.status, tweetId: p.tweetId || null, at: p.at, rejected: (p.rejected || []).map((r) => r.why) });
   app.get('/api/posts', (req, res) => res.json({ x: xbot.status(), posts: D.posts.filter((p) => p.text).slice(0, Math.min(50, Number(req.query.limit) || 12)).map(publicPost) }));
   app.get('/api/hall', (req, res) => {
-    const list = Object.values(D.rounds).sort((a, b) => b.id - a.id).slice(0, 96).map((r) => ({ ...r, posts: D.posts.filter((p) => p.round === r.id).map(publicPost) }));
+    const list = Object.values(D.rounds).sort((a, b) => b.id - a.id).slice(0, 96).map((r) => ({ ...r, payout: payouts.forRound(r.id), posts: D.posts.filter((p) => p.round === r.id).map(publicPost) }));
     res.json({ rounds: list });
   });
+  // fee share ledger, burn actions, round snapshots
+  app.get('/api/payouts', (req, res) => res.json(payouts.status()));
+  app.get('/api/payouts/round/:r', (req, res) => res.json(payouts.forRound(Number(req.params.r))));
+  app.get('/api/payouts/wallet/:w', (req, res) => (sol.isAddress(req.params.w) ? res.json(payouts.wallet(req.params.w)) : res.status(400).json({ error: 'bad wallet' })));
+  app.get('/api/nominate/quote', bucket(20), wrap(async (req, res) => res.json(await burns.quoteNomination(String(req.query.layer || ''), Number(req.query.index)))));
+  app.post('/api/nominate', bucket(10), wrap(async (req, res) => res.json(await burns.nominate(req.body || {}))));
+  app.get('/api/reply-burn/quote', bucket(20), wrap(async (req, res) => res.json(await burns.quoteReply(String(req.query.url || '')))));
+  app.post('/api/reply-burn', bucket(10), wrap(async (req, res) => res.json(await burns.replyRequest(req.body || {}))));
+  app.get('/api/reply-burn/queue', (req, res) => res.json((D.replyQueue || []).slice(0, 30).map(({ id, tweetId, author, status, at, doneAt }) => ({ id, tweetId, author, status, at, doneAt }))));
+  app.get('/api/rounds/:r/snapshot', (req, res) => { const j = (D.snapshots || {})[Number(req.params.r)]; if (!j) return res.status(404).json({ error: 'no snapshot' }); res.type('json').send(j); });
   app.get('/api/votes/:round', (req, res) => res.json(Object.entries(D.votes[Number(req.params.round)] || {}).map(([wallet, v]) => ({ wallet, ...v }))));
 
   app.post('/api/rpc', bucket(60), wrap(async (req, res) => {
@@ -153,10 +171,10 @@ function createApp(cfg = baseCfg, over = {}) {
   let ticking = false;
   async function tickOnce() {
     if (ticking) return; ticking = true;
-    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) await rounds.close(r - 1); await xbot.tick(); }
+    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); } await payouts.tick(); await xbot.tick(); }
     catch (e) { console.log('[tick]', e.message); } finally { ticking = false; }
   }
-  return { app, store, rounds, xbot, budget, tickOnce, presets };
+  return { app, store, rounds, xbot, budget, tickOnce, presets, payouts, burns };
 }
 
 if (require.main === module) {

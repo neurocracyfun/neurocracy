@@ -55,3 +55,61 @@ api('/api/config').then((c) => {
   }
 }).catch(() => {});
 showWallet(); load().catch(() => {}); setInterval(() => load().catch(() => {}), 20000);
+
+// ---- fee share, nomination by burn, burn for reply ----
+import { burnWithMemo, submitWithRetry } from './burn.js';
+const sol = (l) => (Number(BigInt(l || 0)) / 1e9).toLocaleString('en-US', { maximumFractionDigits: 6 });
+const short = (a) => (a ? a.slice(0, 4) + '...' + a.slice(-4) : '');
+async function extras() {
+  const c = await api('/api/config');
+  const P = c.payout || {};
+  if (P.enabled && P.last) {
+    const L = P.last;
+    $('#pay-last').innerHTML = L.status === 'skipped' ? `Round ${L.round}: no payout (${esc(L.reason || '')}).` : `Round ${L.round}: ${sol(L.pool)} SOL to ${L.voters} winning voter${L.voters === 1 ? '' : 's'}${L.nominator ? ', nominator ' + esc(short(L.nominator.wallet)) : ''}${L.dry ? ', dry run, nothing was sent' : ''}.`;
+  } else if (P.enabled) $('#pay-last').textContent = `Fee share is on${P.dryRun ? ' in dry run' : ''}. No round has paid yet.`;
+  const B = c.burns || {};
+  const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about $${x.usd})` : `about $${x.usd} of NCRACY (paused, no reliable price right now)`);
+  if (B.nominate && B.nominate.enabled) { $('#nom-panel').hidden = false; $('#nom-burn').textContent = amt(B.nominate); }
+  if (B.reply && B.reply.enabled) { $('#rep-panel').hidden = false; $('#rep-burn').textContent = amt(B.reply); if (!B.reply.priced) $('#rep-go').dataset.paused = '1'; }
+  return c;
+}
+let ptmr; $('#pay-w').oninput = () => { clearTimeout(ptmr); ptmr = setTimeout(async () => {
+  const w = $('#pay-w').value.trim(); if (w.length < 32) { $('#pay-hist').textContent = ''; return; }
+  try { const h = await api('/api/payouts/wallet/' + encodeURIComponent(w));
+    $('#pay-hist').innerHTML = `Owed, not yet sent: ${sol(h.owed)} SOL<br>` + (h.history.length ? h.history.slice(0, 20).map((x) => `Round ${x.round}, ${esc(x.kind)}, ${sol(x.lamports)} SOL${x.sig ? ` <a href="https://solscan.io/tx/${esc(x.sig)}" rel="noopener">tx</a>` : ''}`).join('<br>') : 'No history.');
+  } catch (e) { $('#pay-hist').textContent = e.message; } }, 400); };
+
+let ntmr; $('#nq').oninput = () => { clearTimeout(ntmr); ntmr = setTimeout(async () => {
+  const q = $('#nq').value.trim(); const box = $('#nres'); if (q.length < 2) { box.hidden = true; return; }
+  try { const r = await api('/api/features/search?q=' + encodeURIComponent(q)); box.hidden = !r.results.length;
+    box.innerHTML = r.results.map((f) => `<button data-l="${esc(f.layer)}" data-i="${f.index}">${esc(f.label)}<br><small>${esc(f.layer)} #${f.index}</small></button>`).join('');
+  } catch (e) { st($('#nstatus'), e.message, 'err'); } }, 450); };
+$('#nres').onclick = async (e) => {
+  const b = e.target.closest('button'); if (!b) return; const s = $('#nstatus');
+  try {
+    const q = await api(`/api/nominate/quote?layer=${encodeURIComponent(b.dataset.l)}&index=${b.dataset.i}`);
+    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about $${q.usd}) to nominate "${q.label}" for round ${q.round}? This price is held for 5 minutes. The burn is permanent.`)) return;
+    const c = cfg || (await api('/api/config'));
+    st(s, 'Waiting for your wallet...');
+    const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
+    st(s, 'Burn sent, waiting for confirmation...');
+    const r = await submitWithRetry(() => api('/api/nominate', { wallet: wallet.address, layer: q.layer, index: q.index, signature, quote: q.quote }));
+    st(s, `Nominated for round ${r.round}.`, 'ok');
+  } catch (e2) { st(s, e2.message, 'err'); }
+};
+$('#rep-ok').onchange = () => { $('#rep-go').disabled = !$('#rep-ok').checked || $('#rep-go').dataset.paused === '1'; };
+$('#rep-go').onclick = async () => {
+  const s = $('#rstatus'); const url = $('#rep-url').value.trim();
+  try {
+    const m = url.match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/\w{1,15}\/status\/(\d{5,25})/); if (!m) throw new Error('Paste a link to a post on x.com.');
+    const c = cfg || (await api('/api/config'));
+    const q = await api('/api/reply-burn/quote?url=' + encodeURIComponent(url));
+    if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about $${q.usd}) for a reply to that post? This price is held for 5 minutes. No refunds.`)) return;
+    st(s, 'Waiting for your wallet...');
+    const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
+    st(s, 'Burn sent, waiting for confirmation...');
+    await submitWithRetry(() => api('/api/reply-burn', { wallet: wallet.address, url, signature, quote: q.quote }));
+    st(s, 'Queued. The reply appears in the Hall, and on X when the account is live.', 'ok');
+  } catch (e) { st(s, e.message, 'err'); }
+};
+extras().catch(() => {});
