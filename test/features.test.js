@@ -172,7 +172,7 @@ test('burn for reply: USD quote, verified burn queues a reply, per-wallet limit,
   const qx = (u, wl = w) => call(g.app, 'GET', '/api/reply-burn/quote?url=' + encodeURIComponent(u) + '&wallet=' + wl);
   const no = await qx('https://x.com/stranger/status/1849000000000000003'); assert.strictEqual(no.status, 400); assert.match(no.body.error, /mention/);   // unsolicited: refused before any burn
   assert.strictEqual((await qx('https://x.com/mehandle/status/1849000000000000004')).status, 400);
-  g.D.links.mehandle = w; assert.strictEqual((await qx('https://x.com/mehandle/status/1849000000000000004')).status, 200);   // own linked handle: allowed
+  g.D.links.mehandle = w; const own = await qx('https://x.com/mehandle/status/1849000000000000004'); assert.strictEqual(own.status, 400); assert.match(own.body.error, /mention/);   // linked handle no longer enough: must mention
   assert.strictEqual((await qx('https://x.com/someone/status/1849000000000000001', W())).status, 200);                          // mentions the account: allowed for anyone
   const q = await qx(url);
   assert.strictEqual(q.body.burn, 15000);                                          // $1.5 at $0.0001

@@ -37,7 +37,7 @@ Price sources, in order: the pump.fun bonding curve reserves (before graduation)
 The server returns an HMAC-signed quote (purpose, target, token amount, expiry). The quote holds for `NC_QUOTE_TTL_SEC` (5 minutes). A burn is accepted when it is confirmed, signed by the wallet, burns at least the quoted amount of the mint from that wallet, carries the matching memo, landed before the quote expired, and has not been used before.
 
 - **Nominate:** `Neurocracy nominate <layer>/<index>`. The feature is checked on Neuronpedia and against the content filter before the quote is issued, so a rejected feature never costs tokens. It joins the next ballot with room (`NC_NOMINATE_MAX` per ballot). It is never dropped for a full ballot.
-- **Reply:** `Neurocracy reply <post id>`. Posts from @neurocracyfun get a reply for free, so they cannot be bought. Only for a post that mentions @neurocracyfun, or a post written by the X handle you linked to the burning wallet. The server checks the post on X before quoting, so an ineligible post never costs a burn. The X account replies to that post in the current mind, with the same filter, dry run, kill switch and daily cap as everything else. The limit is `NC_REPLY_PER_WALLET_DAY`. If no draft passes the filter, nothing is posted. Burns are final, with no refunds.
+- **Reply:** `Neurocracy reply <post id>`. Posts from @neurocracyfun get a reply for free, so they cannot be bought. Only for a post that mentions @neurocracymind or @neurocracyfun, so the account only replies to people who asked for it. The server checks the post on X before quoting, so an ineligible post never costs a burn. The X account replies to that post in the current mind, with the same filter, dry run, kill switch and daily cap as everything else. The limit is `NC_REPLY_PER_WALLET_DAY`. If no draft passes the filter, nothing is posted. Burns are final, with no refunds.
 
 ## How to use burns safely
 
@@ -51,20 +51,19 @@ The server returns an HMAC-signed quote (purpose, target, token amount, expiry).
 ### Burn for a reply, step by step
 
 1. Connect your wallet on this page. Use the same wallet for every step below.
-2. If the post is your own and does not mention @neurocracymind or @neurocracyfun, link your X handle first: type your handle in Link your X handle, press Sign and link, and sign the message in your wallet. This is a free signed message, not a transaction. The link is saved for that wallet. Skip this step if the post mentions @neurocracymind or @neurocracyfun.
-3. Copy the link of the post on X, for example https://x.com/yourhandle/status/123, and paste it into Link to a post on X.
-4. Tick the box to confirm you understand the burn is final and the reply may not be posted, then press Burn and request.
-5. The site checks the post and shows a price in NCRACY with its dollar value. Read it. The price is held for 5 minutes.
-6. Approve the burn transaction in your wallet before the 5 minutes run out. If they run out, the site stops and asks you to press the button again for a new price.
-7. Wait on the page until it says Queued. The site waits for the burn to confirm on Solana, which can take up to a minute. Do not close the page before that.
-8. The reply is written on the next server tick, which runs every 15 seconds, by whichever mind is live at that moment. Paid replies are answered oldest first, up to 2 per tick. It is posted on X as a reply from @neurocracymind and listed in the Hall, usually within a minute or two.
-9. If the account has hit its daily cap of 60 posts (UTC day), or the model is busy, your request stays in the queue and is answered when there is room. The limit of 4 replies per round applies to free mention replies, not to paid replies.
+2. Make sure the post mentions @neurocracymind or @neurocracyfun. This is required, so the account only replies to people who asked for it. Copy the link of the post on X, for example https://x.com/yourhandle/status/123, and paste it into Link to a post on X.
+3. Tick the box to confirm you understand the burn is final and the reply may not be posted, then press Burn and request.
+4. The site checks the post and shows a price in NCRACY with its dollar value. Read it. The price is held for 5 minutes.
+5. Approve the burn transaction in your wallet before the 5 minutes run out. If they run out, the site stops and asks you to press the button again for a new price.
+6. Wait on the page until it says Queued. The site waits for the burn to confirm on Solana, which can take up to a minute. Do not close the page before that.
+7. The reply is written on the next server tick, which runs every 15 seconds, by whichever mind is live at that moment. Paid replies are answered oldest first, up to 2 per tick. It is posted on X as a reply from @neurocracymind and listed in the Hall, usually within a minute or two.
+8. If the account has hit its daily cap of 60 posts (UTC day), or the model is busy, your request stays in the queue and is answered when there is room. The limit of 4 replies per round applies to free mention replies, not to paid replies.
 
 ### Before you burn, check
 
 The site refuses these before you burn, so no tokens are spent:
 
-1. The post does not mention @neurocracymind or @neurocracyfun, and it was not written by the X handle linked to your wallet.
+1. The post does not mention @neurocracymind or @neurocracyfun.
 2. The post is from @neurocracyfun. Those posts get a free reply when they mention @neurocracymind, so they cannot be bought. Posts by the bot itself cannot be bought either.
 3. The post was deleted, or X will not show it, for example because the account is protected.
 4. Your wallet already requested 3 paid replies today (UTC day).
@@ -76,7 +75,7 @@ These can still cost tokens with no reply, so avoid them:
 
 1. The burn lands on chain after the 5 minute price expired. Approve quickly, and press the button again if you waited.
 2. The burn is signed by a different wallet than the one connected on the page.
-3. The post is deleted, or you change your linked handle, between the price and the burn.
+3. The post is deleted, or edited to drop the mention, between the price and the burn.
 4. The page is closed and the same transaction is never submitted again. If the site says the burn did not confirm in time, submit it again within the next minutes. A burn can be used only once.
 5. None of the 3 drafts passes the content filter. Then nothing is posted. Nobody edits the drafts by hand.
 6. X rejects the post when it is sent. The request is then marked failed.

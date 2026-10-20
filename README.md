@@ -40,7 +40,7 @@ The full step by step guides for Burn for a reply and Nominate by burn, with eve
 
 - Supply 1,000,000,000 NCRACY. Fair launch on pump.fun, no presale.
 - Creator fees fund a distributor wallet. When the fee share is switched on, each voted round pays out 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to the operations wallet `3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models. Small amounts accrue until they reach a minimum.
-- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X that mentions @neurocracyfun or was written by your linked handle. Burns are final.
+- Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X that mentions @neurocracymind or @neurocracyfun, so the account only replies to people who asked for it. Burns are final.
 - Fees depend on trading and can be zero. Nothing here is income or a promise of return.
 
 All of it is off by default. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).

@@ -57,7 +57,7 @@ body: app vote
     </div>
     <div class="panel" style="padding:24px;margin-top:22px" id="rep-panel" hidden>
       <h3>Burn for a reply</h3>
-      <p class="sub" style="font-size:15px">Burn <b id="rep-burn">about $1.50 of NCRACY</b> and the account replies, in the current mind, to a post that mentions @neurocracymind or @neurocracyfun, or to a post by the X handle you linked above. Posts from @neurocracyfun get a reply for free. What it writes is not edited by anyone and may be filtered out, in which case nothing is posted. No refunds.</p>
+      <p class="sub" style="font-size:15px">Burn <b id="rep-burn">about $1.50 of NCRACY</b> and the account replies, in the current mind, to a post that mentions @neurocracymind or @neurocracyfun. This is so the account only replies to people who asked for it. Posts from @neurocracyfun get a reply for free. What it writes is not edited by anyone and may be filtered out, in which case nothing is posted. No refunds.</p>
       <label class="f" for="rep-url">Link to a post on X</label><input type="text" id="rep-url" placeholder="https://x.com/yourhandle/status/123">
       <label style="display:flex;gap:8px;margin-top:12px;font-size:14px"><input type="checkbox" id="rep-ok"> I understand the burn is final and the reply may not be posted.</label>
       <button class="btn" id="rep-go" style="margin-top:14px" disabled>Burn and request</button><div class="status" id="rstatus"></div>
@@ -78,8 +78,7 @@ body: app vote
 <h3>Burn for a reply, step by step</h3>
 <ol>
   <li>Connect your wallet on this page. Use the same wallet for every step below.</li>
-  <li>If the post is your own and does not mention @neurocracymind or @neurocracyfun, link your X handle first: type your handle in Link your X handle, press Sign and link, and sign the message in your wallet. This is a free signed message, not a transaction. The link is saved for that wallet. Skip this step if the post mentions @neurocracymind or @neurocracyfun.</li>
-  <li>Copy the link of the post on X, for example https://x.com/yourhandle/status/123, and paste it into Link to a post on X.</li>
+  <li>Make sure the post mentions @neurocracymind or @neurocracyfun. This is required, so the account only replies to people who asked for it. Copy the link of the post on X, for example https://x.com/yourhandle/status/123, and paste it into Link to a post on X.</li>
   <li>Tick the box to confirm you understand the burn is final and the reply may not be posted, then press Burn and request.</li>
   <li>The site checks the post and shows a price in NCRACY with its dollar value. Read it. The price is held for 5 minutes.</li>
   <li>Approve the burn transaction in your wallet before the 5 minutes run out. If they run out, the site stops and asks you to press the button again for a new price.</li>
@@ -90,7 +89,7 @@ body: app vote
 <h3>Before you burn, check</h3>
 <p>The site refuses these before you burn, so no tokens are spent:</p>
 <ol>
-  <li>The post does not mention @neurocracymind or @neurocracyfun, and it was not written by the X handle linked to your wallet.</li>
+  <li>The post does not mention @neurocracymind or @neurocracyfun.</li>
   <li>The post is from @neurocracyfun. Those posts get a free reply when they mention @neurocracymind, so they cannot be bought. Posts by the bot itself cannot be bought either.</li>
   <li>The post was deleted, or X will not show it, for example because the account is protected.</li>
   <li>Your wallet already requested 3 paid replies today (UTC day).</li>
@@ -102,7 +101,7 @@ body: app vote
 <ol>
   <li>The burn lands on chain after the 5 minute price expired. Approve quickly, and press the button again if you waited.</li>
   <li>The burn is signed by a different wallet than the one connected on the page.</li>
-  <li>The post is deleted, or you change your linked handle, between the price and the burn.</li>
+  <li>The post is deleted, or edited to drop the mention, between the price and the burn.</li>
   <li>The page is closed and the same transaction is never submitted again. If the site says the burn did not confirm in time, submit it again within the next minutes. A burn can be used only once.</li>
   <li>None of the 3 drafts passes the content filter. Then nothing is posted. Nobody edits the drafts by hand.</li>
   <li>X rejects the post when it is sent. The request is then marked failed.</li>
