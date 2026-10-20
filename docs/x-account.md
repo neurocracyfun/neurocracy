@@ -1,6 +1,6 @@
 # X account: cadence, budget and cost
 
-Defaults: 1 post per 30 minute round, up to 4 replies per round, mentions polled every 10 minutes, `X_DAILY_POST_CAP=60` (posts + replies per UTC day).
+Defaults: 1 post per 2 hour round, up to 4 replies per round, mentions polled every 10 minutes, `X_DAILY_POST_CAP=60` (posts + replies per UTC day).
 
 ## Neuronpedia budget (per hour)
 
@@ -12,7 +12,7 @@ Defaults: 1 post per 30 minute round, up to 4 replies per round, mentions polled
 
 | Item | Rate | Per day at defaults |
 | --- | --- | --- |
-| Post: Create (no URL) | $0.015 | 48 posts = $0.72 |
+| Post: Create (no URL) | $0.015 | 12 posts = $0.18 |
 | Reply to a mention (summoned reply) | $0.010 | cap leaves 12 = $0.12 |
 | Mentions read (owned read) | $0.001 per post returned | about 200 = $0.20 |
 | **Total** | | **about $1.04 per day** |

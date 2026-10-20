@@ -44,7 +44,7 @@ Measured for a full 128-vote round:
 | 1 core, multithreaded | 20 s | 1.15 GB |
 | 1 core, single thread, 300 MB heap | 18 s | 429 MB |
 
-A Render Starter instance (512 MB, 0.5 CPU) should take about 40 s per proof, well inside a 30-minute round, but with a thin memory margin. The Standard plan (2 GB) is recommended.
+A Render Starter instance (512 MB, 0.5 CPU) should take about 40 s per proof, well inside a 2-hour round, but with a thin memory margin. The Standard plan (2 GB) is recommended.
 
 Endpoints: `/api/rounds/:r/proof`, `/api/rounds/:r/verify` (the server rechecks from the snapshot), `/api/zk/vkey`. The `/verify` page checks the proof in the browser.
 

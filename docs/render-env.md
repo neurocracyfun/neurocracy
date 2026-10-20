@@ -12,8 +12,8 @@ Values marked SECRET go in Render's secret env and are never logged. Everything 
 | `SITE_URL` | `https://neurocracy.fun` |
 | `GITHUB_URL` | `https://github.com/neurocracyfun` |
 | `X_HANDLE` | `neurocracyfun` |
-| `ROUND_MINUTES` | `30` |
-| `ROUND_EPOCH` | `2026-10-01T00:00:00Z` (or the launch time) |
+| `ROUND_MINUTES` | `120` |
+| `ROUND_EPOCH` | `2026-08-03T18:00:00Z` (2-hour rounds on even UTC hours, numbering continues from the 30-minute rounds) |
 | `NC_RPC` | SECRET (mainnet RPC URL with its key, not the ZKDLE key) |
 | `NC_TOKEN_MINT` | the pump.fun mint address, at launch |
 | `NC_TREASURY` | public treasury address, at launch |
@@ -83,7 +83,7 @@ After each round closes the bot account (a separate X account, not @neurocracyfu
 | `X_APP_KEY`, `X_APP_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | SECRET, the bot account's keys (same vars as posting) |
 | `NC_BOT_RENAME` | `1`, with `NC_AVATAR=1` the display name follows the avatar (name only, never the bio); `0` keeps it fixed |
 | `NC_AVATAR_MIN_MINUTES` | `30`, minimum time between avatar changes |
-| `NC_AVATAR_DAILY_MAX` | `24`, avatar changes per UTC day |
+| `NC_AVATAR_DAILY_MAX` | `12`, avatar changes per UTC day |
 | `NC_AVATAR_GEN_IN_DRY` | `0`, set `1` to let dry run call the image API (still never X) |
 | `NC_AVATAR_DIR` | defaults to `avatars/` next to `DB`, so `/var/data/avatars` |
 | `NC_IMAGE_PROVIDER` | `openai` or `xai` (empty: only seeded hybrids are used) |

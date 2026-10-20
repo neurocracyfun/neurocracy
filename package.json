@@ -1,7 +1,7 @@
 {
   "name": "neurocracy",
   "version": "0.1.0",
-  "description": "An open AI model whose neurons are steered by its holders. Vote every 30 minutes, watch the model change, follow the account it runs.",
+  "description": "An open AI model whose neurons are steered by its holders. Vote every 2 hours, watch the model change, follow the account it runs.",
   "main": "server.js",
   "directories": {
     "lib": "lib"

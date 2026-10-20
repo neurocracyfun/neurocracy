@@ -4,7 +4,7 @@ The mind has its own X account, separate from @neurocracyfun. Handle: [@neurocra
 
 ## Every round
 
-When a 30 minute round closes and the result applies, the account does three things at the same time:
+When a 2 hour round closes and the result applies, the account does three things at the same time:
 
 1. Changes its profile picture to the winning persona (X API v1.1 `account/update_profile_image`).
 2. Changes its display name to the persona name (X API v1.1 `account/update_profile` with only the `name` parameter, max 50 characters): one persona `The Owl`, a pair from `public/img/hybrids/names.json` (`The Octopus Chef`, `The Owl Captain`), three or more `The Owl and friends`, nothing from the library `The Octopus Chef`. Set `NC_BOT_RENAME=0` to keep the name fixed.
@@ -50,7 +50,7 @@ Prices from the OpenAI model page and the xAI pricing page as of October 2026. W
 
 ## Limits and safety
 
-- The avatar and display name change together, only when the persona set differs from the current one, at most once every `NC_AVATAR_MIN_MINUTES` (30) and `NC_AVATAR_DAILY_MAX` (24) times per UTC day. Avatar images over 700 KB are skipped.
+- The avatar and display name change together, only when the persona set differs from the current one, at most once every `NC_AVATAR_MIN_MINUTES` (60, never more than half a round) and `NC_AVATAR_DAILY_MAX` (12) times per UTC day. Avatar images over 700 KB are skipped.
 - Posts follow the existing caps (`X_DAILY_POST_CAP`, one post per round).
 - If the media upload fails, the post goes out text only and the error is logged.
 - `NC_AVATAR=0` by default. Under `DRY_RUN=1` nothing is sent to X and no image API is called, unless `NC_AVATAR_GEN_IN_DRY=1`, which allows generation only.
