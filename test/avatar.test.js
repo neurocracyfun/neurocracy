@@ -179,3 +179,19 @@ test('a round nobody voted on says it was picked at random', () => {
   const t = roundText(['ocean'], presets, 'The tide is high today.', 'random');
   assert.ok(t.startsWith("This round's vote: nobody voted, so I was picked at random. So right now I am The Sea."));
 });
+
+test('random no-vote rounds 30 min apart always update, and a rejected image still renames', async () => {
+  const { av, calls, tick } = setup({ env: { NC_AVATAR_MIN_MINUTES: '30' } });
+  const r1 = await av.onRoundClosed({ ...round(1, 'chef'), tally: {}, house: true, random: true });
+  assert.ok(r1.ok); tick(29.9);
+  const r2 = await av.onRoundClosed({ ...round(2, 'owl'), tally: {}, house: true, random: true });
+  assert.ok(r2.ok, 'interval must not block the next round'); assert.strictEqual(r2.name, 'The Owl');
+  // X rejects the image ('error' field, not 'errors'): name still follows, error text is logged
+  const { av: av2, calls: c2 } = setup(); const logs = [];
+  const bad = createAvatar({ cfg: { db: '/tmp/x.json', x: { appKey: 'a', appSecret: 'b', accessToken: 'c', accessSecret: 'd' } }, store: { data: {}, save() {} }, presets, now: () => 1e12,
+    fetchImpl: async (url) => url.includes('profile_image') ? { ok: false, status: 400, json: async () => ({ error: 'Denied by user validation.' }) } : (c2.x.push(url), { ok: true, status: 200, json: async () => ({}) }),
+    env: { NC_AVATAR: '1' }, log: (m) => logs.push(m) });
+  const r3 = await bad.onRoundClosed({ ...round(3, 'owl'), tally: {} });
+  assert.ok(r3.error, JSON.stringify(r3)); assert.match(r3.error, /Denied by user validation/); assert.strictEqual(r3.name, 'The Owl');
+  assert.ok(c2.x.some((u) => u.includes('update_profile.json'))); void av2; void calls;
+});
