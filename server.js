@@ -13,6 +13,7 @@ const np = require('./lib/np');
 const sol = require('./lib/solana');
 const { check } = require('./lib/filter');
 const { createPayouts, solanaChain } = require('./lib/payouts');
+const { createFeeSweep, pumpAdapter } = require('./lib/feesweep');
 const { createBurnFeatures } = require('./lib/burnfeatures');
 const { createPrice } = require('./lib/price');
 const { createQuotes } = require('./lib/quotes');
@@ -42,6 +43,7 @@ function createApp(cfg = baseCfg, over = {}) {
   const avatar = createAvatar({ cfg, store, presets, now, fetchImpl: over.avatarFetch || fetch, env: over.env || process.env, log: over.log || console.log });
   const xbot = createXBot({ cfg, store, steer, budget, rounds, presets, avatar, now, fetchImpl: over.fetchImpl || fetch });
   const payouts = createPayouts({ cfg, store, now, chain: 'chain' in over ? over.chain : solanaChain(cfg), log: console.log });
+  const feesweep = createFeeSweep({ cfg, store, now, adapter: 'feeAdapter' in over ? over.feeAdapter : (cfg.feesweep && cfg.feesweep.enabled ? pumpAdapter(cfg) : null), log: over.log || console.log });
   const price = over.price || createPrice({ cfg, now });
   const quotes = createQuotes({ secret: cfg.quotes.secret, ttlMs: cfg.quotes.ttlMs, now });
   const burns = createBurnFeatures({ cfg, store, rounds, featureInfo, getTx: over.getTx, price, quotes, lookupPost: over.lookupPost || xbot.lookupPost, now });
@@ -160,6 +162,7 @@ function createApp(cfg = baseCfg, over = {}) {
     res.json({ rounds: list });
   });
   // fee share ledger, burn actions, round snapshots
+  app.get('/api/feesweeps', (req, res) => res.json(feesweep.status()));
   app.get('/api/payouts', (req, res) => res.json(payouts.status()));
   app.get('/api/payouts/round/:r', (req, res) => res.json(payouts.forRound(Number(req.params.r))));
   app.get('/api/payouts/wallet/:w', (req, res) => (sol.isAddress(req.params.w) ? res.json(payouts.wallet(req.params.w)) : res.status(400).json({ error: 'bad wallet' })));
@@ -209,10 +212,10 @@ function createApp(cfg = baseCfg, over = {}) {
     try { const r = rounds.current();
       // rounds missed while the server was down (deploy, crash): close any that got votes, oldest first, so no vote is lost
       for (let i = Math.max(1, r - 7); i < r - 1; i++) if (!D.rounds[i] && D.votes[i] && Object.keys(D.votes[i]).length) { const c = await rounds.close(i); await payouts.onRoundClosed(c); }
-      if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); try { await avatar.onRoundClosed(closed); } catch (e) { console.log('[avatar]', e.message); } } await payouts.tick(); await xbot.tick(); prover.tick(); }
+      if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); try { await avatar.onRoundClosed(closed); } catch (e) { console.log('[avatar]', e.message); } } await feesweep.tick(); await payouts.tick(); await xbot.tick(); prover.tick(); }
     catch (e) { console.log('[tick]', e.message); } finally { ticking = false; }
   }
-  return { app, store, rounds, xbot, avatar, budget, tickOnce, presets, payouts, burns, prover };
+  return { app, store, rounds, xbot, avatar, budget, tickOnce, presets, payouts, feesweep, burns, prover };
 }
 
 if (require.main === module) {

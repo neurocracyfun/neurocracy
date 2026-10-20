@@ -26,6 +26,7 @@
   "author": "Neurocracy",
   "license": "MIT",
   "dependencies": {
+    "@pump-fun/pump-sdk": "4.2.0",
     "@solana/web3.js": "^1.99.0",
     "bs58": "^6.0.0",
     "circomlibjs": "^0.1.7",

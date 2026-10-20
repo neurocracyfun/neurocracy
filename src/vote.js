@@ -68,6 +68,10 @@ async function extras() {
     const L = P.last;
     $('#pay-last').innerHTML = L.status === 'skipped' ? `Round ${L.round}: no payout (${esc(L.reason || '')}).` : `Round ${L.round}: ${sol(L.pool)} SOL to ${L.voters} winning voter${L.voters === 1 ? '' : 's'}${L.nominator ? ', nominator ' + esc(short(L.nominator.wallet)) : ''}${L.dry ? ', dry run, nothing was sent' : ''}.`;
   } else if (P.enabled) $('#pay-last').textContent = `Fee share is on${P.dryRun ? ' in dry run' : ''}. No round has paid yet.`;
+  try { const F = await api('/api/feesweeps');
+    if (F.sweeps && F.sweeps.length) $('#pay-sweeps').innerHTML = `Swept so far: ${sol(F.totalLamports)} SOL<br>` + F.sweeps.slice(0, 10).map((x) => `${new Date(x.at).toISOString().slice(0, 16).replace('T', ' ')} UTC, ${sol(x.lamports)} SOL <a href="https://solscan.io/tx/${esc(x.sig)}" rel="noopener">tx</a>`).join('<br>');
+    else if (F.enabled) $('#pay-sweeps').textContent = `Sweeps run every ${F.everyMinutes} minutes. No sweep yet.`;
+  } catch {}
   const B = c.burns || {};
   const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about ${usd(B.price ? x.burn * B.price.usd : x.usd)})` : `about ${usd(x.usd)} of NCRACY (paused, no reliable price right now)`);
   if (B.nominate && B.nominate.enabled) { $('#nom-panel').hidden = false; $('#nom-burn').textContent = amt(B.nominate); }

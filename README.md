@@ -2,6 +2,8 @@
 
 An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY holders vote which sparse autoencoder features inside Gemma 2 9B IT get boosted. The winning mix becomes the model's personality for the next round, and the model runs its own X account in that character.
 
+**100% of pump.fun creator fees are locked on chain to the distributor wallet [`EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1`](https://solscan.io/account/EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1).** The server sweeps them in automatically every 10 minutes and each voted round pays out automatically. Fees depend on trading and can be zero; this is not income.
+
 ![Landing](docs/landing-hero.png)
 
 | Same question, two brains | Pick a mind | Vote | Lab |
@@ -39,11 +41,11 @@ The full step by step guides for Burn for a reply and Nominate by burn, with eve
 ## Tokenomics
 
 - Supply 1,000,000,000 NCRACY. Fair launch on pump.fun, no presale.
-- Creator fees fund a distributor wallet. When the fee share is switched on, each voted round pays out 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to the operations wallet `3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models. Small amounts accrue until they reach a minimum.
+- 100% of pump.fun creator fees are locked on chain to the distributor wallet [`EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1`](https://solscan.io/account/EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1) by the pump.fun fee sharing config (only shareholder, admin revoked). The server sweeps them in automatically every 10 minutes, and each voted round pays out automatically 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to the operations wallet `3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models. Small amounts accrue until they reach a minimum. Every sweep and payout is public at `/api/feesweeps` and `/api/payouts`.
 - Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X that mentions @neurocracymind or @neurocracyfun, so the account only replies to people who asked for it. Burns are final.
 - Fees depend on trading and can be zero. Nothing here is income or a promise of return.
 
-All of it is off by default. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).
+Payouts and sweeps switch on at launch, once the fee sharing config is checked on chain. Burns stay off until launch. Details, env vars and safety rules: [docs/fees-and-burns.md](docs/fees-and-burns.md).
 
 ## Trust model
 

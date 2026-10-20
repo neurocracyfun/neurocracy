@@ -4,7 +4,21 @@ Everything here is off by default and does nothing until the token is live.
 
 ## Creator-fee share (70 / 10 / 20)
 
-Creator fees from pump.fun are moved by hand into a distributor wallet. When `NC_PAYOUT_ENABLED=1`, at the close of every round that had votes, the server takes what in that wallet is not yet allocated:
+**100% of pump.fun creator fees for $NCRACY are locked on chain to the distributor wallet [`EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1`](https://solscan.io/account/EoiYniMMajEdhryrwfsXroz48Yn81z14tB2hejj7Zuh1).** The coin's pump.fun fee sharing config (Pump Fees PDA `['sharing-config', mint]`) lists that wallet as its only shareholder at 10,000 bps, and its admin is revoked, so it can never be changed.
+
+### Automatic fee sweep (`lib/feesweep.js`)
+
+Every `NC_FEESWEEP_MIN` minutes (default 10), when `NC_FEESWEEP_ENABLED=1` and `NC_TOKEN_MINT` is set, the server:
+
+1. reads the sharing config on chain and does nothing (only logs) unless it is exactly one shareholder, the distributor, at 10,000 bps, with the admin revoked. A coin with no sharing config is logged and left alone (fees then stay with the creator).
+2. reads the distributable amount (bonding curve creator vault, plus the AMM vault once the coin has graduated).
+3. if it is at least `NC_FEESWEEP_MIN_LAMPORTS` (default 0.01 SOL), sends the permissionless pump.fun `distribute_creator_fees_v2` transaction (with `transfer_creator_fees_to_pump_v2` first for a graduated coin), built with the pinned `@pump-fun/pump-sdk` and paid by the distributor wallet.
+
+Each sweep (signature, lamports) is public at `/api/feesweeps` and on the Vote page. `PAYOUT_DRY_RUN=1` or a missing `NC_PAYOUT_KEY` turns it into checks and logs only. `scripts/check-feeshare.js <mint> <wallet>` runs the same on chain check read only.
+
+### Payouts
+
+The swept SOL lands in the distributor and counts as available at the next voted round. When `NC_PAYOUT_ENABLED=1`, `PAYOUT_DRY_RUN=0` and `NC_PAYOUT_KEY` are set, at the close of every round that had votes, the server takes what in that wallet is not yet allocated:
 
     available = balance - reserve - everything already owed
     pool      = 10% of available (NC_PAYOUT_ROUND_BPS=1000), at most the daily cap; the rest carries over
