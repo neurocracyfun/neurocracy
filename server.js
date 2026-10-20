@@ -101,11 +101,13 @@ function createApp(cfg = baseCfg, over = {}) {
   }));
 
   // Lab: presets are free and cached. Custom mixes are a holder perk (signed once per day).
+  // Upstream failures get a friendly message instead of the raw "neuronpedia 500".
+  const labErr = (e) => { if (/^neuronpedia /.test(e.message) || !e.status || e.name === 'TimeoutError') { const s = e.status === 429 ? 429 : 502; throw Object.assign(new Error(s === 429 ? 'The steering service is busy right now. Please wait a minute and try again.' : 'The steering service did not answer this time. Please try again in a moment, or try a lower strength.'), { status: s }); } throw e; };
   app.post('/api/lab', bucket(12), wrap(async (req, res) => {
     const b = req.body || {}; const prompt = String(b.prompt || '').replace(/\s+/g, ' ').trim().slice(0, 200);
     const feats = Array.isArray(b.features) ? b.features.slice(0, 3) : [];
     if (prompt.length < 3 || !feats.length) throw Object.assign(new Error('add a prompt and at least one feature'), { status: 400 });
-    const mix = feats.map((f) => ({ layer: String(f.layer), index: Number(f.index), strength: Math.max(-150, Math.min(150, Math.round(Number(f.strength) || 0))) }));
+    const mix = feats.map((f) => ({ layer: String(f.layer), index: Number(f.index), strength: Math.max(-np.MAX_STRENGTH, Math.min(np.MAX_STRENGTH, Math.round(Number(f.strength) || 0))) }));
     if (mix.some((f) => !/^(9|20|31)-gemmascope-res-16k$/.test(f.layer) || !Number.isInteger(f.index) || f.index < 0 || f.index >= 16384)) throw Object.assign(new Error('unsupported feature'), { status: 400 });
     for (const p of presets.list()) {
       const same = p.features.length === mix.length && p.features.every((f, i) => f.layer === mix[i].layer && Number(f.index) === mix[i].index && Number(f.strength) === mix[i].strength);
@@ -119,7 +121,7 @@ function createApp(cfg = baseCfg, over = {}) {
       const ipKey = 'ip:' + crypto.createHash('sha256').update(String(req.ip)).digest('hex').slice(0, 16);
       const used = ((D.labUse[today()] ||= {})[ipKey] || 0);
       if (used >= PREVIEW_LAB_PER_DAY) throw Object.assign(new Error(`preview limit of ${PREVIEW_LAB_PER_DAY} live steers per day reached`), { status: 429 });
-      const r = await budget.run('lab', () => steer(prompt, mix));
+      const r = await budget.run('lab', () => steer(prompt, np.normFeatures(mix))).catch(labErr);
       D.labUse[today()][ipKey] = used + 1;
       const c = check(r.steered.slice(0, 280)); const flagged = !c.ok && /slur|group-target/.test(c.why.join());
       const out = { normal: tidy(r.normal, prompt), steered: flagged ? '[hidden by the content filter]' : tidy(r.steered, prompt), share: r.share, source: 'live', preview: true, left: PREVIEW_LAB_PER_DAY - used - 1 };
@@ -133,7 +135,7 @@ function createApp(cfg = baseCfg, over = {}) {
     if (bal < cfg.holderMin) throw Object.assign(new Error(`custom steers need ${cfg.holderMin.toLocaleString('en-US')} ${cfg.ticker}`), { status: 403 });
     const use = ((D.labUse[today()] ||= {})[wallet] || 0);
     if (use >= cfg.labPerDay) throw Object.assign(new Error(`daily limit of ${cfg.labPerDay} custom steers reached`), { status: 429 });
-    const r = await budget.run('lab', () => steer(prompt, mix));
+    const r = await budget.run('lab', () => steer(prompt, np.normFeatures(mix))).catch(labErr);
     D.labUse[today()][wallet] = use + 1;
     const flagged = !check(r.steered.slice(0, 280)).ok && /slur|group-target/.test(check(r.steered.slice(0, 280)).why.join());
     const out = { normal: tidy(r.normal, prompt), steered: flagged ? '[hidden by the content filter]' : tidy(r.steered, prompt), share: r.share, source: 'live', left: cfg.labPerDay - use - 1 };

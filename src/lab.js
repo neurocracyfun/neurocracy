@@ -3,9 +3,10 @@ startBrain(); reveals();
 let slots = []; let presets = []; let cfg = null;
 const st = (m, c = '') => { $('#lstatus').textContent = m; $('#lstatus').className = 'status ' + c; };
 function render() {
-  $('#slots').innerHTML = slots.map((f, i) => `<div class="slot"><div class="top"><span>${esc(f.label || 'feature ' + f.index)} <small class="mono" style="color:var(--dim)">${esc(f.layer)} #${f.index}</small></span><button class="iconbtn" data-x="${i}">Remove</button></div><input type="range" min="-150" max="150" step="5" value="${f.strength}" data-r="${i}"><div class="mono" style="color:var(--cy)">strength ${f.strength}</div></div>`).join('')
+  $('#slots').innerHTML = slots.map((f, i) => `<div class="slot"><div class="top"><span>${esc(f.label || 'feature ' + f.index)} <small class="mono" style="color:var(--dim)">${esc(f.layer)} #${f.index}</small></span><button class="iconbtn" data-x="${i}">Remove</button></div><input type="range" min="-100" max="100" step="5" value="${f.strength}" data-r="${i}"><div class="mono" style="color:var(--cy)">strength ${f.strength}</div></div>`).join('')
     + (slots.length < 3 && searchOpen ? `<div class="slot"><input type="text" id="sq" placeholder="search features, for example owls"><div class="results" id="sres" hidden></div></div>` : '');
   $('#add').hidden = slots.length >= 3;
+  syncChips();
   if (searchOpen) { const q = $('#sq'); if (q) { q.focus(); q.oninput = onSearch; } }
 }
 let searchOpen = false;
@@ -13,13 +14,26 @@ $('#add').onclick = () => { searchOpen = true; render(); };
 $('#slots').oninput = (e) => { const i = e.target.dataset.r; if (i != null) { slots[i].strength = +e.target.value; e.target.nextElementSibling.textContent = 'strength ' + e.target.value; } };
 $('#slots').onclick = (e) => {
   const x = e.target.dataset.x; if (x != null) { slots.splice(+x, 1); render(); return; }
-  const b = e.target.closest('#sres button'); if (b) { slots.push({ layer: b.dataset.l, index: +b.dataset.i, label: b.dataset.t, strength: b.dataset.l.startsWith('9-') ? 60 : 40 }); searchOpen = false; render(); }
+  const b = e.target.closest('#sres button'); if (b) { if (slots.some((f) => f.layer === b.dataset.l && +f.index === +b.dataset.i)) { searchOpen = false; render(); return st('That feature is already in the mix.'); } slots.push({ layer: b.dataset.l, index: +b.dataset.i, label: b.dataset.t, strength: b.dataset.l.startsWith('9-') ? 60 : 40 }); searchOpen = false; render(); }
 };
 let tmr; function onSearch(e) { clearTimeout(tmr); tmr = setTimeout(async () => {
   const q = e.target.value.trim(); const box = $('#sres'); if (q.length < 2) { box.hidden = true; return; }
   try { const r = await api('/api/features/search?q=' + encodeURIComponent(q)); box.hidden = !r.results.length; box.innerHTML = r.results.map((f) => `<button data-l="${esc(f.layer)}" data-i="${f.index}" data-t="${esc(f.label)}">${esc(f.label)}<br><small>${esc(f.layer)} #${f.index}</small></button>`).join(''); }
   catch (err) { st(err.message, 'err'); } }, 450); }
-function usePreset(p) { slots = p.features.map((f) => ({ ...f })); searchOpen = false; render(); fireFor('p:' + p.id, 1.5); }
+const key = (f) => f.layer + '/' + Number(f.index);
+const hasPreset = (p) => p.features.every((f) => slots.some((x) => key(x) === key(f)));
+function syncChips() { document.querySelectorAll('#presetchips .chip').forEach((c) => { const on = hasPreset(presets[+c.dataset.i]); c.classList.toggle('on', on); c.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+// Clicking a persona adds its features to the mix (up to 3, no duplicates); clicking a selected persona removes them.
+function usePreset(p) {
+  searchOpen = false;
+  if (hasPreset(p)) { const ks = new Set(p.features.map(key)); slots = slots.filter((f) => !ks.has(key(f))); render(); st(''); return; }
+  const add = p.features.filter((f) => !slots.some((x) => key(x) === key(f)));
+  const room = 3 - slots.length;
+  if (room <= 0) { render(); return st('The mix is full. Up to 3 features, remove one first.', 'err'); }
+  slots.push(...add.slice(0, room).map((f) => ({ ...f })));
+  render(); fireFor('p:' + p.id, 1.5);
+  st(add.length > room ? 'The mix is full. Only part of this persona was added.' : '');
+}
 async function init() {
   const [r, c] = await Promise.all([api('/api/presets'), api('/api/config')]); cfg = c; presets = r.presets;
   $('#lab-n').textContent = c.labPerDay; $('#lab-min').textContent = fmt(c.holderMin);
@@ -51,5 +65,5 @@ $('#run').onclick = async () => {
 };
 $('#connect').onclick = async () => { try { await wallet.connect(); $('#connect').textContent = wallet.short(wallet.address); } catch (e) { st(e.message, 'err'); } };
 if (wallet.address) $('#connect').textContent = wallet.short(wallet.address);
-window.__demo = async () => { usePreset(presets.find((p) => p.id === 'owl') || presets[0]); $('#prompt').value = 'Who are you?'; await run(false).catch((e) => st(e.message, 'err')); };
+window.__demo = async () => { slots = []; usePreset(presets.find((p) => p.id === 'owl') || presets[0]); $('#prompt').value = 'Who are you?'; await run(false).catch((e) => st(e.message, 'err')); };
 init().catch((e) => st(e.message, 'err'));
