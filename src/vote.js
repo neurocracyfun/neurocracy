@@ -2,18 +2,34 @@ import { $, esc, api, clock, fmt, wallet, startBrain, fireFor, reveals } from '.
 const usd = (v) => '$' + Number(v).toFixed(Number(v) % 1 ? 2 : 0);   // value at the price used, also when the amount is clamped
 startBrain(); reveals();
 let R = null; let pick = null; let cfg = null;
+const myKey = () => wallet.address && R ? `nc.vote.${R.round}.${wallet.address}` : null;
+const myVote = () => { const k = myKey(); return k ? localStorage.getItem(k) : null; };
+const candName = (id) => { const c = R && R.candidates.find((x) => x.id === id); return c ? c.name : id; };
+function steps() {
+  const done = [!!wallet.address, !!pick || !!myVote(), !!myVote() && (!pick || pick === myVote())];
+  ['vs1', 'vs2', 'vs3'].forEach((id, i) => { const el = $('#' + id); if (el) el.classList.toggle('done', done[i]); });
+  const bar = $('#votebar'); if (!bar) return; if (bar.parentNode !== document.body) document.body.appendChild(bar);   // fixed position must not sit inside a transformed container
+  const show = !(cfg && cfg.preview) && !!pick && pick !== myVote();
+  bar.hidden = !show; if (show) $('#vb-pick').textContent = candName(pick);
+  $('#vb-cast').textContent = wallet.address ? 'Sign vote' : 'Connect wallet';
+}
 const st = (el, m, cls = '') => { el.textContent = m; el.className = 'status ' + cls; };
 async function load() {
   R = await api('/api/round');
   $('#r-id').textContent = R.round; $('#r-voters').textContent = `${R.voters} voter${R.voters === 1 ? '' : 's'}`; $('#r-live').textContent = R.live ? R.live.winner.name : 'none';
   const prev = R.round - 1; $('#votes-link').href = '/api/votes/' + prev; $('#votes-link').textContent = '/api/votes/' + prev;
-  $('#cands').innerHTML = R.candidates.map((c) => `<button class="panel cand${pick === c.id ? ' on' : ''}" data-id="${esc(c.id)}"><h3>${esc(c.name)}</h3><small>${esc(c.note || '')}</small><div class="mono" style="color:var(--dim);margin-top:10px;font-size:11px">${c.features.map((f) => esc(f.layer) + ' #' + esc(f.index) + ' +' + esc(f.strength)).join('<br>')}</div></button>`).join('');
+  const mine = myVote(); $('#cands').innerHTML = R.candidates.map((c) => `<button class="panel cand${pick === c.id ? ' on' : ''}${mine === c.id ? ' mine' : ''}" data-id="${esc(c.id)}">${mine === c.id ? '<span class="badge">Your vote</span>' : ''}<h3>${esc(c.name)}</h3><small>${esc(c.note || '')}</small><div class="mono" style="color:var(--dim);margin-top:10px;font-size:11px">${c.features.map((f) => esc(f.layer) + ' #' + esc(f.index) + ' +' + esc(f.strength)).join('<br>')}</div></button>`).join('');
   $('#topics').innerHTML = `<span class="badge">${R.topicsSuggested ? R.topicsSuggested + ' suggested, revealed at close' : 'none yet'}</span>`;
+  steps();
+  if (mine && !pick && !/counted|Waiting|vote is in/.test($('#vstatus').textContent)) st($('#vstatus'), `Your vote is in: ${candName(mine)}. You can change it until the round closes.`, 'ok');
   $('#r-hidden').textContent = R.voters ? `${R.voters} voter${R.voters === 1 ? '' : 's'} so far, ${fmt(R.weightCast)} total weight cast. Who is ahead stays hidden until the round closes.` : 'No votes yet. Tallies stay hidden until the round closes.';
 }
-$('#cands').onclick = (e) => { const b = e.target.closest('.cand'); if (!b) return; pick = b.dataset.id; document.querySelectorAll('.cand').forEach((x) => x.classList.toggle('on', x === b)); fireFor(pick, 1.5); $('#cast').disabled = !wallet.address; };
+$('#cands').onclick = (e) => { const b = e.target.closest('.cand'); if (!b) return; pick = b.dataset.id; document.querySelectorAll('.cand').forEach((x) => x.classList.toggle('on', x === b)); fireFor(pick, 1.5); $('#cast').disabled = !wallet.address; steps();
+  if (cfg && cfg.preview) return;
+  if (!wallet.address) st($('#vstatus'), `You picked ${candName(pick)}. Connect your wallet to sign your vote.`); else st($('#vstatus'), `You picked ${candName(pick)}. Press Sign vote to submit.`); };
+$('#vb-cast').onclick = async () => { if (!wallet.address) { try { await wallet.connect(); showWallet(); steps(); } catch (e) { st($('#vstatus'), e.message, 'err'); } return; } $('#cast').click(); };
 const showWallet = () => { if (cfg && cfg.preview) return; if (wallet.address) { $('#connect').textContent = wallet.short(wallet.address); $('#cast').disabled = !pick; } };
-$('#connect').onclick = async () => { try { await wallet.connect(); showWallet(); } catch (e) { st($('#vstatus'), e.message, 'err'); } };
+$('#connect').onclick = async () => { try { await wallet.connect(); showWallet(); steps(); if (!pick) st($('#vstatus'), 'Wallet connected. Now pick a candidate from the list below.'); } catch (e) { st($('#vstatus'), e.message, 'err'); } };
 $('#cast').onclick = async () => {
   const s = $('#vstatus');
   try {
@@ -21,7 +37,10 @@ $('#cast').onclick = async () => {
     const msg = `Neurocracy vote\nRound: ${R.round}\nCandidate: ${pick}\nTopic: ${topic || '-'}\nWallet: ${wallet.address}`;
     st(s, 'Waiting for your wallet...'); const signature = await wallet.sign(msg);
     const r = await api('/api/vote', { wallet: wallet.address, round: R.round, candidate: pick, topic, signature });
-    st(s, `Vote counted with weight ${r.weight.toFixed(2)}. You can change it until the round closes.`, 'ok'); fireFor(pick, 3); load();
+    localStorage.setItem(`nc.vote.${R.round}.${wallet.address}`, pick);
+    const left = Math.max(0, Math.round((R.endsAt - Date.now()) / 60e3)); const at = new Date(R.endsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    st(s, `Your vote is in: ${candName(pick)}, weight ${r.weight.toFixed(2)}. Round ${R.round} closes at ${at} your time, in about ${left} minute${left === 1 ? '' : 's'}. You can change it until then.`, 'ok'); fireFor(pick, 3); pick = null; $('#cast').disabled = true; load();
+    s.scrollIntoView({ block: 'center', behavior: 'smooth' });
   } catch (e) { st(s, e.message, 'err'); }
 };
 let tmr; $('#fq').oninput = () => { clearTimeout(tmr); tmr = setTimeout(async () => {
@@ -45,7 +64,7 @@ $('#link').onclick = async () => {
     await api('/api/link-x', { wallet: wallet.address, handle: h, signature }); st(s, `Linked @${h}.`, 'ok');
   } catch (e) { st(s, e.message, 'err'); }
 };
-setInterval(() => { if (!R) return; $('#r-timer').textContent = clock(R.endsAt - Date.now()); if (Date.now() > R.endsAt + 2000) { pick = null; load(); } }, 1000);
+setInterval(() => { if (!R) return; $('#r-timer').textContent = clock(R.endsAt - Date.now()); if (Date.now() > R.endsAt + 2000) { if (pick) st($('#vstatus'), 'That round closed before you signed. A new round has started, pick again.', 'err'); pick = null; load(); } }, 1000);
 api('/api/config').then((c) => {
   cfg = c; $('#min1').textContent = fmt(c.holderMin); $('#min2').textContent = fmt(c.holderMin);
   if (c.preview) {   // no mint yet: show the ballot, close the actions
@@ -90,6 +109,7 @@ let ntmr; $('#nq').oninput = () => { clearTimeout(ntmr); ntmr = setTimeout(async
   const q = $('#nq').value.trim(); const box = $('#nres'); if (q.length < 2) { box.hidden = true; return; }
   try { const r = await api('/api/features/search?q=' + encodeURIComponent(q)); box.hidden = !r.results.length;
     box.innerHTML = r.results.map((f) => `<button data-l="${esc(f.layer)}" data-i="${f.index}">${esc(f.label)}<br><small>${esc(f.layer)} #${f.index}</small></button>`).join('');
+    st($('#nstatus'), r.results.length ? '' : 'No features found for that word. Try another word.');
   } catch (e) { st($('#nstatus'), e.message, 'err'); } }, 450); };
 $('#nres').onclick = async (e) => {
   const b = e.target.closest('button'); if (!b) return; const s = $('#nstatus');

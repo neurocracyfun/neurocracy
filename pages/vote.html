@@ -7,6 +7,7 @@ body: app vote
   <div class="kicker mono">Round <span id="r-id">0</span></div>
   <h1>Pick the next mind.</h1>
   <p class="sub">Choose one candidate and, if you like, a topic for the account's next post. Your wallet signs a message, no transaction and no fee. Weight is the square root of your NCRACY balance, read again when the round closes.</p>
+  <ol class="vsteps" id="vsteps"><li id="vs1">Connect your wallet.</li><li id="vs2">Pick one candidate from the list below.</li><li id="vs3">Press Sign vote. Your wallet signs a free message.</li></ol>
   <div class="grid2" style="margin-top:34px">
     <div class="panel corner" style="padding:24px">
       <div class="mono" style="color:var(--dim)">Closes in</div><div class="timer" id="r-timer">00:00</div>
@@ -16,7 +17,7 @@ body: app vote
       <label class="f" for="topic">Topic for the next post (optional, 80 characters)</label>
       <input type="text" id="topic" maxlength="80" placeholder="for example: what the moon smells like">
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn ghost" id="connect">Connect wallet</button><button class="btn" id="cast" disabled>Sign vote</button></div>
-      <div class="status" id="vstatus"></div>
+      <div class="status" id="vstatus">Connect your wallet, then pick a candidate from the list below.</div>
     </div>
   </div>
   <p class="mono" id="r-hidden" style="color:var(--dim);margin-top:30px"></p>
@@ -126,5 +127,6 @@ body: app vote
 <p>These can still cost tokens with no nomination: the burn lands after the 5 minute price expired, or it is signed by a different wallet than the one connected. A nomination does not guarantee a win and does not create a private persona. Burns are final. There are no refunds.</p>
   </div></div>
   </section>
+  <div class="votebar" id="votebar" hidden><span>Your pick: <b id="vb-pick"></b></span><button class="btn" id="vb-cast">Sign vote</button></div>
   <p class="note">Every signed vote is published when its round closes, for example the last round at <a id="votes-link" href="#">/api/votes</a>, so anyone can recount.</p>
 </div></main>
