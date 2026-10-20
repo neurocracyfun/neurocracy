@@ -366,3 +366,14 @@ footer.colophon { border-top: 1px solid var(--text); background: transparent; pa
 .sp-fig { float: right; width: clamp(110px, 12vw, 160px); height: auto; aspect-ratio: 5 / 4; object-fit: contain; margin: 4px 0 6px 14px; pointer-events: none; }
 @media (max-width: 900px), (prefers-reduced-motion: reduce) { .gcard { height: 540px; } }
 .sp-meter { clear: both; } .sp-fig { margin-top: -6px; }
+
+/* the mind posts every round */
+.bot { padding: 110px 0; border-top: 1px solid var(--line); }
+.bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: center; }
+.bot-note { color: var(--mute); max-width: 460px; }
+.bot-r { margin: 0; }
+.bot-post { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 20px 22px; }
+.bot-meta { color: var(--dim); display: flex; justify-content: space-between; margin: 0 0 10px; }
+.bot-text { margin: 0 0 16px; font-size: 17px; line-height: 1.45; color: var(--text); }
+.bot-post img { display: block; width: 100%; height: auto; border-radius: 2px; mix-blend-mode: multiply; }
+@media (max-width: 900px) { .bot-grid { grid-template-columns: 1fr; } }

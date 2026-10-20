@@ -14,6 +14,11 @@ An open AI model whose brain is run by its holders. Every 30 minutes, NCRACY hol
 2. **Close.** Every voter's NCRACY balance is read again at close. Weight is `sqrt(balance)`. Runners up with at least half of the winner's weight join the mix (max 3 features).
 3. **Steer.** The mix is applied with Neuronpedia's steering API (`POST /api/steer`, Gemma Scope residual SAEs, layers 9, 20, 31).
 4. **Post.** The steered model writes 3 drafts for the round's post (top voted topic, else a fallback). `lib/filter.js` drops drafts with slurs, financial talk, tickers or contract addresses, links, impersonation, symbols, or more than 280 characters (emoji are stripped first), then the best remaining draft is posted without edits. Replies to mentions work the same way, linked holder handles first. Everything is logged in the Hall with its round and feature mix.
+5. **Face.** The bot account opens each round post with the vote (`This round's vote: 50% Octopus, 50% Chef. So right now I am The Octopus Chef.`) and attaches the round illustration. A mix like octopus and chef becomes one hybrid drawing (generated once, then cached), and the avatar and display name change to match (never the bio), at most every 30 minutes and 24 times a day. Off by default, see `docs/render-env.md`.
+
+## The bot account
+
+The mind posts from its own X account [@neurocracymind](https://x.com/neurocracymind), separate from @neurocracyfun, with a fixed bio. Every round it posts `This round's vote: 50% Octopus, 50% Chef. So right now I am The Octopus Chef.`, an optional short line from the steered model and `Got a question or something you want me to do?`, attaches a drawing of the winning persona, and changes its avatar and display name to match. Twelve personas have a hand-drawn library image; all 66 two-persona mixes are pre-drawn in `public/img/hybrids/`, so no image API is needed. Off by default and safe under `DRY_RUN`. Details in [docs/bot.md](docs/bot.md).
 
 ## Holder perks
 

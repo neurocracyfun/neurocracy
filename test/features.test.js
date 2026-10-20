@@ -9,6 +9,7 @@ const { createApp } = require('../server');
 const { tokensFor, parseCurve, curvePriceSol } = require('../lib/price');
 const { createQuotes } = require('../lib/quotes');
 
+const FIXED_T = Math.floor(Date.parse('2026-10-20T00:05:00Z') / 1000);   // matches the fixed app clock below
 const MINT = 'MintNcracy1111111111111111111111111111111111';
 const W = () => bs58.encode(nacl.sign.keyPair().publicKey);
 const SIG = (n = 1) => bs58.encode(Buffer.alloc(64, n));
@@ -147,9 +148,9 @@ test('nomination by burn: USD quote, verified burn joins the next ballot with ro
   assert.strictEqual(q.status, 200, JSON.stringify(q.body)); assert.strictEqual(q.body.memo, nominateMemo(L, 15766));
   assert.strictEqual(q.body.burn, 50000); assert.strictEqual(q.body.usd, 5);             // $5 at $0.0001
   assert.strictEqual((await call(g.app, 'GET', `/api/nominate/quote?layer=${L}&index=666`)).status, 400);
-  g.setTx(burnTx({ wallet: w, amount: 49999e6, memo: nominateMemo(L, 15766) }));
+  g.setTx(burnTx({ wallet: w, amount: 49999e6, memo: nominateMemo(L, 15766), blockTime: FIXED_T }));
   assert.match((await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 15766, signature: SIG(8), quote: q.body.quote })).body.error, /smaller/);
-  g.setTx(burnTx({ wallet: w, amount: 50000e6, memo: nominateMemo(L, 15766) }));
+  g.setTx(burnTx({ wallet: w, amount: 50000e6, memo: nominateMemo(L, 15766), blockTime: FIXED_T }));
   assert.strictEqual((await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 15766, signature: SIG(9) })).status, 400);  // no quote
   const r = await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 15766, signature: SIG(9), quote: q.body.quote });
   assert.strictEqual(r.status, 200, JSON.stringify(r.body)); const first = r.body.round;
@@ -157,7 +158,7 @@ test('nomination by burn: USD quote, verified burn joins the next ballot with ro
   assert.strictEqual((await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 15766, signature: SIG(9), quote: q.body.quote })).status, 409); // reused
   assert.strictEqual((await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 100, signature: SIG(11), quote: q.body.quote })).status, 400); // quote for another feature
   const q2 = await call(g.app, 'GET', `/api/nominate/quote?layer=${L}&index=100`);
-  g.setTx(burnTx({ wallet: w, amount: 50000e6, memo: nominateMemo(L, 100) }));
+  g.setTx(burnTx({ wallet: w, amount: 50000e6, memo: nominateMemo(L, 100), blockTime: FIXED_T }));
   const r2 = await call(g.app, 'POST', '/api/nominate', { wallet: w, layer: L, index: 100, signature: SIG(10), quote: q2.body.quote });
   assert.strictEqual(r2.body.round, first + 1);                                   // ballot full (max 1): next round, never lost
   g.setPrice(null);
@@ -175,7 +176,7 @@ test('burn for reply: USD quote, verified burn queues a reply, per-wallet limit,
   assert.strictEqual((await qx('https://x.com/someone/status/1849000000000000001', W())).status, 200);                          // mentions the account: allowed for anyone
   const q = await qx(url);
   assert.strictEqual(q.body.burn, 15000);                                          // $1.5 at $0.0001
-  g.setTx(burnTx({ wallet: w, amount: 15000e6, memo: replyMemo('1849000000000000001') }));
+  g.setTx(burnTx({ wallet: w, amount: 15000e6, memo: replyMemo('1849000000000000001'), blockTime: FIXED_T }));
   const r = await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url, signature: SIG(21), quote: q.body.quote });
   assert.strictEqual(r.status, 200, JSON.stringify(r.body));
   const url2 = url.replace('01', '02'); const q3 = await qx(url2);

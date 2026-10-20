@@ -18,6 +18,7 @@ const { createPrice } = require('./lib/price');
 const { createQuotes } = require('./lib/quotes');
 const zk = require('./lib/zk');
 const { createZkChain } = require('./lib/zkchain');
+const { createAvatar } = require('./lib/avatar');
 
 const RPC_METHODS = new Set(['getBalance', 'getTokenAccountsByOwner', 'getAccountInfo', 'getLatestBlockhash', 'getSignatureStatuses', 'getTokenSupply', 'getTokenLargestAccounts']);
 
@@ -38,7 +39,8 @@ function createApp(cfg = baseCfg, over = {}) {
   const budget = createBudget(cfg.npPerHour);
   const steer = over.steer || np.steer;
   const rounds = createRounds({ cfg, store, presets, now });
-  const xbot = createXBot({ cfg, store, steer, budget, rounds, presets, now, fetchImpl: over.fetchImpl || fetch });
+  const avatar = createAvatar({ cfg, store, presets, now, fetchImpl: over.avatarFetch || fetch, env: over.env || process.env, log: over.log || console.log });
+  const xbot = createXBot({ cfg, store, steer, budget, rounds, presets, avatar, now, fetchImpl: over.fetchImpl || fetch });
   const payouts = createPayouts({ cfg, store, now, chain: 'chain' in over ? over.chain : solanaChain(cfg), log: console.log });
   const price = over.price || createPrice({ cfg, now });
   const quotes = createQuotes({ secret: cfg.quotes.secret, ttlMs: cfg.quotes.ttlMs, now });
@@ -68,10 +70,11 @@ function createApp(cfg = baseCfg, over = {}) {
   app.get('/api/config', wrap(async (req, res) => res.json({
     cluster: cfg.cluster, tokenName: cfg.tokenName, ticker: cfg.ticker, mint: cfg.mint || null, treasury: cfg.treasury || null,
     decimals: cfg.decimals, holderMin: cfg.holderMin, voteMin: cfg.voteMin, labPerDay: cfg.labPerDay, roundMinutes: cfg.roundMinutes, model: np.MODEL,
-    x: xbot.status(), payout: payouts.status(), burns: await burns.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, preview: !cfg.mint, budget: budget.status(),
+    x: xbot.status(), payout: payouts.status(), avatar: avatar.status(), burns: await burns.status(), site: cfg.site, github: cfg.github, rpcProxy: !!cfg.rpc, preview: !cfg.mint, budget: budget.status(),
   })));
   app.get('/api/presets', (req, res) => res.json({ model: presets.model, generatedAt: presets.generatedAt, prompts: presets.prompts, presets: presets.list() }));
-  app.get('/api/round', (req, res) => res.json(rounds.publicRound()));
+  app.get('/api/round', (req, res) => { const p = rounds.publicRound(); const a = p.live ? avatar.forRound(p.live.id) : null; res.json({ ...p, avatarUrl: a ? a.url : null, personas: a ? a.personas : [] }); });
+  app.get('/api/avatar/:file', (req, res) => avatar.serve(req, res));
   // preview mode: no token mint configured yet. Votes and holder actions are closed; the Lab gets a few free live steers per visitor.
   const preview = () => !cfg.mint;
   const PREVIEW_LAB_PER_DAY = 3;
@@ -191,10 +194,10 @@ function createApp(cfg = baseCfg, over = {}) {
   let ticking = false;
   async function tickOnce() {
     if (ticking) return; ticking = true;
-    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); } await payouts.tick(); await xbot.tick(); prover.tick(); }
+    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); try { await avatar.onRoundClosed(closed); } catch (e) { console.log('[avatar]', e.message); } } await payouts.tick(); await xbot.tick(); prover.tick(); }
     catch (e) { console.log('[tick]', e.message); } finally { ticking = false; }
   }
-  return { app, store, rounds, xbot, budget, tickOnce, presets, payouts, burns, prover };
+  return { app, store, rounds, xbot, avatar, budget, tickOnce, presets, payouts, burns, prover };
 }
 
 if (require.main === module) {

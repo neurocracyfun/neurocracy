@@ -13,6 +13,7 @@ public/vote.html
 public/hall.html
 public/404.html
 public/verify.html
+public/whitepaper.html
 public/vendor/snarkjs.min.js
 zk/build/*
 !zk/build/tally_js/

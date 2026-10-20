@@ -27,7 +27,7 @@ Values marked SECRET go in Render's secret env and are never logged. Everything 
 | `DRY_RUN` | `1` until the account goes live, then `0` |
 | `X_POSTING_ENABLED` | `0` until live, then `1` |
 | `X_APP_KEY`, `X_APP_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | SECRET |
-| `X_USER_ID` | numeric id of @neurocracyfun |
+| `X_USER_ID` | numeric id of the account the four X keys belong to. With the bot keys: `1165034468966617089` (@neurocracymind), so mentions are read from the bot |
 | `X_DAILY_POST_CAP` | `60` |
 | `X_REPLIES_PER_ROUND` | `4` |
 | `X_CANDIDATES` | `3` |
@@ -71,3 +71,23 @@ Values marked SECRET go in Render's secret env and are never logged. Everything 
 | `NC_ZK_RPC` | empty (uses `NC_RPC`) |
 
 Do not set `NC_TEST` or `PORT` (Render sets `PORT`).
+
+## Bot avatar and round images (OFF by default)
+
+After each round closes the bot account (a separate X account, not @neurocracyfun) changes its avatar and display name to the winning persona, and its round post reads `This round's vote: 50% Octopus, 50% Chef. So right now I am The Octopus Chef. ... Got a question or something you want me to do?` with the round illustration attached. The bio is fixed and set by hand. A single persona uses `public/img/avatars/{id}.png` (built by `python3 scripts/build-avatars.py`) and posts `public/img/minds/{id}.webp`. A mix uses a hybrid illustration: seeded ones live in `public/img/hybrids/` (`chef+ocean.jpg` is The Octopus Chef, also the default when no library persona is steered), the rest are generated once and cached on the disk by sorted combo key. If the media upload fails the post goes out text only. Under `DRY_RUN=1` nothing is sent to X and no image API is called.
+
+| Key | Value |
+|---|---|
+| `NC_AVATAR` | `0` (set `1` to change the avatar each round) |
+| `NC_BOT_HANDLE` | `neurocracymind` ([@neurocracymind](https://x.com/neurocracymind)), shown in status |
+| `X_APP_KEY`, `X_APP_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` | SECRET, the bot account's keys (same vars as posting) |
+| `NC_BOT_RENAME` | `1`, with `NC_AVATAR=1` the display name follows the avatar (name only, never the bio); `0` keeps it fixed |
+| `NC_AVATAR_MIN_MINUTES` | `30`, minimum time between avatar changes |
+| `NC_AVATAR_DAILY_MAX` | `24`, avatar changes per UTC day |
+| `NC_AVATAR_GEN_IN_DRY` | `0`, set `1` to let dry run call the image API (still never X) |
+| `NC_AVATAR_DIR` | defaults to `avatars/` next to `DB`, so `/var/data/avatars` |
+| `NC_IMAGE_PROVIDER` | `openai` or `xai` (empty: only seeded hybrids are used) |
+| `NC_IMAGE_API_KEY` | SECRET, key for that provider |
+| `NC_IMAGE_MODEL` | optional, defaults `gpt-image-1` (1536x1024, medium) or `grok-imagine-image` (3:2) |
+
+`/api/round` returns `avatarUrl` and `personas` for the last closed round. `scripts/bot-sim-round.js` runs one mocked round locally. `scripts/bot-test-post.js` sends one real test post with the bot keys and needs `CONFIRM=1`.
