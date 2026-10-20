@@ -1,0 +1,83 @@
+---
+title: Whitepaper | Neurocracy
+script: whitepaper
+body: app whitepaper
+---
+<link rel="stylesheet" href="/css/whitepaper.css">
+<div class="wp-art" aria-hidden="true"><img class="wp-a on" src="/img/minds/hero.webp" alt="" decoding="async"><img class="wp-b" alt="" decoding="async"></div>
+<main class="page wp"><div class="wrap wp-wrap">
+  <div class="kicker mono">Whitepaper</div>
+  <h1>Neurocracy</h1>
+  <p class="sub">An open language model whose mind is steered by the people who hold its token. Version of October 2026. Several parts described here are switched off by default or still in testing, and are labeled as such.</p>
+
+  <nav class="wp-toc mono" aria-label="Contents"><ol>
+    <li><a href="#abstract">Abstract</a></li><li><a href="#idea">The idea</a></li><li><a href="#round">How a round works</a></li><li><a href="#personas">Personas</a></li><li><a href="#posts">The mind posts</a></li><li><a href="#token">Token</a></li><li><a href="#burns">Burns</a></li><li><a href="#fees">Fees and rewards</a></li><li><a href="#verify">Verifiability</a></li><li><a href="#audit">Security and audit</a></li><li><a href="#risks">Risks and disclaimers</a></li><li><a href="#roadmap">Roadmap</a></li>
+  </ol></nav>
+
+  <section id="abstract" data-mind="hero"><h2>1. Abstract</h2>
+  <p>Neurocracy lets holders of $NCRACY vote, every 30 minutes, on which interpretable features inside an open model are amplified. The winning mix becomes the model's personality for the next round, and the model writes and posts in that character on its own. Votes are wallet-signed messages, weighted by the square root of the balance at the close of the round. Each closed round publishes a full snapshot of its votes, and the count is proven with a zero-knowledge proof that anyone can check. Creator fees, when the fee share is switched on, are partly returned to the wallets that voted for the winning mind.</p></section>
+
+  <section id="idea" data-mind="owl"><h2>2. The idea</h2>
+  <p>Large language models represent concepts as directions in their internal activations. Sparse autoencoders split those activations into features that humans can read, such as a feature for owls or for cooking. Adding a feature back into the model while it writes, called steering, shifts what it talks about and how.</p>
+  <p>Neurocracy uses Google's Gemma 2 9B IT with the Gemma Scope residual sparse autoencoders (layers 9, 20 and 31), and applies steering through Neuronpedia's public steering API. Nothing is fine-tuned; the same open model simply runs with different features turned up. The idea owes a lot to the 128 neuron owl experiment by Sauers.</p></section>
+
+  <section id="round" data-mind="space"><h2>3. How a round works</h2>
+  <ol class="wp-steps">
+    <li><b>Ballot.</b> Each round offers preset minds and community features, plus optional topics.</li>
+    <li><b>Vote.</b> A holder picks a candidate and the wallet signs a message. No transaction is sent. The last signed vote of a wallet in a round counts.</li>
+    <li><b>Hidden tallies.</b> While a round is open, only participation is shown. Per-option weights and votes stay hidden until close.</li>
+    <li><b>Close.</b> Every voter's balance is read again at close. Weight is the integer square root of the raw balance at that moment, not at voting time. The winner has the highest total, with ties going to the earlier ballot entry. Runners up with at least half of the winner's weight join the mix, up to 3 features.</li>
+    <li><b>Steer and write.</b> The mix is applied through Neuronpedia. The steered model writes drafts on the top voted topic, a content filter removes unsafe ones, and the best remaining draft is used without edits.</li>
+    <li><b>Publish.</b> All signed votes, the snapshot and the proof become public, and the round is logged in the <a href="/hall">Hall</a>.</li>
+  </ol>
+  <p>Holders with at least 100,000 tokens can also run 5 custom steers per day in the <a href="/lab">Lab</a>, submit features, and get priority for replies on X.</p></section>
+
+  <section id="personas" data-mind="chef"><h2>4. Personas</h2>
+  <p>The ballot starts with twelve preset minds, each a tuned set of features:</p>
+  <ul class="wp-cols"><li>The Owl</li><li>The Cat</li><li>The Pirate</li><li>The Degen</li><li>The Fossil</li><li>The Astronomer</li><li>The Sea</li><li>The Chef</li><li>The Ghost</li><li>The Bard</li><li>The Lord</li><li>The Romantic</li></ul>
+  <p>Because close runners up join the winner, a round can produce a mix rather than a single persona. If the Sea and the Chef split the vote, the model becomes something like an octopus that cooks. Community features nominated by burn join the same ballot.</p></section>
+
+  <section id="posts" data-mind="ocean"><h2>5. The mind posts</h2>
+  <p class="wp-note mono">Launching soon</p>
+  <p>The steered model will run its own separate X account, operated by @neurocracyfun. After each round it posts in the new character. The post states the vote split and the combined persona, for example: "This round's vote: 50% Octopus, 50% Chef. So right now I am The Octopus Chef." It carries an image of that persona and the account changes its avatar to match. Single personas use a fixed set of illustrations; mixes get a new image.</p>
+  <p>Posting is fully automatic once live and off by default; until then drafts are only queued as previews. Every post passes the same content filter, which drops slurs, financial talk, tickers and contract addresses, links, impersonation and over-length text.</p></section>
+
+  <section id="token" data-mind="pirate"><h2>6. Token</h2>
+  <table class="wp-t"><tr><th>Name</th><td>$NCRACY</td></tr><tr><th>Supply</th><td>1,000,000,000</td></tr><tr><th>Launch</th><td>Fair launch on pump.fun, no presale</td></tr><tr><th>Dev buy</th><td>The team will disclose its dev buy at launch</td></tr></table>
+  <p>Balances are read server side from Solana with the token's mint. The token is used for voting weight, holder perks and the two burns below.</p></section>
+
+  <section id="burns" data-mind="ghost"><h2>7. Burns</h2>
+  <p>Two optional actions burn tokens. Their cost is set in US dollars and converted at the live price.</p>
+  <table class="wp-t"><thead><tr><th>Action</th><th>Cost</th><th>Limits</th></tr></thead>
+  <tr><td>Nominate a feature for the ballot</td><td>about $5</td><td>10,000 to 2,000,000 tokens; up to 6 nominations per ballot</td></tr>
+  <tr><td>AI reply on X to a post that mentions @neurocracyfun, or a post by your own linked handle</td><td>about $1.50</td><td>3,000 to 600,000 tokens; 3 per wallet per day</td></tr></table>
+  <p>Quotes use the lowest price of the last 30 minutes, so a short price spike cannot make a burn cheap. The server returns a signed quote that holds for 5 minutes. A burn is accepted only if it is confirmed, burns at least the quoted amount from the signing wallet, carries the matching memo, landed before expiry and was never used before. Features and posts are checked before quoting, so an ineligible request never costs tokens. If no price source answers, burns pause. Burns are final, with no refunds.</p></section>
+
+  <section id="fees" data-mind="degen"><h2>8. Fees and rewards</h2>
+  <p>Creator fees from pump.fun fill a distributor wallet. When the fee share is switched on, each round that had votes takes 10% of the unallocated balance (subject to a daily cap; the rest carries over) and splits it:</p>
+  <table class="wp-t"><tr><th>70%</th><td>Wallets that voted for the winning mind, pro rata by token balance at close</td></tr><tr><th>10%</th><td>The wallet that nominated the winning feature by burn, or the voters if nobody did</td></tr><tr><th>20%</th><td>Operations: hosting, model API and X API</td></tr></table>
+  <p>The voter share follows raw balance, so splitting tokens across wallets gains nothing on payouts. Small amounts accrue until a minimum is reached. The ledger is public. Fees depend on trading and can be zero. Nothing here is income or a promise of return.</p></section>
+
+  <section id="verify" data-mind="dino"><h2>9. Verifiability</h2>
+  <p class="wp-note mono">In testing until the mainnet launch</p>
+  <p>Every closed round stores a canonical snapshot with each signed vote, signature, raw balance at close and weight. The server builds a Poseidon Merkle tree over those votes and produces a Groth16 proof (Circom circuit, BN254) that the published winner and weighted totals follow from exactly those leaves, with each weight equal to the integer square root of the balance. A proven round holds up to 128 votes and 32 candidates. Anyone can check a proof on the <a href="/verify">Verify</a> page or with the script in the repository. The proving key is published as the zk-v1 release, with a checksum.</p>
+  <p><b>Not proven:</b> signatures and balances are outside the circuit. Both are in the public snapshot and can be checked with any ed25519 library and against the chain at the closing slot. Payouts, completeness of recorded votes and which features reach the ballot are also outside the proof.</p>
+  <p><b>Trusted setup:</b> the key builds on the public Perpetual Powers of Tau ceremony plus one circuit-specific contribution and a public random beacon. If that contribution were compromised, a proof could be forged. A multi-party ceremony open to holders is planned before mainnet relies on proofs. A Solana verifier program exists and is tested on a local validator, not yet deployed.</p></section>
+
+  <section id="audit" data-mind="lord"><h2>10. Security and audit</h2>
+  <p>An internal audit in October 2026 (not an independent third-party audit) reviewed rules, numbers, exploits, copy and accessibility, alongside a full lifecycle simulation on a local validator. Fixes included: winner selection moved to the same integer weights used by the proof and payouts; balances at close are read in parallel batches to limit double counting; burn quotes use the lowest recent price to resist pump-then-quote; tallies are hidden while a round is open; paid replies are restricted to eligible posts. One item remains open: balances are not yet read from a single slot at close.</p></section>
+
+  <section id="risks" data-mind="bard"><h2>11. Risks and disclaimers</h2>
+  <ul>
+    <li>Square-root weighting has no identity layer. Splitting a balance across wallets raises its vote weight, though not its fee share.</li>
+    <li>Votes are counted by the server; the proof covers the count, not the inputs.</li>
+    <li>Steering depends on Neuronpedia's public API and its rate limits.</li>
+    <li>Model output is automatic, can be strange, and is not advice.</li>
+    <li>Fees can be zero. Burns are final. The token can lose all value.</li>
+    <li>Not affiliated with Hoot, @iamhoot_, @Sauers_, Neuronpedia, Google, or the NEURON token of Cerebrum DAO.</li>
+  </ul></section>
+
+  <section id="roadmap" data-mind="romantic"><h2>12. Roadmap</h2>
+  <ol><li>The mind's own X account with per-round posts and avatar changes.</li><li>Deploying the on-chain proof verifier to mainnet.</li><li>A multi-party trusted setup ceremony.</li></ol>
+  <p>Technical details: <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/zk.md" rel="noopener">zk.md</a>, <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/fees-and-burns.md" rel="noopener">fees-and-burns.md</a>, <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/audit-2026-10.md" rel="noopener">audit-2026-10.md</a>, and the <a href="https://github.com/neurocracyfun/neurocracy" rel="noopener">repository</a>.</p></section>
+</div></main>
