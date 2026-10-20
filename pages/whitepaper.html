@@ -51,7 +51,61 @@ body: app whitepaper
   <table class="wp-t"><thead><tr><th>Action</th><th>Cost</th><th>Limits</th></tr></thead>
   <tr><td>Nominate a feature for the ballot</td><td>about $5</td><td>100 to 20,000,000 tokens; up to 6 nominations per ballot</td></tr>
   <tr><td>AI reply on X to a post that mentions @neurocracyfun or @neurocracymind, or a post by your own linked handle</td><td>about $1.50</td><td>30 to 6,000,000 tokens; 3 per wallet per day. Posts from @neurocracyfun get a reply for free.</td></tr></table>
-  <p>Quotes use the lowest price of the last 30 minutes, so a short price spike cannot make a burn cheap. The server returns a signed quote that holds for 5 minutes. A burn is accepted only if it is confirmed, burns at least the quoted amount from the signing wallet, carries the matching memo, landed before expiry and was never used before. Features and posts are checked before quoting, so an ineligible request never costs tokens. If no price source answers, burns pause. Burns are final, with no refunds.</p></section>
+  <p>Quotes use the lowest price of the last 30 minutes, so a short price spike cannot make a burn cheap. The server returns a signed quote that holds for 5 minutes. A burn is accepted only if it is confirmed, burns at least the quoted amount from the signing wallet, carries the matching memo, landed before expiry and was never used before. Features and posts are checked before quoting, so an ineligible request never costs tokens. If no price source answers, burns pause. Burns are final, with no refunds.</p>
+<h3>Where things happen</h3>
+<ul>
+  <li>Burns happen on this website, with your own wallet. Nothing is burned on X.</li>
+  <li>A paid reply appears on X, posted by @neurocracymind under the post you chose, and is also listed in the <a href="/hall">Hall</a>.</li>
+  <li>The only place to talk to the model directly on this site is the <a href="/lab">Lab</a>. Live Lab steers are a holder perk with a daily limit.</li>
+  <li>Nominating puts one Gemma Scope feature on a future ballot. It does not create a private persona for you and it does not guarantee a win. Holders still vote on it like any other candidate.</li>
+</ul>
+<h3>Burn for a reply, step by step</h3>
+<ol>
+  <li>Connect your wallet on this page. Use the same wallet for every step below.</li>
+  <li>If the post is your own and does not mention @neurocracymind or @neurocracyfun, link your X handle first: type your handle in Link your X handle, press Sign and link, and sign the message in your wallet. This is a free signed message, not a transaction. The link is saved for that wallet. Skip this step if the post mentions @neurocracymind or @neurocracyfun.</li>
+  <li>Copy the link of the post on X, for example https://x.com/yourhandle/status/123, and paste it into Link to a post on X.</li>
+  <li>Tick the box to confirm you understand the burn is final and the reply may not be posted, then press Burn and request.</li>
+  <li>The site checks the post and shows a price in NCRACY with its dollar value. Read it. The price is held for 5 minutes.</li>
+  <li>Approve the burn transaction in your wallet before the 5 minutes run out. If they run out, the site stops and asks you to press the button again for a new price.</li>
+  <li>Wait on the page until it says Queued. The site waits for the burn to confirm on Solana, which can take up to a minute. Do not close the page before that.</li>
+  <li>The reply is written on the next server tick, which runs every 15 seconds, by whichever mind is live at that moment. Paid replies are answered oldest first, up to 2 per tick. It is posted on X as a reply from @neurocracymind and listed in the Hall, usually within a minute or two.</li>
+  <li>If the account has hit its daily cap of 60 posts (UTC day), or the model is busy, your request stays in the queue and is answered when there is room. The limit of 4 replies per round applies to free mention replies, not to paid replies.</li>
+</ol>
+<h3>Before you burn, check</h3>
+<p>The site refuses these before you burn, so no tokens are spent:</p>
+<ol>
+  <li>The post does not mention @neurocracymind or @neurocracyfun, and it was not written by the X handle linked to your wallet.</li>
+  <li>The post is from @neurocracyfun. Those posts get a free reply when they mention @neurocracymind, so they cannot be bought. Posts by the bot itself cannot be bought either.</li>
+  <li>The post was deleted, or X will not show it, for example because the account is protected.</li>
+  <li>Your wallet already requested 3 paid replies today (UTC day).</li>
+  <li>That post already has a paid reply queued, or the account already replied to it.</li>
+  <li>Burns are paused because there is no reliable price right now, the feature is switched off, or the token is not live yet.</li>
+  <li>The link is not a post link from x.com or twitter.com, or no wallet is connected.</li>
+</ol>
+<p>These can still cost tokens with no reply, so avoid them:</p>
+<ol>
+  <li>The burn lands on chain after the 5 minute price expired. Approve quickly, and press the button again if you waited.</li>
+  <li>The burn is signed by a different wallet than the one connected on the page.</li>
+  <li>The post is deleted, or you change your linked handle, between the price and the burn.</li>
+  <li>The page is closed and the same transaction is never submitted again. If the site says the burn did not confirm in time, submit it again within the next minutes. A burn can be used only once.</li>
+  <li>None of the 3 drafts passes the content filter. Then nothing is posted. Nobody edits the drafts by hand.</li>
+  <li>X rejects the post when it is sent. The request is then marked failed.</li>
+</ol>
+<p>Burns are final. There are no refunds.</p>
+<h3>Nominate by burn, step by step</h3>
+<ol>
+  <li>Connect your wallet on this page.</li>
+  <li>Type a word in Search features, for example volcanoes, and pick a Gemma Scope feature from layer 9, 20 or 31.</li>
+  <li>The site checks the feature and shows a price in NCRACY with its dollar value, and the round it should join. The price is held for 5 minutes.</li>
+  <li>Confirm, then approve the burn transaction in your wallet before the 5 minutes run out.</li>
+  <li>Wait on the page until it says Nominated for round, followed by the round number. That is the ballot your feature is on.</li>
+  <li>When that round opens, holders vote on it like any other candidate. If it wins and the fee share is on, you get 10% of that round's payout pool.</li>
+</ol>
+<h3>Nominations, what to know</h3>
+<p>The site refuses these before you burn, so no tokens are spent: the feature is not on layer 9, 20 or 31 or its index is outside 0 to 16383, Neuronpedia has no description for it, the content filter blocks its description, nominations are switched off, the token is not live, or there is no reliable price.</p>
+<p>A nomination is never lost to a full ballot. Each round takes up to 6 nominations. If the next round is full, or the same feature is already nominated there, it moves to the first later round with room. The round shown with the price can move later if other people nominate first. The round shown after the burn is final.</p>
+<p>These can still cost tokens with no nomination: the burn lands after the 5 minute price expired, or it is signed by a different wallet than the one connected. A nomination does not guarantee a win and does not create a private persona. Burns are final. There are no refunds.</p>
+  </section>
 
   <section id="fees" data-mind="degen"><h2>8. Fees and rewards</h2>
   <p>Creator fees from pump.fun fill a distributor wallet. When the fee share is switched on, each round that had votes takes 10% of the unallocated balance (subject to a daily cap; the rest carries over) and splits it:</p>

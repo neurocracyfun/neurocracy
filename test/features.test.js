@@ -180,7 +180,10 @@ test('burn for reply: USD quote, verified burn queues a reply, per-wallet limit,
   const r = await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url, signature: SIG(21), quote: q.body.quote });
   assert.strictEqual(r.status, 200, JSON.stringify(r.body));
   const url2 = url.replace('01', '02'); const q3 = await qx(url2);
-  assert.strictEqual((await call(g.app, 'POST', '/api/reply-burn', { wallet: w, url: url2, signature: SIG(22), quote: q3.body.quote })).status, 429);
+  assert.strictEqual(q3.status, 429); assert.match(q3.body.error, /per wallet per day/);   // daily limit refused at the quote, before any burn
+  assert.strictEqual((await qx(url, W())).status, 400);                                      // already queued: refused at the quote
+  g.D.posts.unshift({ id: 'r9', kind: 'reply', inReplyTo: '1849000000000000005', status: 'posted' });
+  assert.match((await qx('https://x.com/someone/status/1849000000000000005', W())).body.error || '', /already replied/);
   g.D.rounds[1] = { id: 1, winner: { id: 'p:owl', name: 'The Owl' }, mix: [], house: true };
   await g.xbot.paidReplies(g.D.rounds[1]);
   assert.strictEqual(g.D.replyQueue[0].status, 'preview');

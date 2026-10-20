@@ -71,6 +71,8 @@ async function extras() {
   const B = c.burns || {};
   const amt = (x) => (x.priced && x.burn ? `${fmt(x.burn)} NCRACY (about ${usd(B.price ? x.burn * B.price.usd : x.usd)})` : `about ${usd(x.usd)} of NCRACY (paused, no reliable price right now)`);
   if (B.nominate && B.nominate.enabled) { $('#nom-panel').hidden = false; $('#nom-burn').textContent = amt(B.nominate); }
+  const on = (B.nominate && B.nominate.enabled) || (B.reply && B.reply.enabled);
+  $('#howto-note').textContent = on ? 'Burns are open. Follow the steps for the action you want, and check the list before you burn.' : 'Coming at launch. Burns open after the token is live. You can read how they work now.';
   if (B.reply && B.reply.enabled) { $('#rep-panel').hidden = false; $('#rep-burn').textContent = amt(B.reply); if (!B.reply.priced) $('#rep-go').dataset.paused = '1'; }
   return c;
 }
@@ -91,6 +93,7 @@ $('#nres').onclick = async (e) => {
     const q = await api(`/api/nominate/quote?layer=${encodeURIComponent(b.dataset.l)}&index=${b.dataset.i}`);
     if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about ${usd(q.burn * q.priceUsd)}) to nominate "${q.label}" for round ${q.round}? This price is held for 5 minutes. The burn is permanent.`)) return;
     const c = cfg || (await api('/api/config'));
+    if (Date.now() > q.expiresAt - 20000) throw new Error('That price expired while you were deciding. Press the button again for a new price.');
     st(s, 'Waiting for your wallet...');
     const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
     st(s, 'Burn sent, waiting for confirmation...');
@@ -106,6 +109,7 @@ $('#rep-go').onclick = async () => {
     const c = cfg || (await api('/api/config'));
     const q = await api('/api/reply-burn/quote?url=' + encodeURIComponent(url) + '&wallet=' + encodeURIComponent(wallet.address || ''));
     if (!confirm(`Burn ${fmt(q.burn)} NCRACY (about ${usd(q.burn * q.priceUsd)}) for a reply to that post? This price is held for 5 minutes. No refunds.`)) return;
+    if (Date.now() > q.expiresAt - 20000) throw new Error('That price expired while you were deciding. Press the button again for a new price.');
     st(s, 'Waiting for your wallet...');
     const signature = await burnWithMemo({ mint: c.mint, decimals: c.decimals ?? 6, amountUi: q.burn, memo: q.memo });
     st(s, 'Burn sent, waiting for confirmation...');
