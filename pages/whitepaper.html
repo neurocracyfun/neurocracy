@@ -43,6 +43,7 @@ body: app whitepaper
 
   <section id="token" data-mind="pirate"><h2>6. Token</h2>
   <table class="wp-t"><tr><th>Name</th><td>$NCRACY</td></tr><tr><th>Supply</th><td>1,000,000,000</td></tr><tr><th>Launch</th><td>Fair launch on pump.fun, no presale</td></tr><tr><th>Dev buy</th><td>The team will disclose its dev buy at launch</td></tr></table>
+  <h3>Public addresses</h3><table class="wp-t"><tr><th>Tally verifier program</th><td class="mono"><a href="https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw" rel="noopener">G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw</a></td></tr><tr><th>Program upgrade authority</th><td class="mono"><a href="https://solscan.io/account/Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA" rel="noopener">Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA</a></td></tr><tr><th>Operations wallet</th><td class="mono"><a href="https://solscan.io/account/3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i" rel="noopener">3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i</a></td></tr></table>
   <p>Balances are read server side from Solana with the token's mint. The token is used for voting weight, holder perks and the two burns below.</p></section>
 
   <section id="burns" data-mind="ghost"><h2>7. Burns</h2>
@@ -54,11 +55,11 @@ body: app whitepaper
 
   <section id="fees" data-mind="degen"><h2>8. Fees and rewards</h2>
   <p>Creator fees from pump.fun fill a distributor wallet. When the fee share is switched on, each round that had votes takes 10% of the unallocated balance (subject to a daily cap; the rest carries over) and splits it:</p>
-  <table class="wp-t"><tr><th>70%</th><td>Wallets that voted for the winning mind, pro rata by token balance at close</td></tr><tr><th>10%</th><td>The wallet that nominated the winning feature by burn, or the voters if nobody did</td></tr><tr><th>20%</th><td>Operations: hosting, model API and X API</td></tr></table>
+  <table class="wp-t"><tr><th>70%</th><td>Wallets that voted for the winning mind, pro rata by token balance at close</td></tr><tr><th>10%</th><td>The wallet that nominated the winning feature by burn, or the voters if nobody did</td></tr><tr><th>20%</th><td>Operations wallet 3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models.</td></tr></table>
   <p>The voter share follows raw balance, so splitting tokens across wallets gains nothing on payouts. Small amounts accrue until a minimum is reached. The ledger is public. Fees depend on trading and can be zero. Nothing here is income or a promise of return.</p></section>
 
   <section id="verify" data-mind="dino"><h2>9. Verifiability</h2>
-  <p class="wp-note mono">In testing until the mainnet launch</p>
+  <p><b>Proven and verified on chain.</b> Every voted round's tally is proven with a zero-knowledge proof and verified on chain on Solana by the Neurocracy tally verifier program <a href="https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw" rel="noopener">G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw</a>. Anyone can check it on the <a href="/verify">Verify</a> page, from the transaction, or with the script in the repository.</p>
   <p>Every closed round stores a canonical snapshot with each signed vote, signature, raw balance at close and weight. The server builds a Poseidon Merkle tree over those votes and produces a Groth16 proof (Circom circuit, BN254) that the published winner and weighted totals follow from exactly those leaves, with each weight equal to the integer square root of the balance. A proven round holds up to 128 votes and 32 candidates. Anyone can check a proof on the <a href="/verify">Verify</a> page or with the script in the repository. The proving key is published as the zk-v1 release, with a checksum.</p>
   <p><b>Not proven:</b> signatures and balances are outside the circuit. Both are in the public snapshot and can be checked with any ed25519 library and against the chain at the closing slot. Payouts, completeness of recorded votes and which features reach the ballot are also outside the proof.</p>
   <p><b>Trusted setup:</b> the key builds on the public Perpetual Powers of Tau ceremony plus one circuit-specific contribution and a public random beacon. If that contribution were compromised, a proof could be forged. A multi-party ceremony open to holders is planned before mainnet relies on proofs. A Solana verifier program exists and is tested on a local validator, not yet deployed.</p></section>
@@ -77,6 +78,6 @@ body: app whitepaper
   </ul></section>
 
   <section id="roadmap" data-mind="romantic"><h2>12. Roadmap</h2>
-  <ol><li>The mind's own X account with per-round posts, avatar and name changes.</li><li>Deploying the on-chain proof verifier to mainnet.</li><li>A multi-party trusted setup ceremony.</li></ol>
+  <ol><li>The mind's own X account with per-round posts, avatar and name changes.</li><li>A multi-party trusted setup ceremony.</li></ol>
   <p>Technical details: <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/zk.md" rel="noopener">zk.md</a>, <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/fees-and-burns.md" rel="noopener">fees-and-burns.md</a>, <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/audit-2026-10.md" rel="noopener">audit-2026-10.md</a>, and the <a href="https://github.com/neurocracyfun/neurocracy" rel="noopener">repository</a>.</p></section>
 </div></main>

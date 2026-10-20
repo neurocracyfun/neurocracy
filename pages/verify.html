@@ -6,7 +6,7 @@ body: app verify
 <main class="page"><div class="wrap">
   <div class="kicker mono">Verify</div>
   <h1>Check the count yourself.</h1>
-  <p class="sub">In testing until the mainnet launch. Every voted round publishes a snapshot of its votes and a zero-knowledge proof that the winner and the weighted totals follow from exactly those votes. This page checks the proof in your browser against the published verification key, so you do not have to trust our server's answer.</p>
+  <p class="sub">Every voted round's tally is proven with a zero-knowledge proof and verified on chain on Solana. Each round publishes a snapshot of its votes and a proof that the winner and the weighted totals follow from exactly those votes. The proof is then checked by the Neurocracy tally verifier program <a href="https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw" rel="noopener">G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw</a> in a mainnet transaction, which anyone can look up. This page checks the proof in your browser against the published verification key, so you do not have to trust our server's answer.</p>
   <form id="vf" class="panel" style="margin:26px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
     <label class="mono" for="vr">Round</label><input id="vr" class="mono" type="number" min="1" inputmode="numeric" style="width:120px">
     <button class="btn" type="submit">Verify</button>
@@ -18,6 +18,7 @@ body: app verify
     <pre style="white-space:pre-wrap;text-transform:none;font-family:var(--mono, monospace);font-size:13px;overflow-x:auto">git clone https://github.com/neurocracyfun/neurocracy
 cd neurocracy && npm install
 node scripts/zk-verify.js ROUND</pre>
+    <p>On chain: program <a href="https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw" rel="noopener">G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw</a>, upgrade authority <a href="https://solscan.io/account/Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA" rel="noopener">Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA</a>. Proven rounds currently hold up to 128 votes each.</p>
     <p>What the proof does and does not cover is written up in <a href="https://github.com/neurocracyfun/neurocracy/blob/main/docs/zk.md">docs/zk.md</a>.</p>
   </div>
 </div></main>

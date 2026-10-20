@@ -1,6 +1,8 @@
+> Mainnet: every voted round's tally is proven with a zero-knowledge proof and verified on chain by the tally verifier program [`G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw`](https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw) (upgrade authority `Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA`).
+
 # Zero-knowledge tally verification
 
-In testing until the mainnet launch. Neurocracy counts votes on its server. To make that count checkable, every voted round gets a Groth16 proof that the winner and the weighted totals were computed correctly from the published votes.
+Neurocracy counts votes on its server. To make that count checkable, every voted round gets a Groth16 proof that the winner and the weighted totals were computed correctly from the published votes.
 
 ## What is proven
 
@@ -57,7 +59,7 @@ Recommendation: keep verify mode. A transaction is as permanent and public as an
 
 Local validator test (`node scripts/zk-localnet.js`) covers both modes: tampered proofs are rejected, valid ones are accepted, records match, duplicates are refused.
 
-Enable with `ZK_ONCHAIN=1`, `NC_ZK_PROGRAM_ID`, `NC_ZK_AUTHORITY_KEY` and optionally `NC_ZK_RPC`. Not deployed to mainnet yet: the on-chain check is in testing.
+Enable with `ZK_ONCHAIN=1`, `NC_ZK_PROGRAM_ID`, `NC_ZK_AUTHORITY_KEY` and optionally `NC_ZK_RPC`. Deployed on mainnet at `G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw` (2026-10-20, signature `2cWTSPzHLdB5RHf4aY1THG3c2swNJpbXZt6LRVvd9yKreQBkUwXgoy6ZVf3DfTbr8mTNpqwBcxCRwYdPJYUDx2eH`). First mainnet verification: `5D11q6VK1p8F75fiTTRMHqafUXJaqBsV4QegcHMkyxuBEoCRemaY3gUnjyiFnKetTPxGFLYpBBeejpErEBYD13Gu` (99,689 compute units, 7,000 lamports). Proofs are published by `HucCo9Xm3KQZH2tkqqkUgRhoTkPkKwDQCevRr4oJt6za`.
 
 ## Roadmap: anonymous voting
 

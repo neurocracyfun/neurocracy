@@ -28,7 +28,7 @@ The mind posts from its own X account [@neurocracymind](https://x.com/neurocracy
 ## Tokenomics
 
 - Supply 1,000,000,000 NCRACY. Fair launch on pump.fun, no presale.
-- Creator fees fund a distributor wallet. When the fee share is switched on, each voted round pays out 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to operations. Small amounts accrue until they reach a minimum.
+- Creator fees fund a distributor wallet. When the fee share is switched on, each voted round pays out 10% of the unallocated balance (the rest carries over), split 70% to wallets that voted for the winning mind (pro rata by token balance, so splitting wallets gains nothing), 10% to the nominator of the winning feature (or to the voters if nobody nominated it), and 20% to the operations wallet `3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models. Small amounts accrue until they reach a minimum.
 - Two optional burns, priced in USD at the live price: about $5 to nominate a feature for the ballot, and about $1.50 for an in-character AI reply to a post on X that mentions @neurocracyfun or was written by your linked handle. Burns are final.
 - Fees depend on trading and can be zero. Nothing here is income or a promise of return.
 
@@ -37,17 +37,26 @@ All of it is off by default. Details, env vars and safety rules: [docs/fees-and-
 ## Trust model
 
 - Steering is off chain on Neuronpedia's public API, which has its own rate limits (240 steers per hour). The server keeps a global budget (`NP_PER_HOUR`, default 150) across the X account and the Lab, and caches presets and repeated Lab mixes.
-- Votes are signed messages counted by the server. Tallies stay hidden while a round is open (only participation is shown). At close, all signed votes are public at `/api/votes/:round`, and every voted round is proven in zero knowledge (in testing, see below).
+- Votes are signed messages counted by the server. Tallies stay hidden while a round is open (only participation is shown). At close, all signed votes are public at `/api/votes/:round`, and every voted round is proven in zero knowledge (see below).
 - Balances are read server side with `getTokenAccountsByOwner` filtered by mint (works for pump.fun Token-2022 mints).
 - The X account is fully automatic once live. It is off by default: `DRY_RUN=1` and `X_POSTING_ENABLED=0` only queue previews.
 
+## Public addresses
+
+| What | Address |
+|---|---|
+| Tally verifier program | [`G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw`](https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw) |
+| Program upgrade authority (deployer) | [`Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA`](https://solscan.io/account/Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA) |
+| Proof publisher (pays the verification transactions) | [`HucCo9Xm3KQZH2tkqqkUgRhoTkPkKwDQCevRr4oJt6za`](https://solscan.io/account/HucCo9Xm3KQZH2tkqqkUgRhoTkPkKwDQCevRr4oJt6za) |
+| Operations wallet (20% share: X API costs that keep the AI account posting and replying, and future upgrades such as better AI models) | [`3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`](https://solscan.io/account/3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i) |
+
 ## Zero-knowledge tally verification
 
-In testing until the mainnet launch. Every closed round publishes a canonical vote snapshot (`/api/rounds/:r/snapshot`). The server then builds a Poseidon Merkle tree of the votes and produces a Groth16 proof (circuit `zk/tally.circom`, BN254) that the published winner and per-candidate weighted totals follow from exactly those leaves, with each weight equal to `floor(sqrt(balance at close))`. The Hall marks proven rounds Verified.
+Every voted round's tally is proven with a zero-knowledge proof and verified on chain on Solana by the Neurocracy tally verifier program [`G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw`](https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw). Anyone can check it. Every closed round publishes a canonical vote snapshot (`/api/rounds/:r/snapshot`). The server then builds a Poseidon Merkle tree of the votes and produces a Groth16 proof (circuit `zk/tally.circom`, BN254) that the published winner and per-candidate weighted totals follow from exactly those leaves, with each weight equal to `floor(sqrt(balance at close))`. The Hall marks proven rounds Verified.
 
 - Check a round in the browser: https://neurocracy.fun/verify
 - Check it without trusting the site: `node scripts/zk-verify.js ROUND`. It rebuilds the tree from the snapshot and verifies the proof against `zk/vkey.json` in this repository.
-- Optional on-chain check: `program/` is a Solana program (groth16-solana) that verifies each proof in a transaction. By default it stores nothing (no rent): the transaction carries the proof and its public inputs. A record-per-round mode exists (`ZK_ONCHAIN_MODE=record`, about 0.0017 SOL rent per round). It is tested on a local validator and not deployed to mainnet yet.
+- On-chain check: `program/` is the Solana program (groth16-solana) deployed on mainnet at [`G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw`](https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw). Each proof is verified in a transaction that carries the proof and its public inputs, so anyone can re-check it from the signature. It stores nothing by default (no rent); a record-per-round mode exists (`ZK_ONCHAIN_MODE=record`, about 0.0017 SOL rent per round).
 
 The proof covers the count, not the inputs: it does not prove that signatures are valid or that balances were read correctly. Both are checkable by anyone from the public snapshot. The proving key is the [zk-v1 release asset](https://github.com/neurocracyfun/neurocracy/releases/tag/zk-v1); `npm run build` fetches and checksums it when `ZK_PROVE=1`. Details, limits (128 votes, 32 candidates per proven round) and the anonymous voting roadmap are in [docs/zk.md](docs/zk.md).
 

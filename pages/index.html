@@ -91,7 +91,7 @@ body: home
     <div class="tok-name"><span>NCRACY</span><small class="mono">Neurocracy on Solana, fair launch on pump.fun</small></div>
     <div class="ca mono" id="ca" title="Copy">Contract address goes here at launch.</div>
     <p class="note">Not NEURON, not Cerebrum DAO. Check the address on this page before you trade.</p>
-    <dl class="kv"><dt>Treasury</dt><dd id="treasury">Published at launch</dd><dt>Network</dt><dd id="network">Solana</dd></dl>
+    <dl class="kv"><dt>Treasury</dt><dd id="treasury">Published at launch</dd><dt>Tally verifier program</dt><dd class="mono"><a href="https://solscan.io/account/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw" rel="noopener">G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw</a></dd><dt>Program upgrade authority</dt><dd class="mono"><a href="https://solscan.io/account/Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA" rel="noopener">Gqok1QbCybZDLA96xeSBxVRSJ3hkJ2bCXq4FJyeMa3YA</a></dd><dt>Operations wallet</dt><dd class="mono"><a href="https://solscan.io/account/3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i" rel="noopener">3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i</a></dd><dt>Network</dt><dd id="network">Solana</dd></dl>
   </div>
   <div class="perks2">
     <p class="mono kick">What holding gets you</p>
@@ -99,7 +99,7 @@ body: home
     <p><b><span id="perk-lab">5</span> Lab steers a day</b> with your own prompt and mix, from <span id="perk-min">100,000</span> NCRACY.</p>
     <p><b>Your own candidates.</b> From <span id="perk-min2">100,000</span> NCRACY, add any Gemma Scope feature to the current round's ballot.</p>
     <p><b>First in line.</b> Link your X handle and it answers you before everyone else.</p>
-    <p><b>A share of creator fees.</b> When it is switched on, each voted round pays 10% of the pool: 70% to wallets that voted for the winning mind, by balance, 10% to whoever nominated it, and 20% to running costs.</p>
+    <p><b>A share of creator fees.</b> When it is switched on, each voted round pays 10% of the pool: 70% to wallets that voted for the winning mind, by balance, 10% to whoever nominated it, and 20% to the operations wallet. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models.</p>
     <p><b>Burns, priced in dollars.</b> About $5 to nominate a feature, about $1.50 for a reply from the account to a post that mentions it or one of yours.</p>
     <p class="note">Fees depend on trading and can be zero. This is not income and nothing is promised. Every payout is public with its Solscan link.</p>
   </div>
@@ -109,7 +109,7 @@ body: home
   <p class="mono kick">Fine print, in plain words</p>
   <div class="trust-cols">
     <div class="reveal"><h3>The model</h3><p>Steering runs on Neuronpedia's public API with Gemma 2 9B IT and Gemma Scope features. It's off chain and it isn't the Hoot model. Their rate limits apply, so live steers are capped and presets are cached.</p></div>
-    <div class="reveal"><h3>The votes</h3><p>Signed messages, counted by our server. Who is ahead stays hidden until the round closes. Then every vote is published, and every voted round is proven in zero knowledge (in testing), which you can <a href="/verify">check yourself</a>. The <a href="/whitepaper">whitepaper</a> covers the full design.</p></div>
+    <div class="reveal"><h3>The votes</h3><p>Signed messages, counted by our server. Who is ahead stays hidden until the round closes. Then every vote is published, and every voted round's tally is proven with a zero-knowledge proof and verified on chain on Solana by our open verifier program. Anyone can <a href="/verify">check it</a>. The <a href="/whitepaper">whitepaper</a> covers the full design.</p></div>
     <div class="reveal"><h3>The account</h3><p>Three drafts per post. A filter throws out slurs, money talk, tickers, links and impersonation, and strips emoji. One draft goes out, otherwise unedited.</p></div>
   </div>
   <p class="openline reveal">All of it is open. Read the code and the filter rules in the <a href="https://github.com/neurocracyfun" rel="noopener">source on GitHub</a>, and follow <a href="https://x.com/neurocracymind" rel="noopener">@neurocracymind</a> on X to see who it has become this round.</p>

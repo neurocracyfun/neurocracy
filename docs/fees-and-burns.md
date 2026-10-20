@@ -15,7 +15,7 @@ and splits it:
 |---|---|---|
 | Voters | 70% (`NC_PAYOUT_SHARE_BPS=7000`) | wallets that voted for the winning mind, pro rata by token balance at close |
 | Nominator | 10% (`NC_NOMINATOR_BPS=1000`) | the wallet that nominated the winning feature by burn. If the winner was not nominated, this 10% goes to the voters |
-| Operations | 20% (`NC_OPS_BPS=2000`) | `NC_OPS_ADDRESS` (hosting, model API, X API). Payouts stay off until it is set |
+| Operations | 20% (`NC_OPS_BPS=2000`) | `NC_OPS_ADDRESS` = `3hHMeg1uxFz9V4TP2BY1FQXE8p7kHGQxB3qJRuQkRa3i`. It mainly pays the X API costs that keep the AI account posting and replying, and future upgrades such as better AI models. Payouts stay off until it is set |
 
 Vote weight is the exact integer `floor(sqrt(raw balance at close))`, which decides the winner. The voter share is split by raw token balance at close instead, so splitting tokens across wallets gains nothing on payouts (it still adds vote weight). Each voted round pays out 10% of what is not yet allocated, so a single round never drains the wallet. A round nobody voted in pays nothing. Payout amounts are not part of the zero-knowledge proof; they are checkable from the snapshot (raw balances) and the public ledger. Each share is added to the wallet's owed balance. A wallet is paid once it reaches `NC_PAYOUT_MIN_LAMPORTS` (default 0.001 SOL); until then it accrues. Remainders from integer division stay in the wallet and roll into the next pool.
 
