@@ -50,7 +50,7 @@ api('/api/config').then((c) => {
   cfg = c; $('#min1').textContent = fmt(c.holderMin); $('#min2').textContent = fmt(c.holderMin);
   if (c.preview) {   // no mint yet: show the ballot, close the actions
     document.body.classList.add('preview');
-    st($('#vstatus'), 'Preview. The token is not live yet, so voting opens at launch. The house picks each round until then.', '');
+    st($('#vstatus'), 'Preview. The token is not live yet, so voting opens at launch. Until then a persona is picked at random each round.', '');
     for (const id of ['cast', 'connect']) { const el = $('#' + id); if (el) { el.disabled = true; el.title = 'Opens when the token is live'; } }
     if ($('#cast')) $('#cast').textContent = 'Voting opens at launch';
   }
