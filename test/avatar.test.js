@@ -173,3 +173,9 @@ test('vote shares use largest remainder and sum to 100', () => {
   assert.deepEqual(t.map((x) => x.pct), [50, 50]);
   assert.deepEqual(voteShares({ tally: {} }, ['owl']), [{ id: 'p:owl', pct: 100 }]);
 });
+
+test('a round nobody voted on says it was picked at random', () => {
+  const { roundText } = require('../lib/avatar'); const presets = require('../lib/presets').loadPresets(__dirname + '/../data/presets.json');
+  const t = roundText(['ocean'], presets, 'The tide is high today.', 'random');
+  assert.ok(t.startsWith("This round's vote: nobody voted, so I was picked at random. So right now I am The Sea."));
+});
