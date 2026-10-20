@@ -28,6 +28,16 @@ pub const RECORD_LEN: usize = 1 + 8 + 32 + 4 + 32 + 8 + 32; // 117
 #[cfg(not(feature = "no-entrypoint"))]
 solana_program::entrypoint!(process_instruction);
 
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Neurocracy",
+    project_url: "https://neurocracy.fun",
+    contacts: "link:https://neurocracy.fun,link:https://x.com/neurocracyfun",
+    policy: "https://github.com/neurocracyfun/neurocracy/blob/main/SECURITY.md",
+    source_code: "https://github.com/neurocracyfun/neurocracy",
+    source_release: "tally-verifier-v1"
+}
+
 fn be_u64(x: &[u8; 32]) -> Result<u64, ProgramError> {
     if x[..24].iter().any(|b| *b != 0) { return Err(ProgramError::InvalidInstructionData); }
     Ok(u64::from_be_bytes(x[24..].try_into().unwrap()))
