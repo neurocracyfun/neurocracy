@@ -6,7 +6,7 @@ export async function api(path, body) {
   const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'request failed'); return j;
 }
 export const pad = (n) => String(n).padStart(2, '0');
-export const clock = (ms) => { ms = Math.max(0, ms); const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60; return pad(m) + ':' + pad(s); };
+export const clock = (ms) => { ms = Math.max(0, ms); const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60; return (h ? h + ':' : '') + pad(m) + ':' + pad(s); };
 export const fmt = (n) => Number(n || 0).toLocaleString('en-US');
 export const ago = (t) => { const s = Math.round((Date.now() - t) / 1000); if (s < 60) return s + 's ago'; if (s < 3600) return Math.round(s / 60) + 'm ago'; if (s < 86400) return Math.round(s / 3600) + 'h ago'; return Math.round(s / 86400) + 'd ago'; };
 export const mixHTML = (mix) => (mix || []).map((f) => `<div class="feat"><span class="l">${esc(f.label || 'feature ' + f.index)}</span><span class="s">+${esc(f.strength)}</span><span class="m">${esc(f.layer)} #${esc(f.index)}</span></div>`).join('');
