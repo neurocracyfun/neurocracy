@@ -53,7 +53,7 @@ Endpoints: `/api/rounds/:r/proof`, `/api/rounds/:r/verify` (the server rechecks 
 `program/` is a Solana program built on `groth16-solana`. Instruction data is a tag byte, the proof (A negated, 256 bytes) and the four public inputs (385 bytes in total). It has two modes:
 
 - **verify (default, `ZK_ONCHAIN_MODE=verify`)**: the program verifies the proof and logs round, winner and publisher. No account is created, so there is no rent. The transaction stays on chain with the proof and public inputs in its data, so anyone can look it up by signature (shown on /verify) and check that the program accepted those exact inputs. `scripts/zk-verify.js` does this when `NC_ZK_RPC` is set. About 99,500 compute units, 5,000 lamports fee.
-- **record (`ZK_ONCHAIN_MODE=record`)**: the program also writes a 117-byte record at the PDA `["tally", authority, round]` (round, root, winner, totals commitment, slot, authority). A second write for the same round is refused. Rent is about 0.0017 SOL per round, so about 30 SOL a year at 48 rounds a day. That is why it is off by default.
+- **record (`ZK_ONCHAIN_MODE=record`)**: the program also writes a 117-byte record at the PDA `["tally", authority, round]` (round, root, winner, totals commitment, slot, authority). A second write for the same round is refused. Rent is about 0.0017 SOL per round, so about 7.5 SOL a year at 12 rounds a day. That is why it is off by default.
 
 Recommendation: keep verify mode. A transaction is as permanent and public as an account, so the record mode only makes lookups by round easier, at real cost.
 

@@ -1,5 +1,5 @@
 // Full lifecycle simulation on a local validator (solana-test-validator on :8899 with the tally verifier deployed).
-// Test Token-2022 mint, simulated holders, time-accelerated 30-minute rounds, signed votes with balance changes
+// Test Token-2022 mint, simulated holders, time-accelerated 2-hour rounds, signed votes with balance changes
 // before close, burn nominations (accepted, duplicate, undersized, wrong memo, expired quote), a nominated
 // feature winning, steering (Neuronpedia, cached fallback), X bot in dry run plus paid burn replies, a ZK proof
 // per round verified by the on-chain program, Hall badges, payouts 70/10/20 dry run then real, and a restart.
@@ -50,7 +50,7 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   process.env.ZK_ONCHAIN = '1'; process.env.NC_ZK_PROGRAM_ID = programId; process.env.NC_ZK_RPC = RPC; process.env.NC_ZK_AUTHORITY_KEY = bs58.encode(admin.secretKey);
   let offset = 0; const now = () => Date.now() + offset;
   const epoch = Date.now() - 60e3;
-  const mkCfg = (dry) => ({ ...base, cluster: 'localnet', rpc: RPC, mint: mint.toBase58(), decimals: 6, db, roundEpoch: epoch, roundMinutes: 30,
+  const mkCfg = (dry) => ({ ...base, cluster: 'localnet', rpc: RPC, mint: mint.toBase58(), decimals: 6, db, roundEpoch: epoch, roundMinutes: 120,
     payout: { ...base.payout, enabled: true, dryRun: dry, key: bs58.encode(dist.secretKey), rpc: RPC, opsAddress: ops.publicKey.toBase58(), minLamports: 1_000_000, reserveLamports: 50_000_000, dailyCapLamports: 3_000_000_000 },
     nominate: { ...base.nominate, enabled: true }, replyBurn: { ...base.replyBurn, enabled: true }, x: { ...base.x, dryRun: true, enabled: false }, quotes: { ...base.quotes, secret: 'sim-quote-secret' } });
   // price from a simulated pump.fun bonding curve read through the real parser: 30 SOL virtual / 1.073B tokens, SOL at $180
@@ -70,7 +70,7 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   const burn = async (n, amountUi, memo) => { const tx = new web3.Transaction().add(spl.createBurnCheckedInstruction(ata[n], mint, W(n).publicKey, BigInt(amountUi) * 1_000_000n, 6, [], T22), new web3.TransactionInstruction({ programId: MEMO, keys: [{ pubkey: W(n).publicKey, isSigner: true, isWritable: false }], data: Buffer.from(memo) })); return web3.sendAndConfirmTransaction(conn, tx, [W(n)], { commitment: 'confirmed' }); };
   const move = async (from, to, ui) => { const tx = new web3.Transaction().add(spl.createTransferCheckedInstruction(ata[from], mint, ata[to], W(from).publicKey, BigInt(ui) * 1_000_000n, 6, [], T22)); return web3.sendAndConfirmTransaction(conn, tx, [W(from)], { commitment: 'confirmed' }); };
   const D = () => app.store.data;
-  const closeRound = async () => { const R = app.rounds.current(); offset += 30 * 60e3; await app.tickOnce(); return D().rounds[R]; };
+  const closeRound = async () => { const R = app.rounds.current(); offset += 120 * 60e3; await app.tickOnce(); return D().rounds[R]; };
   const waitProof = async (r) => { for (let i = 0; i < 120 && !(D().proofs || {})[r]?.at; i++) { await sleep(1000); if (!app.prover.busy()) await app.prover.tick(); } for (let i = 0; i < 30 && D().proofs[r].status === 'proven' && !D().proofs[r].onchain && !D().proofs[r].onchainError; i++) await sleep(500); return D().proofs[r]; };
   boot(true);
 
@@ -87,7 +87,7 @@ const key = (n) => { const f = path.join(DIR, 'sim-' + n + '.json'); if (!fs.exi
   const unsol = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/stranger/status/1849000000000000303') + '&wallet=' + A('bob')); ok(unsol.status === 400, 'reply to a post that never mentioned the account refused before any burn: ' + (unsol.body && unsol.body.error));
   const own0 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('bob')); ok(own0.status === 400, "bob's own post refused before he links his handle");
   { const msg = `Neurocracy link X\nHandle: @bobsays\nWallet: ${A('bob')}`; const l = await call('POST', '/api/link-x', { wallet: A('bob'), handle: 'bobsays', signature: sign(W('bob'), msg) }); ok(l.status === 200, 'bob linked @bobsays with a signed message'); }
-  const own1 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('bob')); ok(own1.status === 200, "after linking, a reply to bob's own post can be quoted");
+  const own1 = await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('bob')); ok(own1.status === 400, "after linking, bob's own post without a mention is still refused (mention-only paid replies): " + (own1.body && own1.body.error));
   ok((await call('GET', '/api/reply-burn/quote?url=' + encodeURIComponent('https://x.com/bobsays/status/1849000000000000404') + '&wallet=' + A('carol'))).status === 400, "carol cannot buy a reply to bob's post");
 
   // ---- 2. nominations by burn ----
