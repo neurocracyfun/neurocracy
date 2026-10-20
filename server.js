@@ -142,7 +142,17 @@ function createApp(cfg = baseCfg, over = {}) {
   }));
 
   const publicPost = (p) => ({ id: p.id, kind: p.kind, round: p.round, persona: p.persona, mix: p.mix, topic: p.topic, topicSource: p.topicSource, to: p.to, holder: p.holder, mention: p.mention, text: p.text, share: p.share, status: p.status, tweetId: p.tweetId || null, at: p.at, rejected: (p.rejected || []).map((r) => r.why) });
-  app.get('/api/posts', (req, res) => res.json({ x: xbot.status(), posts: D.posts.filter((p) => p.text).slice(0, Math.min(50, Number(req.query.limit) || 12)).map(publicPost) }));
+  // Home page post list: real posts the bot published come first (newest first), previews only fill the rest and are labeled.
+  // The first real post (the launch test) is seeded so the list is never empty.
+  const SEED_POSTS = [{ id: 'seed-test', kind: 'post', round: null, persona: 'The Octopus Chef', text: "Test post. This round's vote: 50% Octopus, 50% Chef. So right now I am The Octopus Chef. Got a question or something you want me to do?", image: 'chef+ocean.jpg', status: 'posted', tweetId: '2112415587636777455', at: Date.parse('2026-10-20T05:28:17Z') }];
+  const imageUrl = (name) => { if (!name) return null; const b = String(name).replace(/\.(jpg|png|webp)$/, ''); const dir = b.includes('+') ? 'hybrids' : 'minds'; for (const e of ['webp', 'jpg', 'png']) if (require('fs').existsSync(path.join(__dirname, 'public', 'img', dir, b + '.' + e))) return '/img/' + dir + '/' + encodeURIComponent(b) + '.' + e; return null; };
+  app.get('/api/posts', (req, res) => {
+    const n = Math.min(50, Number(req.query.limit) || 12); const all = D.posts.filter((p) => p.text);
+    const real = [...all.filter((p) => p.status === 'posted' && p.tweetId), ...SEED_POSTS.filter((s) => !all.some((p) => p.tweetId === s.tweetId))].sort((a, b) => b.at - a.at);
+    const rest = all.filter((p) => !(p.status === 'posted' && p.tweetId) && (p.kind !== 'post' || /^This round's vote: /.test(p.text)));   // old-format previews are hidden
+    const handle = cfg.botHandle || 'neurocracymind';
+    res.json({ x: xbot.status(), handle, posts: [...real, ...rest].slice(0, n).map((p) => ({ ...publicPost(p), preview: !(p.status === 'posted' && p.tweetId), image: imageUrl(p.image), url: p.tweetId ? `https://x.com/${handle}/status/${p.tweetId}` : null })) });
+  });
   app.get('/api/hall', (req, res) => {
     const list = Object.values(D.rounds).sort((a, b) => b.id - a.id).slice(0, 96).map((r) => ({ ...r, payout: payouts.forRound(r.id), posts: D.posts.filter((p) => p.round === r.id).map(publicPost), zk: zkStatus(r.id) }));
     res.json({ rounds: list });
@@ -194,7 +204,10 @@ function createApp(cfg = baseCfg, over = {}) {
   let ticking = false;
   async function tickOnce() {
     if (ticking) return; ticking = true;
-    try { const r = rounds.current(); if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); try { await avatar.onRoundClosed(closed); } catch (e) { console.log('[avatar]', e.message); } } await payouts.tick(); await xbot.tick(); prover.tick(); }
+    try { const r = rounds.current();
+      // rounds missed while the server was down (deploy, crash): close any that got votes, oldest first, so no vote is lost
+      for (let i = Math.max(1, r - 7); i < r - 1; i++) if (!D.rounds[i] && D.votes[i] && Object.keys(D.votes[i]).length) { const c = await rounds.close(i); await payouts.onRoundClosed(c); }
+      if (r > 1 && !D.rounds[r - 1]) { const closed = await rounds.close(r - 1); await payouts.onRoundClosed(closed); try { await avatar.onRoundClosed(closed); } catch (e) { console.log('[avatar]', e.message); } } await payouts.tick(); await xbot.tick(); prover.tick(); }
     catch (e) { console.log('[tick]', e.message); } finally { ticking = false; }
   }
   return { app, store, rounds, xbot, avatar, budget, tickOnce, presets, payouts, burns, prover };

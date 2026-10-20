@@ -35,7 +35,7 @@ body: app whitepaper
   <section id="personas" data-mind="chef"><h2>4. Personas</h2>
   <p>The ballot starts with twelve preset minds, each a tuned set of features:</p>
   <ul class="wp-cols"><li>The Owl</li><li>The Cat</li><li>The Pirate</li><li>The Degen</li><li>The Fossil</li><li>The Astronomer</li><li>The Sea</li><li>The Chef</li><li>The Ghost</li><li>The Bard</li><li>The Lord</li><li>The Romantic</li></ul>
-  <p>Because close runners up join the winner, a round can produce a mix rather than a single persona. If the Sea and the Chef split the vote, the model becomes something like an octopus that cooks. Community features nominated by burn join the same ballot.</p></section>
+  <p>Because close runners up join the winner, a round can produce a mix rather than a single persona. If the Sea and the Chef split the vote, the model becomes something like an octopus that cooks. Community features nominated by burn join the same ballot. If nobody votes, one of the twelve personas is picked at random, never the same one twice in a row, and the account changes to it as usual.</p></section>
 
   <section id="posts" data-mind="ocean"><h2>5. The mind posts</h2>
   <p class="wp-note mono">Launching soon</p>
@@ -49,8 +49,8 @@ body: app whitepaper
   <section id="burns" data-mind="ghost"><h2>7. Burns</h2>
   <p>Two optional actions burn tokens. Their cost is set in US dollars and converted at the live price.</p>
   <table class="wp-t"><thead><tr><th>Action</th><th>Cost</th><th>Limits</th></tr></thead>
-  <tr><td>Nominate a feature for the ballot</td><td>about $5</td><td>10,000 to 2,000,000 tokens; up to 6 nominations per ballot</td></tr>
-  <tr><td>AI reply on X to a post that mentions @neurocracyfun, or a post by your own linked handle</td><td>about $1.50</td><td>3,000 to 600,000 tokens; 3 per wallet per day</td></tr></table>
+  <tr><td>Nominate a feature for the ballot</td><td>about $5</td><td>100 to 20,000,000 tokens; up to 6 nominations per ballot</td></tr>
+  <tr><td>AI reply on X to a post that mentions @neurocracyfun or @neurocracymind, or a post by your own linked handle</td><td>about $1.50</td><td>30 to 6,000,000 tokens; 3 per wallet per day. Posts from @neurocracyfun get a reply for free.</td></tr></table>
   <p>Quotes use the lowest price of the last 30 minutes, so a short price spike cannot make a burn cheap. The server returns a signed quote that holds for 5 minutes. A burn is accepted only if it is confirmed, burns at least the quoted amount from the signing wallet, carries the matching memo, landed before expiry and was never used before. Features and posts are checked before quoting, so an ineligible request never costs tokens. If no price source answers, burns pause. Burns are final, with no refunds.</p></section>
 
   <section id="fees" data-mind="degen"><h2>8. Fees and rewards</h2>

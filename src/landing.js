@@ -123,7 +123,7 @@ async function loadRound() {
   if (live) {
     $('#hud-mind').textContent = live.winner.name; $('#now-persona').textContent = live.winner.name.replace(/^The /, 'the ') + '.';
     const c = round.candidates.find((x) => x.id === live.winner.id);
-    $('#now-note').textContent = (c && c.note ? c.note + ' ' : '') + (live.house ? 'Nobody voted last round, so the house picked.' : `${live.voters} wallet${live.voters === 1 ? '' : 's'} decided that.`);
+    $('#now-note').textContent = (c && c.note ? c.note + ' ' : '') + (live.house ? 'Nobody voted last round, so it was picked at random.' : `${live.voters} wallet${live.voters === 1 ? '' : 's'} decided that.`);
     $('#now-mix').innerHTML = mixHTML(live.mix);
   } else { $('#now-persona').textContent = 'nothing yet.'; $('#hud-mind').textContent = 'waiting'; }
 }
@@ -133,7 +133,8 @@ async function loadPosts() {
   const r = await api('/api/posts?limit=4');
   $('#x-mode').innerHTML = r.x.mode === 'live' ? '<span class="badge">Live</span>' : '<span class="badge amber">Preview, not posted yet</span>';
   if (!r.posts.length) return;
-  $('#posts').innerHTML = r.posts.map((p) => `<article class="panel post"><div class="meta mono"><span>Round ${p.round}</span><span>${esc(p.persona)}</span><span>${p.kind === 'reply' ? 'reply to @' + esc(p.to) : esc(p.topic)}</span><span>${ago(p.at)}</span></div><p>${esc(p.text)}</p>${p.tweetId ? `<div class="mono" style="margin-top:10px"><a href="https://x.com/neurocracyfun/status/${esc(p.tweetId)}" rel="noopener">View on X</a></div>` : ''}</article>`).join('');
+  const lab = (p) => (p.preview ? '<span class="badge amber">Preview</span>' : '<span class="badge">Posted</span>');
+  $('#posts').innerHTML = r.posts.map((p) => `<article class="panel post">${p.image && p.kind === 'post' ? `<img class="post-img" src="${esc(p.image)}" alt="${esc(p.persona || 'Round persona')}" loading="lazy" decoding="async">` : ''}<div class="meta mono">${lab(p)}${p.round ? `<span>Round ${p.round}</span>` : ''}<span>${esc(p.persona || '')}</span>${p.kind === 'reply' ? `<span>reply to @${esc(p.to)}</span>` : ''}<span>${ago(p.at)}</span></div><p>${esc(p.text)}</p>${p.url ? `<div class="mono" style="margin-top:10px"><a href="${esc(p.url)}" rel="noopener">View on X</a></div>` : ''}</article>`).join('');
 }
 
 const ORDER = ['owl', 'cat', 'pirate', 'degen', 'chef', 'ghost', 'space', 'lord', 'bard', 'ocean', 'dino', 'romantic'];

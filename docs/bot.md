@@ -62,3 +62,11 @@ Prices from the OpenAI model page and the xAI pricing page as of October 2026. W
 - `CONFIRM=1 node scripts/bot-test-post.js` sends one real test post with the bot keys (sets the default avatar and the name The Octopus Chef, uploads the octopus chef, posts `Test post. ` plus the 50 50 example above). Without `CONFIRM=1` it only prints.
 
 All env vars are listed in `docs/render-env.md`.
+
+## Free replies for the main account
+
+Posts from @neurocracyfun get a reply for free. When the main account posts something that mentions @neurocracymind, the bot answers it in the current persona without any burn. These replies are answered first and count toward `X_REPLIES_PER_ROUND`. Set the accounts with `NC_FREE_REPLY_HANDLES` (comma separated usernames, default `neurocracyfun`) and optionally `NC_FREE_REPLY_IDS` (numeric user ids, survives a rename). The bot never replies to its own posts (matched by `NC_BOT_HANDLE` and by `X_USER_ID`). A paid reply quote for a post by a free account is refused, so nobody burns for it.
+
+## Rounds nobody voted on
+
+If a round closes with no weighted votes, one of the 12 library personas is picked at random, never the previous round's persona. The pick is seeded by the round number (sha256), so a restart or a retried close gives the same result. The account then posts, changes its avatar and display name as usual (avatar limits still apply), and the site says "Nobody voted last round, so it was picked at random." No payout is made for such a round.

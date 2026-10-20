@@ -47,13 +47,13 @@ Values marked SECRET go in Render's secret env and are never logged. Everything 
 | `NC_PAYOUT_MAX_PER_TX` | `18` |
 | `NC_NOMINATE_ENABLED` | `0` (then `1`) |
 | `NC_NOMINATE_USD` | `5` |
-| `NC_NOMINATE_MIN` | `10000` |
-| `NC_NOMINATE_MAX_TOKENS` | `2000000` |
+| `NC_NOMINATE_MIN` | `100` |
+| `NC_NOMINATE_MAX_TOKENS` | `20000000` |
 | `NC_NOMINATE_MAX` | `6` |
 | `NC_REPLY_BURN_ENABLED` | `0` (then `1`, needs the X keys to check posts) |
 | `NC_REPLY_USD` | `1.5` |
-| `NC_REPLY_MIN` | `3000` |
-| `NC_REPLY_MAX_TOKENS` | `600000` |
+| `NC_REPLY_MIN` | `30` |
+| `NC_REPLY_MAX_TOKENS` | `6000000` |
 | `NC_REPLY_PER_WALLET_DAY` | `3` |
 | `PRICE_TTL_SEC` | `180` |
 | `PRICE_WINDOW_MIN` | `30` |
@@ -91,3 +91,12 @@ After each round closes the bot account (a separate X account, not @neurocracyfu
 | `NC_IMAGE_MODEL` | optional, defaults `gpt-image-1` (1536x1024, medium) or `grok-imagine-image` (3:2) |
 
 `/api/round` returns `avatarUrl` and `personas` for the last closed round. `scripts/bot-sim-round.js` runs one mocked round locally. `scripts/bot-test-post.js` sends one real test post with the bot keys and needs `CONFIRM=1`.
+
+## Replies and round close
+
+| Variable | Value |
+|---|---|
+| `NC_RPC_RPS` | `8` (raise on a paid RPC plan) |
+| `NC_FREE_REPLY_HANDLES` | `neurocracyfun` (posts from these accounts that mention the bot get a free reply first) |
+| `NC_FREE_REPLY_IDS` | optional numeric user id of @neurocracyfun |
+| `NC_CLOSE_CONCURRENCY` | `8` (parallel balance reads at round close; keep under the RPC plan's RPS) |

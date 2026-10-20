@@ -29,15 +29,15 @@ Both actions burn NCRACY with a Token-2022 BurnChecked plus an SPL Memo that bin
 
 | Action | USD | Clamp (tokens) |
 |---|---|---|
-| Nominate a feature | `NC_NOMINATE_USD=5` | 10,000 to 2,000,000 |
-| AI reply on X | `NC_REPLY_USD=1.5` | 3,000 to 600,000 |
+| Nominate a feature | `NC_NOMINATE_USD=5` | 100 to 20,000,000 |
+| AI reply on X | `NC_REPLY_USD=1.5` | 30 to 6,000,000 |
 
 Price sources, in order: the pump.fun bonding curve reserves (before graduation) times SOL/USD from Jupiter, then the Jupiter price API, then the DexScreener pair with the most liquidity. Prices are cached for `PRICE_TTL_SEC`. If no source answers, burn actions are paused; the server never guesses.
 
 The server returns an HMAC-signed quote (purpose, target, token amount, expiry). The quote holds for `NC_QUOTE_TTL_SEC` (5 minutes). A burn is accepted when it is confirmed, signed by the wallet, burns at least the quoted amount of the mint from that wallet, carries the matching memo, landed before the quote expired, and has not been used before.
 
 - **Nominate:** `Neurocracy nominate <layer>/<index>`. The feature is checked on Neuronpedia and against the content filter before the quote is issued, so a rejected feature never costs tokens. It joins the next ballot with room (`NC_NOMINATE_MAX` per ballot). It is never dropped for a full ballot.
-- **Reply:** `Neurocracy reply <post id>`. Only for a post that mentions @neurocracyfun, or a post written by the X handle you linked to the burning wallet. The server checks the post on X before quoting, so an ineligible post never costs a burn. The X account replies to that post in the current mind, with the same filter, dry run, kill switch and daily cap as everything else. The limit is `NC_REPLY_PER_WALLET_DAY`. If no draft passes the filter, nothing is posted. Burns are final, with no refunds.
+- **Reply:** `Neurocracy reply <post id>`. Posts from @neurocracyfun get a reply for free, so they cannot be bought. Only for a post that mentions @neurocracyfun, or a post written by the X handle you linked to the burning wallet. The server checks the post on X before quoting, so an ineligible post never costs a burn. The X account replies to that post in the current mind, with the same filter, dry run, kill switch and daily cap as everything else. The limit is `NC_REPLY_PER_WALLET_DAY`. If no draft passes the filter, nothing is posted. Burns are final, with no refunds.
 
 ## Round snapshots
 

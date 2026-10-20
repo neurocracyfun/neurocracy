@@ -17,7 +17,7 @@ const rpcServer = http.createServer((req, res) => { let b = ''; req.on('data', (
 
 function setup(over = {}) {
   let t = Date.parse('2026-10-20T00:05:00Z');
-  const cfg = { ...require('../lib/config'), rpc: rpcUrl, mint: 'mint' in over ? over.mint : MINT, holderMin: 1000, voteMin: 1, labPerDay: 2, npPerHour: 150, roundEpoch: Date.parse('2026-10-01T00:00:00Z'), roundMinutes: 30, presetsFile: __dirname + '/../data/presets.json', testMode: false, x: { ...require('../lib/config').x, ...(over.x || {}) } };
+  const cfg = { ...require('../lib/config'), rpc: rpcUrl, mint: 'mint' in over ? over.mint : MINT, holderMin: 1000, voteMin: 1, labPerDay: 2, npPerHour: 150, roundEpoch: Date.parse('2026-10-01T00:00:00Z'), roundMinutes: 30, presetsFile: __dirname + '/../data/presets.json', testMode: false, ...('botHandle' in over ? { botHandle: over.botHandle } : {}), ...(over.freeReplyHandles ? { freeReplyHandles: over.freeReplyHandles } : {}), x: { ...require('../lib/config').x, ...(over.x || {}) } };
   const store = { data: { rounds: {}, votes: {}, candidates: {}, lab: [], labUse: {}, posts: [], links: {}, mentions: { sinceId: null, seen: [] }, xDay: {}, feats: {} }, save() {}, flush() {} };
   const outputs = over.outputs || [];
   let n = 0; const steer = async (q, mix, o = {}) => { n++; const s = outputs.length ? outputs[(n - 1) % outputs.length] : `I am a calm voice of the wood and I watch the river all night long, thinking about ${q.length} small things.`; return { steered: s, normal: 'I am Gemma, an AI assistant.', share: 'https://www.neuronpedia.org/steer/x' + n, ms: 1 }; };
@@ -73,9 +73,17 @@ test('signed votes, sqrt weight, recheck at close, runner-up mix, top topic', as
   const pub = await call(s.app, 'GET', '/api/votes/' + r); assert.strictEqual(pub.body.length, 3);
 });
 
-test('no votes: house rotates presets', async () => {
-  const s = setup(); const r = s.rounds.current(); s.advance(30 * 60e3);
-  const c = await s.rounds.close(r); assert.ok(c.house); assert.ok(c.mix.length === 1);
+test('no votes: random library persona, never the previous one, same pick on re-close', async () => {
+  const s = setup(); const r0 = s.rounds.current(); const lib = ['owl', 'cat', 'pirate', 'degen', 'dino', 'space', 'ocean', 'chef', 'ghost', 'bard', 'lord', 'romantic'];
+  let prev = null; const seen = new Set();
+  for (let i = 0; i < 30; i++) {
+    s.advance(30 * 60e3); const c = await s.rounds.close(r0 + i);
+    assert.ok(c.house && c.random); assert.ok(lib.includes(c.winner.id.slice(2))); assert.notStrictEqual(c.winner.id, prev);
+    prev = c.winner.id; seen.add(prev);
+  }
+  assert.ok(seen.size >= 6);
+  const again = s.D.rounds[r0 + 5].winner.id; delete s.D.rounds[r0 + 5]; const D4 = s.D.rounds[r0 + 4];
+  assert.strictEqual((await s.rounds.close(r0 + 5)).winner.id, again); assert.ok(D4);
 });
 
 test('x account dry run: 3 drafts, filter, pick, preview only, nothing sent', async () => {
@@ -110,6 +118,18 @@ test('replies: holder mentions first, capped per round', async () => {
   const out = await s.xbot.replies(round, [{ id: '1', text: '@neurocracyfun hello there', author: 'rando' }, { id: '2', text: '@neurocracyfun how are you', author: 'other' }, { id: '3', text: '@neurocracyfun who are you today', author: 'fan' }]);
   assert.strictEqual(out.length, 2); assert.strictEqual(out[0].to, 'fan'); assert.ok(out[0].holder);
   assert.ok(s.xCalls.every((c) => JSON.parse(c.init.body).reply));
+});
+
+test('replies: main account gets a free reply first, the bot never answers itself', async () => {
+  const keys = { appKey: 'k', appSecret: 's', accessToken: 't', accessSecret: 'x', userId: '42' };
+  const s = setup({ botHandle: 'neurocracymind', freeReplyHandles: ['neurocracyfun'], x: { ...keys, dryRun: false, enabled: true, repliesPerRound: 2 } });
+  const h = kp(); balances[h.addr] = 5000; s.D.links['fan'] = h.addr;
+  s.advance(30 * 60e3); await s.rounds.close(s.rounds.current() - 1);
+  const round = s.rounds.live();
+  const out = await s.xbot.replies(round, [{ id: '1', text: '@neurocracymind hello there', author: 'fan' }, { id: '2', text: '@neurocracymind a word from me', author: 'NeurocracyFun' },
+    { id: '3', text: '@neurocracymind talking to myself', author: 'neurocracymind' }, { id: '4', text: 'self by id', author: 'renamed', authorId: '42' }]);
+  assert.strictEqual(out.length, 2); assert.strictEqual(out[0].to, 'NeurocracyFun'); assert.ok(out[0].free); assert.strictEqual(out[1].to, 'fan');
+  assert.ok(!out.some((o) => o.to === 'neurocracymind' || o.to === 'renamed'));
 });
 
 test('lab: presets free, custom needs holder pass, daily limit', async () => {
