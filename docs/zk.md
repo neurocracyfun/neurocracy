@@ -61,6 +61,8 @@ Local validator test (`node scripts/zk-localnet.js`) covers both modes: tampered
 
 Enable with `ZK_ONCHAIN=1`, `NC_ZK_PROGRAM_ID`, `NC_ZK_AUTHORITY_KEY` and optionally `NC_ZK_RPC`. Deployed on mainnet at `G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw` (2026-10-20, signature `2cWTSPzHLdB5RHf4aY1THG3c2swNJpbXZt6LRVvd9yKreQBkUwXgoy6ZVf3DfTbr8mTNpqwBcxCRwYdPJYUDx2eH`). First mainnet verification: `5D11q6VK1p8F75fiTTRMHqafUXJaqBsV4QegcHMkyxuBEoCRemaY3gUnjyiFnKetTPxGFLYpBBeejpErEBYD13Gu` (99,689 compute units, 7,000 lamports). Proofs are published by `HucCo9Xm3KQZH2tkqqkUgRhoTkPkKwDQCevRr4oJt6za`.
 
+Upgraded on 2026-10-20 to a reproducible build with an embedded security.txt (source commit `9d42fc20dea786bda7f7d5c61d2f7593fea1ce30`, tag `tally-verifier-v1`), signature `cqq2D11vp8TtbKEA4NqPCirT4FFsLnVpT2ctQe3MoMJa774mfWb1mGpxGddk49DQVW6Be9xc14csD4rj6b4Ubdu`. The verifying key did not change. The program is verified by OtterSec (https://verify.osec.io/status/G4dJmDirX69n4aKo2fFx3eAnWXnn4NMZigrunpAd1nYw). On chain hash `cd4b2a811f2bd62aec8728517947544639477f7c60c3acbe9ad980a8da934298`. To reproduce: `solana-verify build --arch v3 --base-image solanafoundation/solana-verifiable-build@sha256:12fd4c0a0790f0fc41ef74b0cdb6bccc167ba6137eb1adb749bac649481c86bd --library-name neurocracy_tally_verifier` in `program/`, then `solana-verify get-executable-hash target/deploy/neurocracy_tally_verifier.so`.
+
 ## Roadmap: anonymous voting
 
 Today every vote is public. The path to private votes, all in the same proof system:
